@@ -1,7 +1,0 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<site>
-   <feature url="features/GitBlitRepositoryExplorerFeature_0.0.1.201311281600.jar" id="GitBlitRepositoryExplorerFeature" version="0.0.1.201311281600">
-      <category name="gitblitexplorer"/>
-   </feature>
-   <category-def name="gitblitexplorer" label="GitBlit Explorer"/>
-</site>
