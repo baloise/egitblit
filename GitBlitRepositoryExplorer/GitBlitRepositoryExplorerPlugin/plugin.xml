@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?eclipse version="3.4"?>
+<plugin>
+
+   <extension
+         point="org.eclipse.ui.views">
+      <category
+            id="ch.basler.plugin.gitblitexplorer.view"
+            name="GitBlit Repository Explorer">
+      </category>
+      <view
+            allowMultiple="false"
+            category="ch.basler.plugin.gitblitexplorer.view"
+            class="ch.basler.plugin.gitblitexplorer.view.GITRepositoryExplorerView"
+            icon="icons/git-black-16x16.png"
+            id="ch.basler.plugin.gitblitexplorer.view.navigator"
+            name="GitBlit Repository Explorer"
+            restorable="true">
+      </view>
+   </extension>
+   <extension
+         point="org.eclipse.ui.preferencePages">
+      <page
+            class="ch.basler.plugin.gitblitexplorer.pref.GitBlitExplorerPrefPage"
+            id="ch.basler.plugin.gitblitexplorer.pref"
+            name="GitBlit Repository Explorer Settings">
+      </page>
+   </extension>
+   <extension
+         point="org.eclipse.core.runtime.preferences">
+      <initializer
+            class="ch.basler.plugin.gitblitexplorer.pref.Initializer">
+      </initializer>
+   </extension>
+
+</plugin>
