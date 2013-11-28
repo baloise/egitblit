@@ -2,7 +2,7 @@
 <feature
       id="GitBlitRepositoryExplorerFeature"
       label="GitBlitRepositoryExplorerFeature"
-      version="0.0.1.SNAPSHOT">
+      version="0.0.1.201311281512">
 
    <description url="https://github.com/baloise/egitblit">
       [Enter Feature Description here.]
@@ -18,8 +18,8 @@
 
    <plugin
          id="GitBlitRepositoryExplorerPlugin"
-         download-size="0"
-         install-size="0"
-         version="0.0.0"/>
+         download-size="1205"
+         install-size="1296"
+         version="0.0.1.201311281512"/>
 
 </feature>

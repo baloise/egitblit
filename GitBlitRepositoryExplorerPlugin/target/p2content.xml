@@ -1,0 +1,36 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<units size='1'>
+  <unit id='GitBlitRepositoryExplorerPlugin' version='0.0.1.201311281512'>
+    <update id='GitBlitRepositoryExplorerPlugin' range='[0.0.0,0.0.1.201311281512)' severity='0'/>
+    <properties size='5'>
+      <property name='org.eclipse.equinox.p2.name' value='GitBlit Repository Explorer'/>
+      <property name='org.eclipse.equinox.p2.provider' value='Basler Versicherung AG'/>
+      <property name='maven-groupId' value='ch.basler.plugin.gitblitexplorer'/>
+      <property name='maven-artifactId' value='GitBlitRepositoryExplorerPlugin'/>
+      <property name='maven-version' value='0.0.1-SNAPSHOT'/>
+    </properties>
+    <provides size='3'>
+      <provided namespace='org.eclipse.equinox.p2.iu' name='GitBlitRepositoryExplorerPlugin' version='0.0.1.201311281512'/>
+      <provided namespace='osgi.bundle' name='GitBlitRepositoryExplorerPlugin' version='0.0.1.201311281512'/>
+      <provided namespace='org.eclipse.equinox.p2.eclipse.type' name='bundle' version='1.0.0'/>
+    </provides>
+    <requires size='5'>
+      <required namespace='osgi.bundle' name='org.eclipse.ui' range='0.0.0'/>
+      <required namespace='osgi.bundle' name='org.eclipse.core.runtime' range='0.0.0'/>
+      <required namespace='osgi.bundle' name='org.eclipse.jface' range='0.0.0'/>
+      <required namespace='osgi.bundle' name='org.eclipse.jface.text' range='0.0.0'/>
+      <required namespace='osgi.bundle' name='org.eclipse.swt' range='0.0.0'/>
+    </requires>
+    <artifacts size='1'>
+      <artifact classifier='osgi.bundle' id='GitBlitRepositoryExplorerPlugin' version='0.0.1.201311281512'/>
+    </artifacts>
+    <touchpoint id='org.eclipse.equinox.p2.osgi' version='1.0.0'/>
+    <touchpointData size='1'>
+      <instructions size='1'>
+        <instruction key='manifest'>
+          Bundle-SymbolicName: GitBlitRepositoryExplorerPlugin;singleton:=true&#xA;Bundle-Version: 0.0.1.201311281512&#xA;
+        </instruction>
+      </instructions>
+    </touchpointData>
+  </unit>
+</units>

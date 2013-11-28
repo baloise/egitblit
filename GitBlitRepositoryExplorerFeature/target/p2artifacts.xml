@@ -1,0 +1,14 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<?artifactRepository version='1.1.0'?>
+<artifacts size='1'>
+  <artifact classifier='org.eclipse.update.feature' id='GitBlitRepositoryExplorerFeature' version='0.0.1.201311281512'>
+    <properties size='6'>
+      <property name='artifact.size' value='2224'/>
+      <property name='download.size' value='2224'/>
+      <property name='maven-groupId' value='ch.basler.plugin.gitblitexplorer'/>
+      <property name='maven-artifactId' value='GitBlitRepositoryExplorerFeature'/>
+      <property name='maven-version' value='0.0.1-SNAPSHOT'/>
+      <property name='download.contentType' value='application/zip'/>
+    </properties>
+  </artifact>
+</artifacts>
