@@ -11,7 +11,7 @@
       <view
             allowMultiple="false"
             category="ch.basler.plugin.gitblitexplorer.view"
-            class="ch.basler.plugin.gitblitexplorer.view.GITRepositoryExplorerView"
+            class="ch.basler.plugin.gitblitexplorer.view.RepoExplorerView"
             icon="icons/git-black-16x16.png"
             id="ch.basler.plugin.gitblitexplorer.view.navigator"
             name="GitBlit Repository Explorer"
