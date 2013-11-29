@@ -3,7 +3,7 @@
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
   <modelVersion>4.0.0</modelVersion>
   <groupId>ch.basler.plugin.gitblitexplorer</groupId>
-  <artifactId>GitBlitRepositoryExplorer</artifactId>
+  <artifactId>ch.basler.plugin.gitblitexplorer.build</artifactId>
   <version>0.0.1-SNAPSHOT</version>
   <packaging>pom</packaging>
   

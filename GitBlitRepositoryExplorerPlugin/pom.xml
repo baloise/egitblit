@@ -3,12 +3,12 @@
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
   <modelVersion>4.0.0</modelVersion>
   <parent>
-    <artifactId>GitBlitRepositoryExplorer</artifactId>
+    <artifactId>ch.basler.plugin.gitblitexplorer.build</artifactId>
     <groupId>ch.basler.plugin.gitblitexplorer</groupId>
     <version>0.0.1-SNAPSHOT</version>
   </parent>
   <groupId>ch.basler.plugin.gitblitexplorer</groupId>
-  <artifactId>GitBlitRepositoryExplorerPlugin</artifactId>
+  <artifactId>ch.basler.plugin.gitblitexplorer.plugin</artifactId>
   <version>0.0.1-SNAPSHOT</version>
   <packaging>eclipse-plugin</packaging>
 </project>

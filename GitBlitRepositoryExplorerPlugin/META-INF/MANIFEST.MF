@@ -1,7 +1,7 @@
 Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: GitBlit Repository Explorer
-Bundle-SymbolicName: GitBlitRepositoryExplorerPlugin;singleton:=true
+Bundle-SymbolicName: ch.basler.plugin.gitblitexplorer.plugin;singleton:=true
 Bundle-Version: 0.0.1.qualifier
 Bundle-Activator: ch.basler.plugin.gitblitexplorer.main.Activator
 Bundle-Vendor: Basler Versicherung AG
