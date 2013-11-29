@@ -5,7 +5,7 @@
       version="0.0.1.qualifier">
 
    <description url="https://github.com/baloise/egitblit">
-      [Enter Feature Description here.]
+      View showing git reopositories via gitblit and copies repo url to clipboard
    </description>
 
    <copyright url="http://www.example.com/copyright">
