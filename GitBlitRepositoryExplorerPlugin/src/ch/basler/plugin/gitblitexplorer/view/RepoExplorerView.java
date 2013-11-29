@@ -427,20 +427,20 @@ public class RepoExplorerView extends ViewPart {
 		}
 		catch(Exception e){
 			logError(value);
-			showMessage(IStatus.ERROR,"Configuration Error", "GitBlit URL is not specified or invalid");
+			showMessage(IStatus.ERROR,"GitBlit Explorer: Configuration Error", "GitBlit URL is not specified or invalid");
 		}
 		value = preferenceStore.getString(GitBlitExplorerPrefPage.KEY_GITBLIT_USER);
 		if(value == null || value.trim().isEmpty()){
 			String msg = "Missing configuration parameter: User";
 			logError(value);
-			showMessage(IStatus.ERROR,"Configuration Error", msg);
+			showMessage(IStatus.ERROR,"GitBlit Explorer: Configuration Error", msg);
 		}
 
 		value = preferenceStore.getString(GitBlitExplorerPrefPage.KEY_GITBLIT_PWD);
 		if(value == null || value.trim().isEmpty()){
 			String msg = "Missing configuration parameter: Password";
 			logError(value);
-			showMessage(IStatus.ERROR,"Configuration Error", msg);
+			showMessage(IStatus.ERROR,"GitBlit Explorer: Configuration Error", msg);
 		}
 	}
 

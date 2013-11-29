@@ -2,7 +2,8 @@
 <feature
       id="ch.basler.plugin.gitblitexplorer.feature"
       label="GitBlitRepositoryExplorerFeature"
-      version="0.0.1.qualifier">
+      version="0.0.1.qualifier"
+      provider-name="Basler Versicherung AG">
 
    <description url="https://github.com/baloise/egitblit">
       View showing git reopositories via gitblit and copies repo url to clipboard
