@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <classpath>
 	<classpathentry kind="src" path="src"/>
+	<classpathentry exported="true" kind="lib" path="icons/"/>
 	<classpathentry exported="true" kind="lib" path="lib/"/>
 	<classpathentry exported="true" kind="lib" path="lib/gbapi-1.3.2.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/gson-1.7.2.jar"/>

@@ -32,9 +32,12 @@ import org.eclipse.swt.events.KeyEvent;
 import org.eclipse.swt.events.KeyListener;
 import org.eclipse.swt.events.ModifyEvent;
 import org.eclipse.swt.events.ModifyListener;
+import org.eclipse.swt.events.SelectionEvent;
+import org.eclipse.swt.events.SelectionListener;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
+import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Label;
@@ -42,6 +45,7 @@ import org.eclipse.swt.widgets.Text;
 import org.eclipse.ui.ISharedImages;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.part.ViewPart;
+import org.eclipse.ui.plugin.AbstractUIPlugin;
 
 import ch.basler.plugin.gitblitexplorer.common.GitBlitBD;
 import ch.basler.plugin.gitblitexplorer.common.GitBlitRepository;
@@ -58,6 +62,7 @@ public class RepoExplorerView extends ViewPart {
 	private List<RepoViewModel> rootModel;
 
 	private boolean isDoubleClickGit = false;
+	private Image imgRefesh = null;
 	
 	// ------------------------------------------------------------------------
 	// --- Actions
@@ -96,10 +101,13 @@ public class RepoExplorerView extends ViewPart {
 					try {
 						IPreferenceStore preferenceStore = Activator.getDefault().getPreferenceStore();
 						String url = preferenceStore.getString(GitBlitExplorerPrefPage.KEY_GITBLIT_URL);
-						url = url + "/summary/" + model.repo + "!" + model.project + ".git";
+						if(url != null && url.endsWith("/") == false){
+							url += "/";
+						}
+						url = url + "summary/" + model.repo + "!" + model.project + ".git";
 						PlatformUI.getWorkbench().getBrowserSupport().getExternalBrowser().openURL(new URL(url));
 					} catch (Exception e) {
-						logError(e.toString());
+						logError("Error while performing open GitBlit action",e);
 					}
 				}
 			}
@@ -119,9 +127,7 @@ public class RepoExplorerView extends ViewPart {
 		public void propertyChange(PropertyChangeEvent event) {
 			String prop = event.getProperty();
 			if (prop != null && prop.startsWith("gitblit.") && viewer != null) {
-				rootModel = readRepositories();
-				viewer.setInput(rootModel);
-				initDoubleBehaviour();
+				initViewModel();
 			}
 		}
 	};
@@ -140,6 +146,10 @@ public class RepoExplorerView extends ViewPart {
 	public void dispose() {
 		super.dispose();
 		Activator.getDefault().getPreferenceStore().removePropertyChangeListener(propChangeListener);
+		if(imgRefesh != null){
+			imgRefesh.dispose();
+			imgRefesh = null;
+		}
 	}
 
 	/*
@@ -158,6 +168,12 @@ public class RepoExplorerView extends ViewPart {
 		Activator.getDefault().getPreferenceStore().addPropertyChangeListener(propChangeListener);
 		checkPreferences();
 		
+		// --- loading reasources
+		ImageDescriptor desc = getImageFromPlugin("refresh_tab.gif");
+		if(desc != null){
+			imgRefesh = desc.createImage();
+		}
+		
 		// --------------------------------------------------------------------
 		// Layout
 		// --------------------------------------------------------------------
@@ -173,7 +189,7 @@ public class RepoExplorerView extends ViewPart {
 
 		Composite comp = new Composite(parent, SWT.NONE);
 		l = GridLayoutFactory.swtDefaults().create();
-		l.numColumns = 2;
+		l.numColumns = 3;
 		gd = GridDataFactory.swtDefaults().create();
 		gd.grabExcessHorizontalSpace = true;
 		gd.horizontalAlignment = SWT.FILL;
@@ -211,6 +227,26 @@ public class RepoExplorerView extends ViewPart {
 			public void keyPressed(KeyEvent e) {
 			}
 		});		
+		Button rBt = new Button(comp, SWT.PUSH);
+		if(imgRefesh != null){
+			rBt.setImage(imgRefesh);
+		}
+		else{
+			rBt.setText("Refresh");
+		}
+
+		rBt.setToolTipText("Retrieve projects from GitBlit");
+		rBt.addSelectionListener(new SelectionListener() {
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				initViewModel();
+				filterResult(text.getText());
+			}
+			
+			@Override
+			public void widgetDefaultSelected(SelectionEvent e) {
+			}
+		});
 
 		// --------------------------------------------------------------------
 		// Tree viewer
@@ -218,8 +254,7 @@ public class RepoExplorerView extends ViewPart {
 		viewer = new TreeViewer(parent, SWT.H_SCROLL | SWT.V_SCROLL);
 		viewer.setContentProvider(new RepoContentProvider());
 		viewer.setLabelProvider(new RepoLabelProvider());
-		rootModel = readRepositories();
-		viewer.setInput(rootModel);
+		initViewModel();
 
 		l = GridLayoutFactory.swtDefaults().create();
 		gd.grabExcessHorizontalSpace = true;
@@ -311,12 +346,21 @@ public class RepoExplorerView extends ViewPart {
 		});
 	}
 
-	private final static Image getImage(String name) {
-		return Activator.getDefault().getImageRegistry().get(name);
+	private final static ImageDescriptor getImageFromPlugin(String name){
+		return AbstractUIPlugin.imageDescriptorFromPlugin(Activator.PLUGIN_ID,"/icons/" + name);
 	}
-
+	
 	private final static ImageDescriptor getImageDescriptor(String name) {
 		return Activator.getDefault().getImageRegistry().getDescriptor(name);
+	}
+	
+	
+	private void initViewModel(){
+		rootModel = readRepositories(true);
+		if(viewer != null){
+			viewer.setInput(rootModel);
+		}
+		initDoubleBehaviour();
 	}
 
 	/**
@@ -345,14 +389,13 @@ public class RepoExplorerView extends ViewPart {
 	 * 
 	 * @return
 	 */
-	private List<RepoViewModel> readRepositories() {
+	private List<RepoViewModel> readRepositories(final boolean reload) {
 		final Holder<Boolean> noAccess = new Holder<Boolean>(Boolean.FALSE);
 
 		final List<RepoViewModel> modelList = new ArrayList<RepoViewModel>();
 		BusyIndicator.showWhile(Display.getDefault(), new Runnable() {
 			public void run() {
 				try {
-
 					IPreferenceStore preferenceStore = Activator.getDefault().getPreferenceStore();
 					String url = preferenceStore.getString(GitBlitExplorerPrefPage.KEY_GITBLIT_URL);
 					String user = preferenceStore.getString(GitBlitExplorerPrefPage.KEY_GITBLIT_USER);
@@ -369,7 +412,7 @@ public class RepoExplorerView extends ViewPart {
 					// --------------------------------------------------------
 					// Call GitBlit
 					// --------------------------------------------------------
-					GitBlitBD bd = new GitBlitBD(url, user, pwd, true);
+					GitBlitBD bd = new GitBlitBD(url, user, pwd, !reload);
 					Map<String, List<GitBlitRepository>> map = bd.readRepositoryMap();
 					RepoViewModel model;
 					List<GitBlitRepository> list;
@@ -383,12 +426,13 @@ public class RepoExplorerView extends ViewPart {
 						}
 					}
 				} catch (Exception e) {
-					logError(e.toString());
+					logError("Error while connecting GitBlit",e);
+					showMessage(IStatus.ERROR,"GitBlit Explorer: Error reading project from GitBlit", e.toString());
 				}
 			}
 		});
 		if (noAccess.value) {
-			modelList.add(new RepoViewModel(null, null, "Please configure GitBlit Explorer in preferences.", null));
+			modelList.add(new RepoViewModel(null, null, "Please configure GitBlit Explorer in preferences, first.", null));
 		}
 		return modelList;
 	}
@@ -426,7 +470,7 @@ public class RepoExplorerView extends ViewPart {
 			new URL(value);
 		}
 		catch(Exception e){
-			logError(value);
+			logError("Error while checking preferences",e);
 			showMessage(IStatus.ERROR,"GitBlit Explorer: Configuration Error", "GitBlit URL is not specified or invalid");
 		}
 		value = preferenceStore.getString(GitBlitExplorerPrefPage.KEY_GITBLIT_USER);
@@ -442,6 +486,11 @@ public class RepoExplorerView extends ViewPart {
 			logError(value);
 			showMessage(IStatus.ERROR,"GitBlit Explorer: Configuration Error", msg);
 		}
+	}
+
+	private void logError(String msg, Throwable e) {
+		IStatus s = new Status(IStatus.ERROR, Activator.PLUGIN_ID, msg,e);
+		Activator.getDefault().getLog().log(s);
 	}
 
 	private void logError(String msg) {

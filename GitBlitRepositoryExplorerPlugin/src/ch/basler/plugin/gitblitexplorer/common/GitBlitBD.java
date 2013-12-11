@@ -30,31 +30,37 @@ public class GitBlitBD {
 		this.endpoint = endpoint;
 		this.user = user;
 		this.pwd = pwd;
-		this.doCaching = doCaching;
+		setCaching(doCaching);
 	}
 		
+	public void setCaching(boolean onOff){
+		this.doCaching = onOff;
+		if(this.doCaching == false){
+			clearCache();
+		}
+	}
+	
+	public boolean isCaching(){
+		return this.doCaching;
+	}
+	
 	public void clearCache(){
 		this.projectCache = null;
 	}
 	
-	/**
-	 * Liest alle GIT Repositories ("Projekte")
-	 * @return List der als BaslerRepository aufbereiteten GIT-Repositories  
-	 * @throws GitBlitBDException
-	 */
 	public List<GitBlitRepository> readRepositories() throws GitBlitBDException{
 		if(this.projectCache != null){
 			return this.projectCache;
 		}
 		try{
-			// --- Git Utils: RPC Client für den Zugriff
+			// --- Git Utils: RPC Client
 			Map<String, RepositoryModel> res = RpcUtils.getRepositories(this.endpoint,this.user,this.pwd.toCharArray());
 			List<GitBlitRepository> bres = new ArrayList<GitBlitRepository>();
 			for(String item : res.keySet()){
 				bres.add(GitBlitRepository.create(item, res.get(item)));
 			}
 			// --- Caching BD: Wenn cache if desired
-			if(this.doCaching){
+			if(isCaching()){
 				this.projectCache = bres;
 			}
 			return bres;
@@ -82,6 +88,7 @@ public class GitBlitBD {
 			return mres;
 		}
 		catch(GitBlitBDException e){
+			clearCache();
 			throw e;
 		}
 		catch(Exception e){
