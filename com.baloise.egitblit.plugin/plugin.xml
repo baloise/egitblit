@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?eclipse version="3.4"?>
+<plugin>
+   <extension
+         point="org.eclipse.ui.views">
+      <category
+            id="com.baloise.egitblit.view"
+            name="GitBlit Repository Explorer">
+      </category>
+      <view
+            allowMultiple="false"
+            category="com.baloise.egitblit.view"
+            class="com.baloise.egitblit.view.RepoExplorerView"
+            icon="/icons/git-black-16x16.png"
+            id="com.baloise.egitblit.view.navigator"
+            name="GitBlit Repository Explorer"
+            restorable="true">
+      </view>
+   </extension>
+   <extension
+         point="org.eclipse.ui.preferencePages">
+      <page
+            class="com.baloise.egitblit.pref.GitBlitExplorerPrefPage"
+            id="com.baloise.egitblit.pref"
+            name="GitBlit Repository Explorer">
+      </page>
+   </extension>
+   <extension
+         point="org.eclipse.core.runtime.preferences">
+      <initializer
+            class="com.baloise.egitblit.pref.Initializer">
+      </initializer>
+   </extension>
+
+</plugin>

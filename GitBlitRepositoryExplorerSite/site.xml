@@ -1,7 +1,0 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<site>
-   <feature url="features/ch.basler.plugin.gitblitexplorer.feature_0.0.1.qualifier.jar" id="ch.basler.plugin.gitblitexplorer.feature" version="0.0.1.qualifier">
-      <category name="ch.basler.plugin.gitblitexplorer"/>
-   </feature>
-   <category-def name="ch.basler.plugin.gitblitexplorer" label="GitBlitExplorer"/>
-</site>

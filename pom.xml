@@ -2,8 +2,8 @@
 <project xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd" xmlns="http://maven.apache.org/POM/4.0.0"
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
   <modelVersion>4.0.0</modelVersion>
-  <groupId>ch.basler.plugin.gitblitexplorer</groupId>
-  <artifactId>ch.basler.plugin.gitblitexplorer.build</artifactId>
+  <groupId>com.baloise.egitblit</groupId>
+  <artifactId>com.baloise.egitblit</artifactId>
   <version>0.0.1-SNAPSHOT</version>
   <packaging>pom</packaging>
   
@@ -23,12 +23,19 @@
   
   
   <modules>
-    <module>GitBlitRepositoryExplorerPlugin</module>
-    <module>GitBlitRepositoryExplorerFeature</module>
-    <module>GitBlitRepositoryExplorerSite</module>
+    <module>com.baloise.egitblit.plugin</module>
+    <module>com.baloise.egitblit.feature</module>
+    <module>com.baloise.egitblit.site</module>
   </modules>
   <build>
     <plugins>
+        <plugin>
+            <artifactId>maven-compiler-plugin</artifactId>
+            <configuration>
+                <source>1.7</source>
+                <target>1.7</target>
+            </configuration>
+        </plugin>
       <plugin>
         <groupId>org.eclipse.tycho</groupId>
         <artifactId>tycho-maven-plugin</artifactId>
