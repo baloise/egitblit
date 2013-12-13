@@ -1,47 +1,69 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd" xmlns="http://maven.apache.org/POM/4.0.0"
-    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
-  <modelVersion>4.0.0</modelVersion>
-  <groupId>com.baloise.egitblit</groupId>
-  <artifactId>com.baloise.egitblit</artifactId>
-  <version>0.0.1-SNAPSHOT</version>
-  <packaging>pom</packaging>
-  
-  <properties>
-    <tycho.version>0.19.0</tycho.version>
+<project
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd"
+	xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+	<modelVersion>4.0.0</modelVersion>
+	<groupId>com.baloise.egitblit</groupId>
+	<artifactId>com.baloise.egitblit</artifactId>
+	<version>0.0.1-SNAPSHOT</version>
+	<packaging>pom</packaging>
 
-    <kepler-repo.url>http://download.eclipse.org/releases/kepler</kepler-repo.url>
-  </properties>
+	<properties>
+		<tycho.version>0.19.0</tycho.version>
+		<github.global.server>github</github.global.server>
+		<kepler-repo.url>http://download.eclipse.org/releases/kepler</kepler-repo.url>
+	</properties>
 
-  <repositories>
-    <repository>
-      <id>eclipse-kepler</id>
-      <url>http://download.eclipse.org/releases/kepler</url>
-      <layout>p2</layout>
-    </repository>
-  </repositories>
-  
-  
-  <modules>
-    <module>com.baloise.egitblit.plugin</module>
-    <module>com.baloise.egitblit.feature</module>
-    <module>com.baloise.egitblit.site</module>
-  </modules>
-  <build>
-    <plugins>
-        <plugin>
-            <artifactId>maven-compiler-plugin</artifactId>
-            <configuration>
-                <source>1.7</source>
-                <target>1.7</target>
-            </configuration>
-        </plugin>
-      <plugin>
-        <groupId>org.eclipse.tycho</groupId>
-        <artifactId>tycho-maven-plugin</artifactId>
-        <version>0.19.0</version>
-        <extensions>true</extensions>
-      </plugin>
-    </plugins>
-  </build>
+	<repositories>
+		<repository>
+			<id>eclipse-kepler</id>
+			<url>http://download.eclipse.org/releases/kepler</url>
+			<layout>p2</layout>
+		</repository>
+	</repositories>
+
+
+	<modules>
+		<module>com.baloise.egitblit.plugin</module>
+		<module>com.baloise.egitblit.feature</module>
+		<module>com.baloise.egitblit.site</module>
+	</modules>
+	<build>
+		<plugins>
+			<plugin>
+				<artifactId>maven-compiler-plugin</artifactId>
+				<configuration>
+					<source>1.7</source>
+					<target>1.7</target>
+				</configuration>
+			</plugin>
+			
+			<plugin>
+				<groupId>com.github.github</groupId>
+				<artifactId>site-maven-plugin</artifactId>
+				<version>0.9</version>
+				<configuration>
+					<repositoryOwner>baloise</repositoryOwner>
+					<repositoryName>egitblit</repositoryName>
+					<message>Creating site for ${project.artifactId} ${project.version}</message>
+					<dryRun>true</dryRun>
+				</configuration>
+				<executions>
+					<execution>
+						<goals>
+							<goal>site</goal>
+						</goals>
+						<phase>site</phase>
+					</execution>
+				</executions>
+			</plugin>
+			
+			<plugin>
+				<groupId>org.eclipse.tycho</groupId>
+				<artifactId>tycho-maven-plugin</artifactId>
+				<version>0.19.0</version>
+				<extensions>true</extensions>
+			</plugin>
+		</plugins>
+	</build>
 </project>
