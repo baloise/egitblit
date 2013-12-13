@@ -38,25 +38,7 @@
 				</configuration>
 			</plugin>
 			
-			<plugin>
-				<groupId>com.github.github</groupId>
-				<artifactId>site-maven-plugin</artifactId>
-				<version>0.9</version>
-				<configuration>
-					<repositoryOwner>baloise</repositoryOwner>
-					<repositoryName>egitblit</repositoryName>
-					<message>Creating site for ${project.artifactId} ${project.version}</message>
-					<dryRun>true</dryRun>
-				</configuration>
-				<executions>
-					<execution>
-						<goals>
-							<goal>site</goal>
-						</goals>
-						<phase>site</phase>
-					</execution>
-				</executions>
-			</plugin>
+			
 			
 			<plugin>
 				<groupId>org.eclipse.tycho</groupId>
