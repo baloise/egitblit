@@ -10,6 +10,7 @@ import com.gitblit.models.RepositoryModel;
  */
 public class GitBlitRepository {
 
+  public static final String MAIN = "main";
   public String url;
   public String repositoryName;
   public String projectName;
@@ -39,7 +40,7 @@ public class GitBlitRepository {
     }
     int pos = value.lastIndexOf("/");
     if (pos == -1) {
-      return "<root>";
+      return MAIN;
     }
     return value.substring(0, pos);
   }

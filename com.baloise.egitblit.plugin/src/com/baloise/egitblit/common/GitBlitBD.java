@@ -1,5 +1,7 @@
 package com.baloise.egitblit.common;
 
+import static com.baloise.egitblit.common.GitBlitRepository.MAIN;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -76,6 +78,7 @@ public class GitBlitBD {
 			List<GitBlitRepository> res = readRepositories();
 			Map<String,List<GitBlitRepository>> mres = new TreeMap<String,List<GitBlitRepository>>();
 			for(GitBlitRepository item : res){
+				if(item.repositoryName == null) item.repositoryName = MAIN;
 				List<GitBlitRepository> rlist = mres.get(item.repositoryName);
 				if(rlist == null){
 					rlist = new ArrayList<GitBlitRepository>();

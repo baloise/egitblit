@@ -19,11 +19,13 @@ public class GitBlitExplorerPrefPage extends FieldEditorPreferencePage implement
 
 	// Keys to store / access data at preference store
 	public final static String KEY_GITBLIT_URL = "gitblit.url";
+	public final static String KEY_GITBLIT_URL_SEPERATOR = "gitblit.url.seperator";
 	public final static String KEY_GITBLIT_USER = "gitblit.user";
 	public final static String KEY_GITBLIT_PWD = "gitblit.password";
 	public final static String KEY_GITBLIT_DCLICK = "gitblit.dobuleclick";
 	public final static String VALUE_GITBLIT_DCLICK_GIT = "git";
 	public final static String VALUE_GITBLIT_DCLICK_GITBLIT = "gitblit";
+	public final static String VALUE_GITBLIT_URL_SEPERATOR = "%2F";
 	
 	public GitBlitExplorerPrefPage() {
 		super(GRID);
@@ -45,6 +47,10 @@ public class GitBlitExplorerPrefPage extends FieldEditorPreferencePage implement
 			surl = "";
 		}
 		addField(url);
+		
+		
+		StringFieldEditor urlSep = new StringFieldEditor(KEY_GITBLIT_URL_SEPERATOR, 	"GitBlit server url seperator",getFieldEditorParent());
+		addField(urlSep);
 		
 		 addField(new StringFieldEditor(KEY_GITBLIT_USER, "GitBlit user",getFieldEditorParent()));
 		 StringFieldEditor pwd = new StringFieldEditor(KEY_GITBLIT_PWD, "GitBlit password",getFieldEditorParent()){

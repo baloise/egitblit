@@ -1,5 +1,7 @@
 package com.baloise.egitblit.view;
 
+import static com.baloise.egitblit.common.GitBlitRepository.MAIN;
+
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
@@ -104,7 +106,13 @@ public class RepoExplorerView extends ViewPart {
 						if(url != null && url.endsWith("/") == false){
 							url += "/";
 						}
-						url = url + "summary/" + model.repo + "!" + model.project + ".git";
+						url = url + "summary/";
+						if(!MAIN.equals(model.repo)){
+							String seperator = preferenceStore.getString(GitBlitExplorerPrefPage.KEY_GITBLIT_URL_SEPERATOR);
+							
+							url += model.repo + seperator;
+						}
+						url += model.project + ".git";
 						PlatformUI.getWorkbench().getBrowserSupport().getExternalBrowser().openURL(new URL(url));
 					} catch (Exception e) {
 						logError("Error while performing open GitBlit action",e);
