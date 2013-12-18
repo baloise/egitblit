@@ -49,4 +49,9 @@ public class GroupViewModel implements GitBlitViewModel{
 		return this.parent;
 	}
 
+	@Override
+	public String getToolTip(){
+		return null;
+	}
+
 }

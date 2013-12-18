@@ -11,6 +11,7 @@ public class ProjectViewModel implements GitBlitViewModel{
 
 	private GitBlitRepository entry;
 	private GitBlitViewModel parent;
+	private String toolTip;
 	
 	public ProjectViewModel(GitBlitRepository entry, GitBlitViewModel parent){
 		this.entry = entry;
@@ -77,4 +78,14 @@ public class ProjectViewModel implements GitBlitViewModel{
 		}
 		return this.entry.description;
 	}
+	
+	
+	public void setToolTip(String msg){
+		this.toolTip = msg;
+	}
+	
+	public String getToolTip(){
+		return this.toolTip;
+	}
+			
 }

@@ -1,9 +1,10 @@
 package com.baloise.egitblit.view;
 
-import org.eclipse.jface.viewers.ILabelProviderListener;
-import org.eclipse.jface.viewers.ITableLabelProvider;
-import org.eclipse.swt.graphics.Image;
+import org.eclipse.jface.viewers.CellLabelProvider;
+import org.eclipse.jface.viewers.ViewerCell;
+import org.eclipse.swt.graphics.Point;
 
+import com.baloise.egitblit.view.model.GitBlitViewModel;
 import com.baloise.egitblit.view.model.GroupViewModel;
 import com.baloise.egitblit.view.model.ProjectViewModel;
 
@@ -11,53 +12,54 @@ import com.baloise.egitblit.view.model.ProjectViewModel;
  * @author MicBag
  * 
  */
-public class RepoLabelProvider implements ITableLabelProvider {
+public class RepoLabelProvider extends CellLabelProvider{
 
 	@Override
-	public Image getColumnImage(Object element, int columnIndex){
-//		if(element instanceof GroupViewModel && columnIndex == 0){
-//			return PlatformUI.getWorkbench().getSharedImages().getImage(ISharedImages.IMG_OBJ_FOLDER); 
-//		}
-		return null;
-	}
-	
-	@Override
-	public String getColumnText(Object element, int columnIndex){
+	public void update(ViewerCell cell){
+		Object element = cell.getElement();
+		int columnIndex = cell.getColumnIndex();
 		if(element == null){
-			return "(Error)";
+			return;
 		}
+
 		switch(columnIndex){
 			case 0:
 				if(element instanceof GroupViewModel){
-					return ((GroupViewModel) element).getName();
+					cell.setText(((GroupViewModel) element).getName());
 				}
-				if(element instanceof ProjectViewModel){
-					return ((ProjectViewModel) element).getName();
+				else if(element instanceof ProjectViewModel){
+					cell.setText(((ProjectViewModel) element).getName());
 				}
-				return null;
+				break;
 			case 1:
 				if(element instanceof ProjectViewModel){
-					return ((ProjectViewModel) element).getDescription();
+					cell.setText(((ProjectViewModel) element).getDescription());
 				}
-				return null;
+				break;
 		}
-		return "(Error)";
-	}
-	
-	@Override
-	public void addListener(ILabelProviderListener listener){
-	}
-	
-	@Override
-	public void dispose(){
 	}
 
 	@Override
-	public boolean isLabelProperty(Object element, String property){
-		return false;
+	public String getToolTipText(Object element){
+		String str = null;
+		if(element instanceof GitBlitViewModel){
+			str = ((GitBlitViewModel)element).getToolTip();
+		}
+		return str;
+	}
+
+	@Override
+	public Point getToolTipShift(Object object){
+		return new Point(5, 5);
+	}
+
+	@Override
+	public int getToolTipDisplayDelayTime(Object object){
+		return 500;
 	}
 	
 	@Override
-	public void removeListener(ILabelProviderListener listener){
+	public int getToolTipTimeDisplayed(Object object) {
+		return 5000;
 	}
 }

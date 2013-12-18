@@ -18,12 +18,14 @@ import org.eclipse.jface.layout.GridLayoutFactory;
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.jface.util.IPropertyChangeListener;
 import org.eclipse.jface.util.PropertyChangeEvent;
+import org.eclipse.jface.viewers.ColumnViewerToolTipSupport;
 import org.eclipse.jface.viewers.DoubleClickEvent;
 import org.eclipse.jface.viewers.IDoubleClickListener;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.ITableLabelProvider;
 import org.eclipse.jface.viewers.TreeViewer;
 import org.eclipse.jface.viewers.Viewer;
+import org.eclipse.jface.window.ToolTip;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.BusyIndicator;
 import org.eclipse.swt.dnd.DND;
@@ -261,7 +263,7 @@ public class RepoExplorerView extends ViewPart{
 		});
 
 		viewer.getControl().setMenu(mgr.createContextMenu(viewer.getControl()));
-
+		ColumnViewerToolTipSupport.enableFor(viewer);
 		initViewModel();
 	}
 
@@ -329,9 +331,14 @@ public class RepoExplorerView extends ViewPart{
 						modelList.add(gModel);
 
 						// Adding childs of group
+						ProjectViewModel pModel;
 						List<GitBlitRepository> pList = groupMap.get(groupName);
 						for(GitBlitRepository item : pList){
-							gModel.addChild(new ProjectViewModel(item));
+							pModel = new ProjectViewModel(item);
+							if(item.hasCommits == false){
+								pModel.setToolTip("Repository has no commits. Can´t show repository summary  in GitBlit");
+							}
+							gModel.addChild(pModel);
 						}
 					}
 				}catch(Exception e){
