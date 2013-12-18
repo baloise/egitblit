@@ -63,7 +63,10 @@ public class GitBlitExplorerPrefPage extends PreferencePage implements IWorkbenc
 	@Override
 	protected Control createContents(Composite parent){
 
+		// Root composite which contains all gui elements
 		Composite root = new Composite(parent, SWT.NONE);
+
+		// ...do a little bit layout
 		GridLayout l = GridLayoutFactory.swtDefaults().create();
 		l.numColumns = 2;
 		l.marginWidth = 0;
@@ -75,6 +78,7 @@ public class GitBlitExplorerPrefPage extends PreferencePage implements IWorkbenc
 		gd.horizontalAlignment = SWT.FILL;
 		gd.verticalAlignment = SWT.FILL;
 
+		// Table which shows all server properties
 		viewer = new TableViewer(root, SWT.CHECK | SWT.H_SCROLL | SWT.V_SCROLL | SWT.FULL_SELECTION | SWT.BORDER);
 		Table table = viewer.getTable();
 		table.setHeaderVisible(true);
@@ -82,6 +86,7 @@ public class GitBlitExplorerPrefPage extends PreferencePage implements IWorkbenc
 		table.setLayout(l);
 		table.setLayoutData(gd);
 
+		// --- add activation check box
 		TableViewerColumn colActive = createColumn(viewer, "Active", 50);
 		colActive.setLabelProvider(new ColumnLabelProvider() {
 			@Override
@@ -90,6 +95,7 @@ public class GitBlitExplorerPrefPage extends PreferencePage implements IWorkbenc
 			}
 		});
 
+		// --- add url column
 		TableViewerColumn colURL = createColumn(viewer, "URL", 150);
 		colURL.setLabelProvider(new ColumnLabelProvider() {
 			@Override
@@ -101,6 +107,7 @@ public class GitBlitExplorerPrefPage extends PreferencePage implements IWorkbenc
 			}
 		});
 
+		// --- add user column
 		TableViewerColumn colUser = createColumn(viewer, "User", 100);
 		colUser.setLabelProvider(new ColumnLabelProvider() {
 			@Override
@@ -112,6 +119,7 @@ public class GitBlitExplorerPrefPage extends PreferencePage implements IWorkbenc
 			}
 		});
 
+		// --- add masked password column 
 		TableViewerColumn colPwd = createColumn(viewer, "Password", 100);
 		colPwd.getColumn().setText("Password");
 		colPwd.setLabelProvider(new ColumnLabelProvider() {
@@ -127,6 +135,7 @@ public class GitBlitExplorerPrefPage extends PreferencePage implements IWorkbenc
 			}
 		});
 
+		// --- container for table/row related editing / actions
 		Composite btComp = new Composite(root, SWT.NONE);
 		l = GridLayoutFactory.swtDefaults().create();
 		l.numColumns = 1;
@@ -138,6 +147,7 @@ public class GitBlitExplorerPrefPage extends PreferencePage implements IWorkbenc
 		gd.horizontalAlignment = SWT.LEFT;
 		btComp.setLayoutData(gd);
 
+		// --- add new server button
 		Button btAdd = new Button(btComp, SWT.PUSH);
 		btAdd.setText("Add...");
 		btAdd.addSelectionListener(new SelectionListener() {
@@ -155,6 +165,7 @@ public class GitBlitExplorerPrefPage extends PreferencePage implements IWorkbenc
 			}
 		});
 
+		// --- edit server button
 		final Button btEdit = new Button(btComp, SWT.PUSH);
 		btEdit.setText("Edit...");
 		btEdit.addSelectionListener(new SelectionListener() {
@@ -176,7 +187,8 @@ public class GitBlitExplorerPrefPage extends PreferencePage implements IWorkbenc
 			public void widgetDefaultSelected(SelectionEvent e){
 			}
 		});
-
+		
+		// --- remove server button
 		final Button btRemove = new Button(btComp, SWT.PUSH);
 		btRemove.setText("Remove");
 		btRemove.addSelectionListener(new SelectionListener() {
@@ -199,6 +211,7 @@ public class GitBlitExplorerPrefPage extends PreferencePage implements IWorkbenc
 			}
 		});
 
+		// --- container for double click behaviour radio buttons
 		Composite comp = new Composite(root, SWT.NONE);
 		l = GridLayoutFactory.swtDefaults().create();
 		l.numColumns = 1;
@@ -207,9 +220,9 @@ public class GitBlitExplorerPrefPage extends PreferencePage implements IWorkbenc
 		gd = GridDataFactory.swtDefaults().create();
 		gd.verticalAlignment = SWT.TOP;
 		gd.grabExcessHorizontalSpace = true;
-		// gd.grabExcessVerticalSpace = true;
 		comp.setLayoutData(gd);
 
+		// --- rb group
 		Group g = new Group(comp, SWT.SHADOW_IN);
 		g.setLayout(l);
 		g.setLayoutData(gd);
@@ -221,6 +234,7 @@ public class GitBlitExplorerPrefPage extends PreferencePage implements IWorkbenc
 		btCopyUrl = new Button(g, SWT.RADIO);
 		btCopyUrl.setText("Copy repository path to clipboard");
 
+		// --- Open edit dialog when a given row is double clicked 
 		viewer.setContentProvider(new PreferenceModelProvider());
 		viewer.addDoubleClickListener(new IDoubleClickListener() {
 			@Override
@@ -237,8 +251,11 @@ public class GitBlitExplorerPrefPage extends PreferencePage implements IWorkbenc
 			}
 		});
 
+		// --- init buttons by default
 		btEdit.setEnabled(false);
 		btRemove.setEnabled(false);
+
+		// --- Sync button state corresponding to table selection
 		viewer.addSelectionChangedListener(new ISelectionChangedListener() {
 			@Override
 			public void selectionChanged(SelectionChangedEvent event){
@@ -249,7 +266,7 @@ public class GitBlitExplorerPrefPage extends PreferencePage implements IWorkbenc
 		});
 		
 		// --- init data
-		this.prefModel = getRepositoryList();
+		this.prefModel = readPreferenceSettings();
 		viewer.setInput(this.prefModel);
 		synchDoubleClick(true);
 		syncActive(true);
@@ -257,12 +274,18 @@ public class GitBlitExplorerPrefPage extends PreferencePage implements IWorkbenc
 	}
 	
 
+	/**
+	 * Apply all field settings of preferences to preference model.
+	 */
 	protected void applyFieldValues(){
 		synchDoubleClick(false);
 		syncActive(false);
 	}
 	
 	
+	/**
+	 * @param doRead true = read from model to gui, false = save gui to model
+	 */
 	protected void syncActive(boolean doRead){
 		if(viewer == null || this.prefModel == null){
 			return;
@@ -282,6 +305,9 @@ public class GitBlitExplorerPrefPage extends PreferencePage implements IWorkbenc
 		}
 	}
 	
+	/**
+	 * @param doRead true = read from model to gui, false = save gui to model
+	 */
 	protected void synchDoubleClick(boolean doRead){
 		if(this.btCopyUrl == null || this.btOpenGitBlit == null || this.prefModel == null){
 			return;
@@ -309,6 +335,9 @@ public class GitBlitExplorerPrefPage extends PreferencePage implements IWorkbenc
 		}
 	}
 
+	/* (non-Javadoc)
+	 * @see org.eclipse.jface.preference.PreferencePage#performApply()
+	 */
 	@Override
 	protected void performApply(){
 		try{
@@ -321,11 +350,17 @@ public class GitBlitExplorerPrefPage extends PreferencePage implements IWorkbenc
 		super.performApply();
 	}
 
+	/* (non-Javadoc)
+	 * @see org.eclipse.jface.preference.PreferencePage#performCancel()
+	 */
 	@Override
 	public boolean performCancel(){
 		return super.performCancel();
 	}
 
+	/* (non-Javadoc)
+	 * @see org.eclipse.jface.preference.PreferencePage#performOk()
+	 */
 	@Override
 	public boolean performOk(){
 		try{
@@ -339,10 +374,21 @@ public class GitBlitExplorerPrefPage extends PreferencePage implements IWorkbenc
 		return super.performOk();
 	}
 	
+	/**
+	 * Because this dialog uses regular swt/jface controls, preference changes are not published
+	 * This method publishes a change event by using the root key of gitblit preferences PreferenceMgr.KEY_GITBLIT_ROOT 
+	 */
 	private void firePreferenceChange(){
 		Activator.getDefault().getPreferenceStore().firePropertyChangeEvent(PreferenceMgr.KEY_GITBLIT_ROOT, null,null);
 	}
 
+	/**
+	 * Creates a table column
+	 * @param viewer
+	 * @param title
+	 * @param width
+	 * @return
+	 */
 	private TableViewerColumn createColumn(TableViewer viewer, String title, int width){
 		TableViewerColumn viewerColumn = new TableViewerColumn(viewer, SWT.NONE);
 		TableColumn column = viewerColumn.getColumn();
@@ -353,7 +399,11 @@ public class GitBlitExplorerPrefPage extends PreferencePage implements IWorkbenc
 		return viewerColumn;
 	}
 
-	private PreferenceModel getRepositoryList(){
+	/**
+	 * Wrapper method reading stored config
+	 * @return
+	 */
+	private PreferenceModel readPreferenceSettings(){
 		try{
 			return PreferenceMgr.readConfig();
 		}catch(GitBlitExplorerException e){
@@ -362,6 +412,11 @@ public class GitBlitExplorerPrefPage extends PreferencePage implements IWorkbenc
 		return null;
 	}
 
+	/**
+	 * initializes the {@link RepositoryDialog} and opens the dialog
+	 * @param entry entry to be displayed and updated
+	 * @return Eclipse {@link Window} code OK or CAMCEL
+	 */
 	private int processEntry(GitBlitServer entry){
 		RepositoryDialog dlg = new RepositoryDialog(getShell());
 		dlg.setBlockOnOpen(true);
@@ -379,6 +434,5 @@ public class GitBlitExplorerPrefPage extends PreferencePage implements IWorkbenc
 		}
 		return rc;
 	}
-
 	
 }

@@ -14,6 +14,8 @@ import com.baloise.egitblit.view.model.GitBlitViewModel;
 import com.baloise.egitblit.view.model.ProjectViewModel;
 
 /**
+ * Offers drag & drop capability to a selected repository in viewer
+ * @see DragSourceListener
  * @author MicBag
  *
  */

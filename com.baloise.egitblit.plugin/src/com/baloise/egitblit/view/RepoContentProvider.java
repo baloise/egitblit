@@ -10,6 +10,7 @@ import com.baloise.egitblit.view.model.GroupViewModel;
 import com.baloise.egitblit.view.model.ProjectViewModel;
 
 /**
+ * @see ITreeContentProvider
  * @author MicBag
  *
  */

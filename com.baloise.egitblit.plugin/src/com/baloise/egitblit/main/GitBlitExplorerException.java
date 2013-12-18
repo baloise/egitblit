@@ -1,5 +1,10 @@
 package com.baloise.egitblit.main;
 
+/**
+ * Exception which will be used by all GitBlit Explorer classes (this is just a wrapper)
+ * @author MicBag
+ *
+ */
 public class GitBlitExplorerException extends Exception {
 
 	private static final long serialVersionUID = 1L;

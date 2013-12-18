@@ -25,7 +25,6 @@ import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.ITableLabelProvider;
 import org.eclipse.jface.viewers.TreeViewer;
 import org.eclipse.jface.viewers.Viewer;
-import org.eclipse.jface.window.ToolTip;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.BusyIndicator;
 import org.eclipse.swt.dnd.DND;
@@ -33,6 +32,8 @@ import org.eclipse.swt.dnd.TextTransfer;
 import org.eclipse.swt.dnd.Transfer;
 import org.eclipse.swt.events.DisposeEvent;
 import org.eclipse.swt.events.DisposeListener;
+import org.eclipse.swt.events.SelectionAdapter;
+import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
@@ -66,7 +67,6 @@ import com.baloise.egitblit.view.model.ProjectViewModel;
  * 
  */
 public class RepoExplorerView extends ViewPart{
-
 	
 	private TreeViewer viewer;
 	private List<GroupViewModel> rootModel;
@@ -94,7 +94,6 @@ public class RepoExplorerView extends ViewPart{
 		}
 	};
 
-	// ------------------------------------------------------------------------
 	// ------------------------------------------------------------------------
 	public RepoExplorerView(){
 	}
@@ -225,7 +224,7 @@ public class RepoExplorerView extends ViewPart{
 		colGroup.setAlignment(SWT.LEFT);
 		colGroup.setText("Group / Repository");
 		colGroup.setWidth(280);
-
+		
 		TreeColumn colDesc = new TreeColumn(viewer.getTree(), SWT.LEFT);
 		colDesc.setAlignment(SWT.LEFT);
 		colDesc.setText("Description");
@@ -263,14 +262,25 @@ public class RepoExplorerView extends ViewPart{
 		});
 
 		viewer.getControl().setMenu(mgr.createContextMenu(viewer.getControl()));
+		viewer.setSorter(new RepoViewSorter());
+		
 		ColumnViewerToolTipSupport.enableFor(viewer);
 		initViewModel();
 	}
 
+	/**
+	 * Gets the {@link ImageDescriptor} of the passed image
+	 * The image must be located in the "/icons/" folder of the source project 
+	 * @param name Name of the image
+	 * @return {@link ImageDescriptor}
+	 */
 	private final static ImageDescriptor getImageFromPlugin(String name){
 		return AbstractUIPlugin.imageDescriptorFromPlugin(Activator.PLUGIN_ID, "/icons/" + name);
 	}
 
+	/**
+	 * Reads the repositories from GitBlit and sets the result in the viewre to be displayed
+	 */
 	private void initViewModel(){
 		rootModel = readRepositories(true);
 		if(viewer != null){
@@ -307,8 +317,7 @@ public class RepoExplorerView extends ViewPart{
 
 	/**
 	 * Reading repos / projects from gitblit
-	 * 
-	 * @return
+	 * @return reload Currently not supported 
 	 */
 	private List<GroupViewModel> readRepositories(final boolean reload){
 		final Holder<Boolean> noAccess = new Holder<Boolean>(Boolean.FALSE);
@@ -413,6 +422,11 @@ public class RepoExplorerView extends ViewPart{
 		}
 	}
 
+	/**
+	 * Shows the message as dialog
+	 * @param level {@link IStatus} codes
+	 * @param msg Message to be displayed
+	 */
 	private void showMessage(final int level, final String msg){
 		getSite().getShell().getDisplay().asyncExec(new Runnable() {
 			public void run(){

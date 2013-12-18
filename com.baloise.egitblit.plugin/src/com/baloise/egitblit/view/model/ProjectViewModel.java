@@ -3,7 +3,7 @@ package com.baloise.egitblit.view.model;
 import com.baloise.egitblit.common.GitBlitRepository;
 
 /**
- * ViewModel wrapping GitBlitProject
+ * ViewModel wrapping GitBlitProject (Git Repository entry)
  * @author MicBag
  *
  */

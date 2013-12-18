@@ -8,6 +8,11 @@ import com.baloise.egitblit.common.GitBlitServer;
 import com.baloise.egitblit.main.EclipseLog;
 import com.baloise.egitblit.main.GitBlitExplorerException;
 
+/**
+ * Handling preference settings
+ * @author MicBag
+ *
+ */
 public class PreferenceMgr{
 
 	// --- Root node

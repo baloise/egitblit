@@ -3,6 +3,11 @@ package com.baloise.egitblit.view.model;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * Model for displaying a gitblit group in the tree viewer
+ * @author Mike
+ *
+ */
 public class GroupViewModel implements GitBlitViewModel{
 
 	private String groupName;

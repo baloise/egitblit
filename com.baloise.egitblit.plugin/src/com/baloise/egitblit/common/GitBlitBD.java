@@ -18,16 +18,29 @@ import com.gitblit.utils.RpcUtils;
  */
 public class GitBlitBD{
 
+	/**
+	 * List of gitblit servers 
+	 */
 	private List<GitBlitServer> repoList = new ArrayList<GitBlitServer>();
 
+	/**
+	 * @param repoList List of repositories to read from
+	 */
 	public GitBlitBD(List<GitBlitServer> repoList){
 		this.repoList.addAll(repoList);
 	}
 
+	/**
+	 * @param repoList List of repositories to read from
+	 */
 	public GitBlitBD(GitBlitServer[] repoList){
 		this(Arrays.asList(repoList));
 	}
 
+	/**
+	 * @param repo server to add to list
+	 * @throws GitBlitExplorerException If the passed repo
+	 */
 	public void addRepository(GitBlitServer repo) throws GitBlitExplorerException{
 		if(repo == null){
 			EclipseLog.error("Trying to add null value to GitBlidBD.");
@@ -39,10 +52,18 @@ public class GitBlitBD{
 		this.repoList.add(repo);
 	}
 
+	/**
+	 * @param repo Server to be removed
+	 */
 	public void removeRepository(GitBlitServer repo){
 		this.repoList.remove(repo);
 	}
 
+	/**
+	 * Reads all groups/repositories from the gitblit servers which have been added
+	 * @return List of repositories
+	 * @throws GitBlitExplorerException in case of an network or authorization error
+	 */
 	public List<GitBlitRepository> readRepositories() throws GitBlitExplorerException{
 		List<GitBlitRepository> bres = new ArrayList<GitBlitRepository>();
 		for(GitBlitServer ritem : this.repoList){

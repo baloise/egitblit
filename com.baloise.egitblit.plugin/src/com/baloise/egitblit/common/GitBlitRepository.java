@@ -18,7 +18,7 @@ public class GitBlitRepository {
 	public String projectPath;
 	public boolean hasCommits;
 	public String description;
-
+	// ....more properties to come
 	
 	public GitBlitRepository(){
 	}
@@ -43,6 +43,11 @@ public class GitBlitRepository {
 		return repo;
 	}
 
+	/**
+	 * Extracts the group name
+	 * @param model repository which group name should be extracted
+	 * @return the group name 
+	 */
 	private final static String getGroupName(RepositoryModel model){
 		if(model == null){
 			return null;
@@ -58,6 +63,11 @@ public class GitBlitRepository {
 		return value.substring(0, pos);
 	}
 
+	/**
+	 * Extracts the project/repository name from the passed repository model
+	 * @param model repository which name should be extracted
+	 * @return name of the repository / project name
+	 */
 	private final static String getProjectName(RepositoryModel model){
 		if(model == null){
 			return null;
@@ -73,6 +83,12 @@ public class GitBlitRepository {
 		return value.substring(pos + 1);
 	}
 
+	/**
+	 * ...copied from gitblit api source code
+	 *  Extract trailing ".git" from passed string
+	 * @param value url
+	 * @return url without ".git"
+	 */
 	private static String stripDotGit(String value){
 		if(value != null && value.toLowerCase().endsWith(".git")){
 			return value.substring(0, value.length() - 4);

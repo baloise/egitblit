@@ -16,6 +16,12 @@ import com.baloise.egitblit.pref.GitBlitExplorerPrefPage;
 import com.baloise.egitblit.view.model.ErrorViewModel;
 import com.baloise.egitblit.view.model.ProjectViewModel;
 
+/**
+ * Guess what: Copy Git url to clipboard
+ * @see Action 
+ * @author MicBag
+ *
+ */
 public class CopyClipBoardAction extends Action{
 
 	private final Viewer viewer;

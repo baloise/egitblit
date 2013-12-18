@@ -6,6 +6,11 @@ import java.util.List;
 import com.baloise.egitblit.common.GitBlitServer;
 import com.baloise.egitblit.main.EclipseLog;
 
+/**
+ * Model representing the preference settings
+ * @author MicBag
+ *
+ */
 public class PreferenceModel{
 
 	public static enum DoubleClickBehaviour{

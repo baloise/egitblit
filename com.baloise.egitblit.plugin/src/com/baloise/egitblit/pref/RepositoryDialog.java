@@ -14,6 +14,11 @@ import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
 
+/**
+ * Dialog for editing a gitblit server entry
+ * @author MicBag
+ *
+ */
 public class RepositoryDialog extends TitleAreaDialog{
 
 	private Text ctrlUrl;

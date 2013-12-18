@@ -22,6 +22,12 @@ import com.baloise.egitblit.pref.GitBlitExplorerPrefPage;
 import com.baloise.egitblit.view.model.ErrorViewModel;
 import com.baloise.egitblit.view.model.ProjectViewModel;
 
+/**
+ * Opens the gitblit summary page for a repository
+ * @see Action
+ * @author Mike
+ *
+ */
 public class OpenGitBlitAction extends Action{
 
 	public final static String GITBLIT_SUMMARY_PATH = "summary/?r=";
@@ -59,13 +65,6 @@ public class OpenGitBlitAction extends Action{
 			url += model.getGroupName() + "/";
 		}
 		url += model.getProjectName() + GIT_URL_POSTFIX;
-
-//		// Ignore main group
-//		if(!GitBlitRepository.GROUP_MAIN.equalsIgnoreCase(model.getGroupName())){
-//			url += model.getGroupName() + GitBlitServer.DEF_URL_SEPARATOR;
-//		}
-//
-//		url += model.getProjectName() + GIT_URL_POSTFIX;
 		return new URL(url);
 		
 	}

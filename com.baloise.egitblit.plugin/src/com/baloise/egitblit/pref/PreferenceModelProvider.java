@@ -3,6 +3,11 @@ package com.baloise.egitblit.pref;
 import org.eclipse.jface.viewers.IStructuredContentProvider;
 import org.eclipse.jface.viewers.Viewer;
 
+/**
+ * @see IStructuredContentProvider
+ * @author MicBag
+ *
+ */
 public class PreferenceModelProvider implements IStructuredContentProvider{
 
 	@Override
