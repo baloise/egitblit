@@ -16,7 +16,6 @@ import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.dialogs.PreferencesUtil;
 
 import com.baloise.egitblit.common.GitBlitRepository;
-import com.baloise.egitblit.common.GitBlitServer;
 import com.baloise.egitblit.main.Activator;
 import com.baloise.egitblit.main.EclipseLog;
 import com.baloise.egitblit.pref.GitBlitExplorerPrefPage;
