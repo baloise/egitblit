@@ -29,22 +29,19 @@ import org.eclipse.swt.custom.BusyIndicator;
 import org.eclipse.swt.dnd.DND;
 import org.eclipse.swt.dnd.TextTransfer;
 import org.eclipse.swt.dnd.Transfer;
-import org.eclipse.swt.events.KeyEvent;
-import org.eclipse.swt.events.KeyListener;
-import org.eclipse.swt.events.ModifyEvent;
-import org.eclipse.swt.events.ModifyListener;
-import org.eclipse.swt.events.SelectionEvent;
-import org.eclipse.swt.events.SelectionListener;
+import org.eclipse.swt.events.DisposeEvent;
+import org.eclipse.swt.events.DisposeListener;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
-import org.eclipse.swt.widgets.Text;
 import org.eclipse.swt.widgets.TreeColumn;
 import org.eclipse.ui.dialogs.FilteredTree;
 import org.eclipse.ui.dialogs.PatternFilter;
+import org.eclipse.ui.forms.widgets.Form;
+import org.eclipse.ui.forms.widgets.FormToolkit;
 import org.eclipse.ui.part.ViewPart;
 import org.eclipse.ui.plugin.AbstractUIPlugin;
 
@@ -69,6 +66,7 @@ import com.baloise.egitblit.view.model.ProjectViewModel;
  */
 public class RepoExplorerView extends ViewPart{
 
+	
 	private TreeViewer viewer;
 	private List<GroupViewModel> rootModel;
 
@@ -131,15 +129,43 @@ public class RepoExplorerView extends ViewPart{
 		Activator.getDefault().getPreferenceStore().addPropertyChangeListener(propChangeListener);
 		PreferenceMgr.isValidConfig();
 
-		// --- loading reasources
-		ImageDescriptor desc = getImageFromPlugin("refresh_tab.gif");
-		if(desc != null){
-			imgRefesh = desc.createImage();
+		final FormToolkit ftk = new FormToolkit(parent.getDisplay()); 
+		parent.addDisposeListener(new DisposeListener() {
+			public void widgetDisposed(DisposeEvent e) {
+				ftk.dispose();
+			}
+		});
+		
+		// --- Use Formtoolkit, because of header preparing
+		Form form = ftk.createForm(parent);
+		form.setText("GitBlit Repository Explorer");
+		GridDataFactory.fillDefaults().grab(true, true).applyTo(form);
+		ftk.decorateFormHeading(form);
+		
+		final ImageDescriptor refreskImgDesc = getImageFromPlugin("refresh_tab.gif");
+		if(refreskImgDesc != null){
+			imgRefesh = refreskImgDesc.createImage();
 		}
 
+		Action rAction = new Action("Reload Repositories"){
+			@Override
+			public void run(){
+				initViewModel();
+			}
+
+			@Override
+			public ImageDescriptor getImageDescriptor(){
+				return refreskImgDesc;
+			}
+			
+		};
+		form.getToolBarManager().add(rAction);
+		form.getToolBarManager().update(true);
+		
 		// --------------------------------------------------------------------
 		// Layout
 		// --------------------------------------------------------------------
+
 		GridLayout l = GridLayoutFactory.swtDefaults().create();
 		GridData gd = GridDataFactory.swtDefaults().create();
 		l.numColumns = 1;
@@ -147,44 +173,14 @@ public class RepoExplorerView extends ViewPart{
 		gd.grabExcessVerticalSpace = true;
 		gd.horizontalAlignment = SWT.FILL;
 		gd.verticalAlignment = SWT.FILL;
-		parent.setLayout(l);
-		parent.setLayoutData(gd);
+		
+		form.getBody().setLayout(l);
+		form.getBody().setLayoutData(gd);
 
-		Composite comp = new Composite(parent, SWT.NONE);
-		l = GridLayoutFactory.swtDefaults().create();
-		l.numColumns = 2;
-		gd = GridDataFactory.swtDefaults().create();
-		gd.grabExcessHorizontalSpace = true;
-		gd.horizontalAlignment = SWT.FILL;
+		Composite comp = ftk.createComposite(form.getBody(), SWT.NONE);
 		comp.setLayout(l);
 		comp.setLayoutData(gd);
 
-		// --------------------------------------------------------------------
-		// Project search field
-		// --------------------------------------------------------------------
-
-//		gd = GridDataFactory.swtDefaults().create();
-//		gd.grabExcessHorizontalSpace = true;
-//		gd.horizontalAlignment = SWT.FILL;
-
-		Button rBt = new Button(comp, SWT.PUSH);
-		if(imgRefesh != null){
-			rBt.setImage(imgRefesh);
-		}else{
-			rBt.setText("Refresh");
-		}
-
-		rBt.setToolTipText("Retrieve repositories from GitBlit");
-		rBt.addSelectionListener(new SelectionListener() {
-			@Override
-			public void widgetSelected(SelectionEvent e){
-				initViewModel();
-			}
-
-			@Override
-			public void widgetDefaultSelected(SelectionEvent e){
-			}
-		});
 
 		// --------------------------------------------------------------------
 		// Viewer
@@ -204,7 +200,7 @@ public class RepoExplorerView extends ViewPart{
 			}
 		};
 
-		FilteredTree filteredTree = new FilteredTree(parent, SWT.FULL_SELECTION | SWT.BORDER | SWT.H_SCROLL | SWT.V_SCROLL, filter, true);
+		FilteredTree filteredTree = new FilteredTree(comp, SWT.FULL_SELECTION | SWT.BORDER | SWT.H_SCROLL | SWT.V_SCROLL, filter, true);
 		viewer = filteredTree.getViewer();
 
 		// viewer = new TreeViewer(parent, SWT.H_SCROLL | SWT.V_SCROLL);
@@ -321,7 +317,10 @@ public class RepoExplorerView extends ViewPart{
 			public void run(){
 				try{
 					Map<String, List<GitBlitRepository>> groupMap = readGroups();
-					if(groupMap == null){
+					if(groupMap == null || groupMap.isEmpty()){
+						final String msg = "No GitBlit repositories defined. Please add a GitBlit server location via preferences.";
+						showMessage(IStatus.INFO, msg);
+						modelList.add(new ErrorViewModel(msg));
 						return;
 					}
 					GroupViewModel gModel;
@@ -338,7 +337,7 @@ public class RepoExplorerView extends ViewPart{
 					}
 				}catch(Exception e){
 					EclipseLog.error("Error reading project from GitBlit", e);
-					showMessage(IStatus.ERROR, "GitBlit Explorer: Error reading project from GitBlit", e.toString());
+					showMessage(IStatus.ERROR, "Error reading project from GitBlit\n" + e.toString());
 					modelList.add(new ErrorViewModel("Error reading projects from GitBlit. Check your preference settings, please."));
 				}
 			}
@@ -401,17 +400,17 @@ public class RepoExplorerView extends ViewPart{
 			}
 		}else{
 			if(isDoubleClickOpenGit){
-				return actionOpenGitBlit;
-			}else{
 				return actionCopyClipboard;
+			}else{
+				return actionOpenGitBlit;
 			}
 		}
 	}
 
-	private void showMessage(final int level, final String title, final String msg){
+	private void showMessage(final int level, final String msg){
 		getSite().getShell().getDisplay().asyncExec(new Runnable() {
 			public void run(){
-				MessageDialog.open(level, getSite().getShell(), title, msg, SWT.NONE);
+				MessageDialog.open(level, getSite().getShell(), "GitBlit Explorer", msg, SWT.NONE);
 			}
 		});
 	}

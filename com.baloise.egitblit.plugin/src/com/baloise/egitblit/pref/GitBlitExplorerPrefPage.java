@@ -373,14 +373,14 @@ public class GitBlitExplorerPrefPage extends PreferencePage implements IWorkbenc
 		dlg.url = entry.url;
 		dlg.user = entry.user;
 		dlg.pwd = entry.password;
-		dlg.urlSep = entry.urlSeparator;
+		//dlg.urlSep = entry.urlSeparator;
 
 		int rc = dlg.open();
 		if(rc == Window.OK){
 			entry.url = dlg.url;
 			entry.user = dlg.user;
 			entry.password = dlg.pwd;
-			entry.urlSeparator = dlg.urlSep;
+			//entry.urlSeparator = dlg.urlSep;
 		}
 		return rc;
 	}

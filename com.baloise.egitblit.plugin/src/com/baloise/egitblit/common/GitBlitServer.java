@@ -10,25 +10,25 @@ import java.util.List;
 public class GitBlitServer{
 	public boolean active;
 	public String url;
-	public String urlSeparator;
+//	public String urlSeparator;
 	public String user;
 	public String password;
 	
-	public final static String DEF_URL_SEPARATOR = "/";
+//	public final static String DEF_URL_SEPARATOR = "/";
 
 	private List<GitBlitRepository> projectList;
 	
-	public GitBlitServer(String url, String urlSep, boolean active, String user, String pwd){
+	public GitBlitServer(String url, boolean active, String user, String pwd){
 		this.url = url;
 		this.user = user;
 		this.password = pwd;
 		this.active = active;
-		this.urlSeparator = urlSep;
+//		this.urlSeparator = urlSep;
 	}
 	
 	
 	public GitBlitServer(){
-		this(null,null,true,null,null);
+		this(null,true,null,null);
 	}
 
 	public void addProject(GitBlitRepository proj){

@@ -15,6 +15,8 @@ import org.eclipse.ui.ISharedImages;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.dialogs.PreferencesUtil;
 
+import com.baloise.egitblit.common.GitBlitRepository;
+import com.baloise.egitblit.common.GitBlitServer;
 import com.baloise.egitblit.main.Activator;
 import com.baloise.egitblit.main.EclipseLog;
 import com.baloise.egitblit.pref.GitBlitExplorerPrefPage;
@@ -23,7 +25,7 @@ import com.baloise.egitblit.view.model.ProjectViewModel;
 
 public class OpenGitBlitAction extends Action{
 
-	public final static String GITBLIT_SUMMARY_PATH = "summary/";
+	public final static String GITBLIT_SUMMARY_PATH = "summary/?r=";
 	public final static String GIT_URL_POSTFIX = ".git";
 	
 	private final Viewer viewer; 
@@ -51,13 +53,20 @@ public class OpenGitBlitAction extends Action{
 		if(url != null && url.endsWith("/") == false){
 			url += "/";
 		}
-		url = url + GITBLIT_SUMMARY_PATH;
-
-//		if(!GitBlitRepository.GROUP_MAIN.equals(model.repo)){
-//			String seperator = preferenceStore.getString(GitBlitExplorerPrefPage.KEY_GITBLIT_URL_SEPERATOR);
-//			url += model.repo + seperator;
-//		}
+		url +=  GITBLIT_SUMMARY_PATH;
+		
+		// ignore main group
+		if(!GitBlitRepository.GROUP_MAIN.equalsIgnoreCase(model.getGroupName())){
+			url += model.getGroupName() + "/";
+		}
 		url += model.getProjectName() + GIT_URL_POSTFIX;
+
+//		// Ignore main group
+//		if(!GitBlitRepository.GROUP_MAIN.equalsIgnoreCase(model.getGroupName())){
+//			url += model.getGroupName() + GitBlitServer.DEF_URL_SEPARATOR;
+//		}
+//
+//		url += model.getProjectName() + GIT_URL_POSTFIX;
 		return new URL(url);
 		
 	}

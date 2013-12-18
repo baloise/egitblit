@@ -21,7 +21,7 @@ public class PreferenceMgr{
 	// --- Server entry
 	public final static String KEY_GITBLIT_SERVER_URL = "com.baloise.gitblit.server.url";
 	public final static String KEY_GITBLIT_SERVER_ACTIVE = "com.baloise.gitblit.server.active";
-	public final static String KEY_GITBLIT_SERVER_URL_SEP = "com.baloise.gitblit.server.url.separator";
+//	public final static String KEY_GITBLIT_SERVER_URL_SEP = "com.baloise.gitblit.server.url.separator";
 	public final static String KEY_GITBLIT_SERVER_USER = "com.baloise.gitblit.server.user";
 	public final static String KEY_GITBLIT_SERVER_PASSWORD = "com.baloise.gitblit.server.password";
 
@@ -61,12 +61,11 @@ public class PreferenceMgr{
 			for(String item : names){
 				entryNode = serverNode.node(item);
 				url = entryNode.get(KEY_GITBLIT_SERVER_URL, null);
-				urlSep = entryNode.get(KEY_GITBLIT_SERVER_URL_SEP, VALUE_GITBLIT_URL_SEPERATOR);
+//				urlSep = entryNode.get(KEY_GITBLIT_SERVER_URL_SEP, VALUE_GITBLIT_URL_SEPERATOR);
 				active = entryNode.getBoolean(KEY_GITBLIT_SERVER_ACTIVE, true);
 				user = entryNode.get(KEY_GITBLIT_SERVER_USER, null);
 				pwd = entryNode.get(KEY_GITBLIT_SERVER_PASSWORD, null);
-				
-				prefModel.addRepository(url, urlSep, active, user, pwd);
+				prefModel.addRepository(url, active, user, pwd);
 			}
 		}catch(Exception e){
 			EclipseLog.error("Error reading preferences. Continue with configuration settings which have been read so far.", e);
@@ -106,7 +105,7 @@ public class PreferenceMgr{
 			for(GitBlitServer item : prefModel.getServerList()){
 				entryNode = serverNode.node(KEY_GITBLIT_SERVER_URL + "_" + count++);
 				entryNode.put(KEY_GITBLIT_SERVER_URL, trim(item.url));
-				entryNode.put(KEY_GITBLIT_SERVER_URL_SEP, item.urlSeparator);
+//				entryNode.put(KEY_GITBLIT_SERVER_URL_SEP, item.urlSeparator);
 				entryNode.putBoolean(KEY_GITBLIT_SERVER_ACTIVE, item.active);
 				entryNode.put(KEY_GITBLIT_SERVER_USER, trim(item.user));
 				entryNode.put(KEY_GITBLIT_SERVER_PASSWORD, item.password);

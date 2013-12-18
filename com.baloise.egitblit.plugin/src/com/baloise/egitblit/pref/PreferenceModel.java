@@ -64,8 +64,8 @@ public class PreferenceModel{
 		this.repoList.add(repo);
 	}
 
-	public void addRepository(String url, String urlSep, boolean active, String user, String pwd){
-		addRepository(new GitBlitServer(url,urlSep, active, user,pwd));
+	public void addRepository(String url, boolean active, String user, String pwd){
+		addRepository(new GitBlitServer(url,active, user,pwd));
 	}
 
 	public boolean removeRepository(GitBlitServer repo){

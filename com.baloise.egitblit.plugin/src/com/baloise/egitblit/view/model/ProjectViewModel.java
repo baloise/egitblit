@@ -52,6 +52,13 @@ public class ProjectViewModel implements GitBlitViewModel{
 		return this.entry.projectName;
 	}
 	
+	public String getGroupName(){
+		if(this.entry == null){
+			return null;
+		}
+		return this.entry.groupName;
+	}
+
 	public boolean hasCommits(){
 		if(this.entry == null){
 			return false;
