@@ -89,6 +89,11 @@ public class RepoLabelProvider extends CellLabelProvider implements ILabelProvid
 					return ((ProjectViewModel) element).getDescription();
 				}
 				break;
+			case 2:
+				if(element instanceof ProjectViewModel){
+					return ((ProjectViewModel) element).getServerURL();
+				}
+				break;
 		}
 		return null;
 	}

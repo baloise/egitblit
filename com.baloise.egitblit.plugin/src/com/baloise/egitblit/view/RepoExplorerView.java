@@ -228,6 +228,11 @@ public class RepoExplorerView extends ViewPart{
 		colDesc.setText("Description");
 		colDesc.setWidth(320);
 
+		TreeColumn serverDesc = new TreeColumn(viewer.getTree(), SWT.LEFT);
+		serverDesc.setAlignment(SWT.LEFT);
+		serverDesc.setText("Gitblit Server");
+		serverDesc.setWidth(320);
+		
 		// --------------------------------------------------------------------
 		// Adding viewer interaction
 		// --------------------------------------------------------------------
