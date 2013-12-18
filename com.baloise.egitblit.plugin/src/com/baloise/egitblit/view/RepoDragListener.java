@@ -9,6 +9,10 @@ import org.eclipse.swt.dnd.DragSourceListener;
 import org.eclipse.swt.dnd.TextTransfer;
 import org.eclipse.swt.dnd.URLTransfer;
 
+import com.baloise.egitblit.main.EclipseLog;
+import com.baloise.egitblit.view.model.GitBlitViewModel;
+import com.baloise.egitblit.view.model.ProjectViewModel;
+
 /**
  * @author MicBag
  *
@@ -28,19 +32,25 @@ public class RepoDragListener implements DragSourceListener {
 	@Override
 	public void dragSetData(DragSourceEvent event) {
 		IStructuredSelection selection = (IStructuredSelection) viewer.getSelection();
-		RepoViewModel model= (RepoViewModel) selection.getFirstElement();
-		if(model.endpoint == null){
+		GitBlitViewModel model= (ProjectViewModel) selection.getFirstElement();
+
+		String gitURL=null;
+		if(model instanceof ProjectViewModel){
+			ProjectViewModel pm = (ProjectViewModel)model;
+			gitURL = pm.getGitURL();
+		}
+		if(gitURL == null){
 			return;
 		}
 		if (TextTransfer.getInstance().isSupportedType(event.dataType)) {
-			event.data = model.endpoint;
+			event.data = gitURL;
 		}
 		if (URLTransfer.getInstance().isSupportedType(event.dataType)) {
 			try{
-				event.data = new URL(model.endpoint);
+				event.data = new URL(gitURL);
 			}
 			catch(Exception e){
-				e.printStackTrace();
+				EclipseLog.error("Error while performin drag & drop",e);
 			}
 		}
 	}

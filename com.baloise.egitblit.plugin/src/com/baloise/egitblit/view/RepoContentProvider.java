@@ -5,6 +5,10 @@ import java.util.List;
 import org.eclipse.jface.viewers.ITreeContentProvider;
 import org.eclipse.jface.viewers.Viewer;
 
+import com.baloise.egitblit.view.model.GitBlitViewModel;
+import com.baloise.egitblit.view.model.GroupViewModel;
+import com.baloise.egitblit.view.model.ProjectViewModel;
+
 /**
  * @author MicBag
  *
@@ -22,33 +26,32 @@ public class RepoContentProvider implements ITreeContentProvider  {
 	@Override
 	public Object[] getElements(Object inputElement) {
 		if(inputElement instanceof List){
-			return ((List<RepoViewModel>)inputElement).toArray();
+			return ((List<GroupViewModel>)inputElement).toArray();
 		}
-		return new RepoViewModel[0];
+		return new ProjectViewModel[0];
 	}
 
 	@Override
 	public Object[] getChildren(Object parentElement) {
-		if(parentElement instanceof RepoViewModel){
-			RepoViewModel model = (RepoViewModel)parentElement;
+		if(parentElement instanceof GroupViewModel){
+			GroupViewModel model = (GroupViewModel)parentElement;
 			return model.getChilds().toArray();
 		}
-		return new RepoViewModel[0];
+		return new ProjectViewModel[0];
 	}
 
 	@Override
 	public Object getParent(Object element) {
-		if(element instanceof RepoViewModel){
-			RepoViewModel model = (RepoViewModel)element;
-			return model.parent;
+		if(element instanceof GitBlitViewModel){
+			return ((GitBlitViewModel)element).getParent();
 		}
 		return null;
 	}
 
 	@Override
 	public boolean hasChildren(Object element) {
-		if(element instanceof RepoViewModel){
-			RepoViewModel model = (RepoViewModel)element;
+		if(element instanceof GroupViewModel){
+			GroupViewModel model = (GroupViewModel)element;
 			return model.getChilds().size() > 0;
 		}
 		return false;
