@@ -156,8 +156,15 @@ public class GitBlitExplorerPrefPage extends PreferencePage implements IWorkbenc
 				GitBlitServer entry = new GitBlitServer();
 				if(processEntry(entry) == Window.OK){
 					prefModel.addRepository(entry);
+					viewer.refresh();
+					TableItem[] items = viewer.getTable().getItems();
+					for(TableItem item : items){
+						if(entry.equals(item.getData())){
+							item.setChecked(true);
+							break;
+						}
+					}
 				}
-				viewer.refresh();
 			}
 
 			@Override
@@ -427,7 +434,7 @@ public class GitBlitExplorerPrefPage extends PreferencePage implements IWorkbenc
 			entry.url = dlg.url;
 			entry.user = dlg.user;
 			entry.password = dlg.pwd;
-			//entry.urlSeparator = dlg.urlSep;
+			entry.active = true;
 		}
 		return rc;
 	}

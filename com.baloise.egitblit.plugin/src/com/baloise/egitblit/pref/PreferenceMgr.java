@@ -1,8 +1,7 @@
 package com.baloise.egitblit.pref;
 
-import org.eclipse.core.runtime.preferences.IEclipsePreferences;
-import org.eclipse.core.runtime.preferences.InstanceScope;
-import org.osgi.service.prefs.Preferences;
+import org.eclipse.equinox.security.storage.ISecurePreferences;
+import org.eclipse.equinox.security.storage.SecurePreferencesFactory;
 
 import com.baloise.egitblit.common.GitBlitServer;
 import com.baloise.egitblit.main.EclipseLog;
@@ -10,8 +9,9 @@ import com.baloise.egitblit.main.GitBlitExplorerException;
 
 /**
  * Handling preference settings
+ * 
  * @author MicBag
- *
+ * 
  */
 public class PreferenceMgr{
 
@@ -26,39 +26,40 @@ public class PreferenceMgr{
 	// --- Server entry
 	public final static String KEY_GITBLIT_SERVER_URL = "com.baloise.gitblit.server.url";
 	public final static String KEY_GITBLIT_SERVER_ACTIVE = "com.baloise.gitblit.server.active";
-//	public final static String KEY_GITBLIT_SERVER_URL_SEP = "com.baloise.gitblit.server.url.separator";
+	// public final static String KEY_GITBLIT_SERVER_URL_SEP =
+	// "com.baloise.gitblit.server.url.separator";
 	public final static String KEY_GITBLIT_SERVER_USER = "com.baloise.gitblit.server.user";
 	public final static String KEY_GITBLIT_SERVER_PASSWORD = "com.baloise.gitblit.server.password";
 
 	public final static String VALUE_GITBLIT_URL_SEPERATOR = "/";
 
-
 	/**
 	 * Reads the configuration, scope INSTANCE
+	 * 
 	 * @return ConfigModel
 	 * @throws GitBlitExplorerException
 	 */
 	public static PreferenceModel readConfig() throws GitBlitExplorerException{
 		PreferenceModel prefModel = new PreferenceModel();
 
-		IEclipsePreferences pref = InstanceScope.INSTANCE.getNode(KEY_GITBLIT_ROOT);
-
-		if(pref == null){
-			final String msg = "Can´t access preferences for Gitblit explorer. Continue with new (empty) settings.";
-			EclipseLog.error(msg);
-			return prefModel;
-		}
-
-		// --- Read global settings
-		int val = pref.getInt(KEY_GITBLIT_DCLICK, PreferenceModel.DoubleClickBehaviour.OpenGitBlit.value);
-		prefModel.setDoubleClick(PreferenceModel.DoubleClickBehaviour.getValue(val));
-
-		// ---- Read list of servers
 		try{
+			ISecurePreferences pref = SecurePreferencesFactory.getDefault().node(KEY_GITBLIT_ROOT);
+
+			if(pref == null){
+				final String msg = "Can´t access preferences for Gitblit explorer. Continue with new (empty) settings.";
+				EclipseLog.error(msg);
+				return prefModel;
+			}
+
+			// --- Read global settings
+			int val = pref.getInt(KEY_GITBLIT_DCLICK, PreferenceModel.DoubleClickBehaviour.OpenGitBlit.value);
+			prefModel.setDoubleClick(PreferenceModel.DoubleClickBehaviour.getValue(val));
+
+			// ---- Read list of servers
 			// Root node
-			Preferences serverNode = pref.node(KEY_GITBLIT_SERVER);
+			ISecurePreferences serverNode = pref.node(KEY_GITBLIT_SERVER);
 			// An entry
-			Preferences entryNode;
+			ISecurePreferences entryNode;
 			String url, user, pwd, urlSep;
 			boolean active;
 
@@ -66,7 +67,8 @@ public class PreferenceMgr{
 			for(String item : names){
 				entryNode = serverNode.node(item);
 				url = entryNode.get(KEY_GITBLIT_SERVER_URL, null);
-//				urlSep = entryNode.get(KEY_GITBLIT_SERVER_URL_SEP, VALUE_GITBLIT_URL_SEPERATOR);
+				// urlSep = entryNode.get(KEY_GITBLIT_SERVER_URL_SEP,
+				// VALUE_GITBLIT_URL_SEPERATOR);
 				active = entryNode.getBoolean(KEY_GITBLIT_SERVER_ACTIVE, true);
 				user = entryNode.get(KEY_GITBLIT_SERVER_USER, null);
 				pwd = entryNode.get(KEY_GITBLIT_SERVER_PASSWORD, null);
@@ -84,7 +86,7 @@ public class PreferenceMgr{
 			EclipseLog.error(msg);
 			throw new GitBlitExplorerException(msg);
 		}
-		IEclipsePreferences pref = InstanceScope.INSTANCE.getNode(KEY_GITBLIT_ROOT);
+		ISecurePreferences pref = SecurePreferencesFactory.getDefault().node(KEY_GITBLIT_ROOT);
 
 		if(pref == null){
 			final String msg = "Can´t access preferences for Gitblit Explorer. Confriguration will not be saved.";
@@ -92,14 +94,14 @@ public class PreferenceMgr{
 			throw new GitBlitExplorerException(msg);
 		}
 
-		// --- Saving global settings
-		pref.putInt(KEY_GITBLIT_DCLICK, prefModel.getDoubleClick().value);
-
-		Preferences serverNode = pref.node(KEY_GITBLIT_SERVER);
-		Preferences entryNode;
-
-		// --- Saving server settings
 		try{
+			// --- Saving global settings
+			pref.putInt(KEY_GITBLIT_DCLICK, prefModel.getDoubleClick().value, false);
+
+			ISecurePreferences serverNode = pref.node(KEY_GITBLIT_SERVER);
+			ISecurePreferences entryNode;
+
+			// --- Saving server settings
 			// First, erase old settings
 			serverNode.removeNode();
 			pref.flush();
@@ -109,51 +111,58 @@ public class PreferenceMgr{
 			serverNode = pref.node(KEY_GITBLIT_SERVER);
 			for(GitBlitServer item : prefModel.getServerList()){
 				entryNode = serverNode.node(KEY_GITBLIT_SERVER_URL + "_" + count++);
-				entryNode.put(KEY_GITBLIT_SERVER_URL, trim(item.url));
-//				entryNode.put(KEY_GITBLIT_SERVER_URL_SEP, item.urlSeparator);
-				entryNode.putBoolean(KEY_GITBLIT_SERVER_ACTIVE, item.active);
-				entryNode.put(KEY_GITBLIT_SERVER_USER, trim(item.user));
-				entryNode.put(KEY_GITBLIT_SERVER_PASSWORD, item.password);
+				entryNode.put(KEY_GITBLIT_SERVER_URL, trim(item.url), false);
+				// entryNode.put(KEY_GITBLIT_SERVER_URL_SEP, item.urlSeparator);
+				entryNode.putBoolean(KEY_GITBLIT_SERVER_ACTIVE, item.active, false);
+				entryNode.put(KEY_GITBLIT_SERVER_USER, trim(item.user), false);
+				entryNode.put(KEY_GITBLIT_SERVER_PASSWORD, item.password, true);
 			}
 			pref.flush();
 		}catch(Exception e){
 			EclipseLog.error("Error saving Gitblit preference settings: Can´t remove older server settings.", e);
 		}
 	}
-	
+
 	private final static String trim(String value){
 		if(value == null){
 			return null;
 		}
 		return value.trim();
 	}
-	
+
 	public final static boolean isValidConfig(){
 		return true;
-//		private void checkPreferences(){
-//		IPreferenceStore preferenceStore = Activator.getDefault().getPreferenceStore();
-//		String value = preferenceStore.getString(GitBlitExplorerPrefPage.KEY_GITBLIT_URL);
-//		try{
-//			new URL(value);
-//		}
-//		catch(Exception e){
-//			EclipseLog.error("Error while checking preferences",e);
-//			showMessage(IStatus.ERROR,"Gitblit Explorer: Configuration Error", "GitBlit URL is not specified or invalid");
-//		}
-//		value = preferenceStore.getString(GitBlitExplorerPrefPage.KEY_GITBLIT_USER);
-//		if(value == null || value.trim().isEmpty()){
-//			String msg = "Missing configuration parameter: User";
-//			EclipseLog.error(value);
-//			showMessage(IStatus.ERROR,"Gitblit Explorer: Configuration Error", msg);
-//		}
-//
-//		value = preferenceStore.getString(GitBlitExplorerPrefPage.KEY_GITBLIT_PWD);
-//		if(value == null || value.trim().isEmpty()){
-//			String msg = "Missing configuration parameter: Password";
-//			EclipseLog.error(value);
-//			showMessage(IStatus.ERROR,"Gitblit Explorer: Configuration Error", msg);
-//		}
-//	}
-		
+		// private void checkPreferences(){
+		// IPreferenceStore preferenceStore =
+		// Activator.getDefault().getPreferenceStore();
+		// String value =
+		// preferenceStore.getString(GitBlitExplorerPrefPage.KEY_GITBLIT_URL);
+		// try{
+		// new URL(value);
+		// }
+		// catch(Exception e){
+		// EclipseLog.error("Error while checking preferences",e);
+		// showMessage(IStatus.ERROR,"Gitblit Explorer: Configuration Error",
+		// "GitBlit URL is not specified or invalid");
+		// }
+		// value =
+		// preferenceStore.getString(GitBlitExplorerPrefPage.KEY_GITBLIT_USER);
+		// if(value == null || value.trim().isEmpty()){
+		// String msg = "Missing configuration parameter: User";
+		// EclipseLog.error(value);
+		// showMessage(IStatus.ERROR,"Gitblit Explorer: Configuration Error",
+		// msg);
+		// }
+		//
+		// value =
+		// preferenceStore.getString(GitBlitExplorerPrefPage.KEY_GITBLIT_PWD);
+		// if(value == null || value.trim().isEmpty()){
+		// String msg = "Missing configuration parameter: Password";
+		// EclipseLog.error(value);
+		// showMessage(IStatus.ERROR,"Gitblit Explorer: Configuration Error",
+		// msg);
+		// }
+		// }
+
 	}
 }

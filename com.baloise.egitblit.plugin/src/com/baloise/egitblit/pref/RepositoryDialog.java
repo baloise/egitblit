@@ -22,7 +22,6 @@ import org.eclipse.swt.widgets.Text;
 public class RepositoryDialog extends TitleAreaDialog{
 
 	private Text ctrlUrl;
-//	private Text ctrlUrlSep;
 	private Text ctrlUser;
 	private Text ctrlPwd;
 	
@@ -46,7 +45,6 @@ public class RepositoryDialog extends TitleAreaDialog{
 	@Override
 	protected void okPressed(){
 		this.url = ctrlUrl.getText();
-//		this.urlSep = ctrlUrlSep.getText();
 		this.user = ctrlUser.getText();
 		this.pwd = ctrlPwd.getText();
 
@@ -95,10 +93,6 @@ public class RepositoryDialog extends TitleAreaDialog{
 		ctrlUrl = new Text(container, SWT.BORDER);
 		ctrlUrl.setLayoutData(gd);
 
-//		new Label(container, SWT.NONE).setText("URL separator:");
-//		ctrlUrlSep = new Text(container, SWT.BORDER);
-//		ctrlUrlSep.setLayoutData(gd);
-
 		new Label(container, SWT.NONE).setText("User:");		
 		ctrlUser = new Text(container, SWT.BORDER);
 		ctrlUser.setLayoutData(gd);
@@ -114,12 +108,8 @@ public class RepositoryDialog extends TitleAreaDialog{
 			user = System.getProperty("user.name");
 			pwd = "";;
 		}
-//		if(urlSep == null || urlSep.trim().isEmpty()){
-//			urlSep = GitBlitServer.DEF_URL_SEPARATOR;
-//		}
 		
 		ctrlUrl.setText(url);
-//		ctrlUrlSep.setText(urlSep);
 		ctrlUser.setText(user);
 		ctrlPwd.setText(pwd);
 
