@@ -78,14 +78,14 @@ public class OpenGitBlitAction extends Action{
 				ProjectViewModel model = (ProjectViewModel) selection.getFirstElement();
 				if(model != null) {
 					if(model.hasCommits() == false){
-						MessageDialog.open(IStatus.INFO,viewer.getControl().getShell(),"GitBlit Repository Explorer","The selected repository has no commits. Can´t open an empty repository in GitBlit.",SWT.NONE);
+						MessageDialog.open(IStatus.INFO,viewer.getControl().getShell(),"Gitblit Repository Explorer","The selected repository has no commits. Can´t open an empty repository in GitBlit.",SWT.NONE);
 						return;
 					}
 					try{
 						URL url = makeGitBlitSummaryUrl(model);
 						PlatformUI.getWorkbench().getBrowserSupport().getExternalBrowser().openURL(url);
 					}catch (Exception e) {
-						EclipseLog.error("Error while performing open GitBlit action",e);
+						EclipseLog.error("Error while performing open Gitblit action",e);
 					}
 				}
 			}

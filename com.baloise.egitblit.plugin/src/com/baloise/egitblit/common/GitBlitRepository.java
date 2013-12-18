@@ -123,7 +123,7 @@ public class GitBlitRepository {
 
 	@Override
 	public String toString(){
-		return "\nGitBlitRepository [gitUrl=" + gitUrl + ", groupName=" + groupName + ", projectName=" + projectName + ", projectPath=" + projectPath + ", description=" + description + "]";
+		return "\nGitblit Repository [gitUrl=" + gitUrl + ", groupName=" + groupName + ", projectName=" + projectName + ", projectPath=" + projectPath + ", description=" + description + "]";
 	}
 	
 	

@@ -44,7 +44,7 @@ public class PreferenceMgr{
 		IEclipsePreferences pref = InstanceScope.INSTANCE.getNode(KEY_GITBLIT_ROOT);
 
 		if(pref == null){
-			final String msg = "Can´t access preferences for gitblit explorer. Continue with new (empty) settings.";
+			final String msg = "Can´t access preferences for Gitblit explorer. Continue with new (empty) settings.";
 			EclipseLog.error(msg);
 			return prefModel;
 		}
@@ -80,14 +80,14 @@ public class PreferenceMgr{
 
 	public static void saveConfig(PreferenceModel prefModel) throws GitBlitExplorerException{
 		if(prefModel == null){
-			final String msg = "Error saving GitBlit Explorer settings: No preference model avail (internal error). Configuration will not be saved.";
+			final String msg = "Error saving Gitblit Explorer settings: No preference model avail (internal error). Configuration will not be saved.";
 			EclipseLog.error(msg);
 			throw new GitBlitExplorerException(msg);
 		}
 		IEclipsePreferences pref = InstanceScope.INSTANCE.getNode(KEY_GITBLIT_ROOT);
 
 		if(pref == null){
-			final String msg = "Can´t access preferences for gitblit explorer. Confriguration will not be saved.";
+			final String msg = "Can´t access preferences for Gitblit Explorer. Confriguration will not be saved.";
 			EclipseLog.error(msg);
 			throw new GitBlitExplorerException(msg);
 		}
@@ -117,7 +117,7 @@ public class PreferenceMgr{
 			}
 			pref.flush();
 		}catch(Exception e){
-			EclipseLog.error("Error saving gitblit preference settings: Can´t remove older server settings.", e);
+			EclipseLog.error("Error saving Gitblit preference settings: Can´t remove older server settings.", e);
 		}
 	}
 	
@@ -138,20 +138,20 @@ public class PreferenceMgr{
 //		}
 //		catch(Exception e){
 //			EclipseLog.error("Error while checking preferences",e);
-//			showMessage(IStatus.ERROR,"GitBlit Explorer: Configuration Error", "GitBlit URL is not specified or invalid");
+//			showMessage(IStatus.ERROR,"Gitblit Explorer: Configuration Error", "GitBlit URL is not specified or invalid");
 //		}
 //		value = preferenceStore.getString(GitBlitExplorerPrefPage.KEY_GITBLIT_USER);
 //		if(value == null || value.trim().isEmpty()){
 //			String msg = "Missing configuration parameter: User";
 //			EclipseLog.error(value);
-//			showMessage(IStatus.ERROR,"GitBlit Explorer: Configuration Error", msg);
+//			showMessage(IStatus.ERROR,"Gitblit Explorer: Configuration Error", msg);
 //		}
 //
 //		value = preferenceStore.getString(GitBlitExplorerPrefPage.KEY_GITBLIT_PWD);
 //		if(value == null || value.trim().isEmpty()){
 //			String msg = "Missing configuration parameter: Password";
 //			EclipseLog.error(value);
-//			showMessage(IStatus.ERROR,"GitBlit Explorer: Configuration Error", msg);
+//			showMessage(IStatus.ERROR,"Gitblit Explorer: Configuration Error", msg);
 //		}
 //	}
 		

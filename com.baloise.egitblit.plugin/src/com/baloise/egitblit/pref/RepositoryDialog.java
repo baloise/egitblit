@@ -38,8 +38,8 @@ public class RepositoryDialog extends TitleAreaDialog{
 	@Override
 	public void create(){
 		super.create();
-		setTitle("GitBlit Repository Entry");
-		setMessage("Please enter or update your GitBlit Repository settings");
+		setTitle("Gitblit Server Definition");
+		setMessage("Please enter or update your Gitblit Repository settings");
 		setHelpAvailable(false);
 	}
 

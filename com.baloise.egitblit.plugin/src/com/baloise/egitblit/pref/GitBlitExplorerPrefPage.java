@@ -212,24 +212,21 @@ public class GitBlitExplorerPrefPage extends PreferencePage implements IWorkbenc
 		});
 
 		// --- container for double click behaviour radio buttons
-		Composite comp = new Composite(root, SWT.NONE);
 		l = GridLayoutFactory.swtDefaults().create();
 		l.numColumns = 1;
-		comp.setLayout(l);
 
 		gd = GridDataFactory.swtDefaults().create();
 		gd.verticalAlignment = SWT.TOP;
 		gd.grabExcessHorizontalSpace = true;
-		comp.setLayoutData(gd);
 
 		// --- rb group
-		Group g = new Group(comp, SWT.SHADOW_IN);
+		Group g = new Group(root, SWT.SHADOW_IN);
 		g.setLayout(l);
 		g.setLayoutData(gd);
 		g.setText("Double click on repository");
 
 		btOpenGitBlit = new Button(g, SWT.RADIO);
-		btOpenGitBlit.setText("Open GitBlit in a Browser");
+		btOpenGitBlit.setText("Open Gitblit in a Browser");
 
 		btCopyUrl = new Button(g, SWT.RADIO);
 		btCopyUrl.setText("Copy repository path to clipboard");
@@ -265,21 +262,25 @@ public class GitBlitExplorerPrefPage extends PreferencePage implements IWorkbenc
 			}
 		});
 		
-		// --- init data
-		this.prefModel = readPreferenceSettings();
-		viewer.setInput(this.prefModel);
-		synchDoubleClick(true);
-		syncActive(true);
+		initData();
 		return root;
 	}
 	
-
 	/**
 	 * Apply all field settings of preferences to preference model.
 	 */
 	protected void applyFieldValues(){
 		synchDoubleClick(false);
 		syncActive(false);
+	}
+	
+	protected void initData(){
+		if(this.viewer != null){
+			this.prefModel = readPreferenceSettings();
+			viewer.setInput(this.prefModel);
+			synchDoubleClick(true);
+			syncActive(true);
+		}
 	}
 	
 	
@@ -316,10 +317,12 @@ public class GitBlitExplorerPrefPage extends PreferencePage implements IWorkbenc
 			DoubleClickBehaviour dbcl = this.prefModel.getDoubleClick();
 			switch(dbcl){
 				case CopyUrl:
-					btCopyUrl.setSelection(true);
+					this.btCopyUrl.setSelection(true);
+					this.btOpenGitBlit.setSelection(false); // hmmm...annoying. Was exprecting button will be deselected. But it isn´t. Thank you SWT/JFace :-(
 					break;
 				case OpenGitBlit:
-					btOpenGitBlit.setSelection(true);
+					this.btOpenGitBlit.setSelection(true);
+					this.btCopyUrl.setSelection(false); // hmmm...was exprecting button will be deselected. But it isn´t. Thank you SWT/JFace :-(
 					break;
 				default:
 			}
@@ -335,19 +338,12 @@ public class GitBlitExplorerPrefPage extends PreferencePage implements IWorkbenc
 		}
 	}
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.jface.preference.PreferencePage#performApply()
-	 */
+	
+
 	@Override
-	protected void performApply(){
-		try{
-			applyFieldValues();
-			PreferenceMgr.saveConfig(this.prefModel);
-			firePreferenceChange();
-		}catch(GitBlitExplorerException e){
-			EclipseLog.error("Error saving preferences.", e);
-		}
-		super.performApply();
+	protected void performDefaults(){
+		initData();
+		super.performDefaults();
 	}
 
 	/* (non-Javadoc)
@@ -355,6 +351,7 @@ public class GitBlitExplorerPrefPage extends PreferencePage implements IWorkbenc
 	 */
 	@Override
 	public boolean performCancel(){
+		initData();
 		return super.performCancel();
 	}
 

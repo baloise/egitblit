@@ -32,8 +32,6 @@ import org.eclipse.swt.dnd.TextTransfer;
 import org.eclipse.swt.dnd.Transfer;
 import org.eclipse.swt.events.DisposeEvent;
 import org.eclipse.swt.events.DisposeListener;
-import org.eclipse.swt.events.SelectionAdapter;
-import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
@@ -351,15 +349,15 @@ public class RepoExplorerView extends ViewPart{
 						}
 					}
 				}catch(Exception e){
-					EclipseLog.error("Error reading project from GitBlit", e);
-					showMessage(IStatus.ERROR, "Error reading project from GitBlit\n" + e.toString());
-					modelList.add(new ErrorViewModel("Error reading projects from GitBlit. Check your preference settings, please."));
+					EclipseLog.error("Error reading project from Gitblit", e);
+					showMessage(IStatus.ERROR, "Error reading project from Gitblit\n" + e.toString());
+					modelList.add(new ErrorViewModel("Error reading projects from Gitblit. Check your preference settings, please."));
 				}
 			}
 		});
 
 		if(noAccess.value){
-			modelList.add(new ErrorViewModel("Please configure GitBlit Explorer in preferences, first."));
+			modelList.add(new ErrorViewModel("Please configure Gitblit Explorer in preferences, first."));
 		}
 		return modelList;
 	}
@@ -430,7 +428,7 @@ public class RepoExplorerView extends ViewPart{
 	private void showMessage(final int level, final String msg){
 		getSite().getShell().getDisplay().asyncExec(new Runnable() {
 			public void run(){
-				MessageDialog.open(level, getSite().getShell(), "GitBlit Explorer", msg, SWT.NONE);
+				MessageDialog.open(level, getSite().getShell(), "Gitblit Explorer", msg, SWT.NONE);
 			}
 		});
 	}
