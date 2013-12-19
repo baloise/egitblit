@@ -57,10 +57,10 @@ public class GitBlitExplorerPrefPage extends PreferencePage implements IWorkbenc
 	@Override
 	public void init(IWorkbench workbench){
 		setPreferenceStore(Activator.getDefault().getPreferenceStore());
-		setDescription("Configure GitBlit Explorer");
 	}
 
 	@Override
+<<<<<<< HEAD
 	protected Control createContents(Composite parent){
 
 		// Root composite which contains all gui elements
@@ -166,6 +166,29 @@ public class GitBlitExplorerPrefPage extends PreferencePage implements IWorkbenc
 					}
 				}
 			}
+=======
+	protected void createFieldEditors() {
+		IPreferenceStore preferenceStore = Activator.getDefault().getPreferenceStore();
+		String surl  = preferenceStore.getString(KEY_GITBLIT_URL);
+		
+		StringFieldEditor url = new StringFieldEditor(KEY_GITBLIT_URL, 	"server url",getFieldEditorParent());
+		if(surl == null || surl.trim() == ""){
+			surl = "";
+		}
+		addField(url);
+		
+		
+		StringFieldEditor urlSep = new StringFieldEditor(KEY_GITBLIT_URL_SEPERATOR, 	"server url seperator",getFieldEditorParent());
+		addField(urlSep);
+		
+		 addField(new StringFieldEditor(KEY_GITBLIT_USER, "user",getFieldEditorParent()));
+		 StringFieldEditor pwd = new StringFieldEditor(KEY_GITBLIT_PWD, "password",getFieldEditorParent()){
+			 @Override
+		     protected void doFillIntoGrid(Composite parent, int numColumns) {
+		         super.doFillIntoGrid(parent, numColumns);
+		         getTextControl().setEchoChar('*');
+		     }
+>>>>>>> refs/remotes/origin/master
 
 			@Override
 			public void widgetDefaultSelected(SelectionEvent e){
