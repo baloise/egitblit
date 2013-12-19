@@ -47,7 +47,7 @@ public class GitBlitExplorerPrefPage extends PreferencePage implements IWorkbenc
 	private TableViewer viewer;
 	private Button btOpenGitBlit;
 	private Button btCopyUrl;
-
+	private Button btEGitPaste;
 	/*
 	 * (non-Javadoc)
 	 * 
@@ -230,7 +230,10 @@ public class GitBlitExplorerPrefPage extends PreferencePage implements IWorkbenc
 		Group g = new Group(root, SWT.SHADOW_IN);
 		g.setLayout(l);
 		g.setLayoutData(gd);
-		g.setText("Double click on repository");
+		g.setText("Double click on repository entry");
+
+		btEGitPaste = new Button(g, SWT.RADIO);
+		btEGitPaste.setText("Paste repsitory url in EGit");
 
 		btOpenGitBlit = new Button(g, SWT.RADIO);
 		btOpenGitBlit.setText("Open Gitblit summary page in a browser");
@@ -323,23 +326,35 @@ public class GitBlitExplorerPrefPage extends PreferencePage implements IWorkbenc
 		if(doRead){
 			DoubleClickBehaviour dbcl = this.prefModel.getDoubleClick();
 			switch(dbcl){
+				case PasteEGit:
+					this.btEGitPaste.setSelection(true);
+					this.btCopyUrl.setSelection(false);
+					this.btOpenGitBlit.setSelection(false); 
+					break;
 				case CopyUrl:
+					this.btEGitPaste.setSelection(false);
 					this.btCopyUrl.setSelection(true);
-					this.btOpenGitBlit.setSelection(false); // hmmm...annoying. Was exprecting button will be deselected. But it isn´t. Thank you SWT/JFace :-(
+					this.btOpenGitBlit.setSelection(false); 
 					break;
 				case OpenGitBlit:
-					this.btOpenGitBlit.setSelection(true);
-					this.btCopyUrl.setSelection(false); // hmmm...was exprecting button will be deselected. But it isn´t. Thank you SWT/JFace :-(
+					this.btEGitPaste.setSelection(false);
+					this.btCopyUrl.setSelection(false);
+					this.btOpenGitBlit.setSelection(true); 
 					break;
 				default:
+					this.btEGitPaste.setSelection(true);
+					this.btCopyUrl.setSelection(false);
+					this.btOpenGitBlit.setSelection(false); 
 			}
 		}
 		else{
-			if(btCopyUrl.getSelection() == true){
+			if(btEGitPaste.getSelection() == true){
+				this.prefModel.setDoubleClick(DoubleClickBehaviour.PasteEGit);
+			}
+			else if(btCopyUrl.getSelection() == true){
 				this.prefModel.setDoubleClick(DoubleClickBehaviour.CopyUrl);
 			}
-			else
-			{
+			else if(btOpenGitBlit.getSelection() == true){
 				this.prefModel.setDoubleClick(DoubleClickBehaviour.OpenGitBlit);
 			}
 		}

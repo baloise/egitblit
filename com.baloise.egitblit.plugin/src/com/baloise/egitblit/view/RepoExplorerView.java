@@ -3,15 +3,18 @@ package com.baloise.egitblit.view;
 import static com.baloise.egitblit.common.GitBlitRepository.GROUP_MAIN;
 
 import java.util.ArrayList;
+import java.util.Hashtable;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 
+import org.eclipse.core.commands.Command;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.IMenuListener;
 import org.eclipse.jface.action.IMenuManager;
 import org.eclipse.jface.action.MenuManager;
+import org.eclipse.jface.action.Separator;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.layout.GridDataFactory;
 import org.eclipse.jface.layout.GridLayoutFactory;
@@ -38,6 +41,8 @@ import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.TreeColumn;
+import org.eclipse.ui.PlatformUI;
+import org.eclipse.ui.commands.ICommandService;
 import org.eclipse.ui.dialogs.FilteredTree;
 import org.eclipse.ui.dialogs.PatternFilter;
 import org.eclipse.ui.forms.widgets.Form;
@@ -65,20 +70,16 @@ import com.baloise.egitblit.view.model.ProjectViewModel;
  * 
  */
 public class RepoExplorerView extends ViewPart{
-	
+
 	private TreeViewer viewer;
 	private List<GroupViewModel> rootModel;
 
-	private boolean isDoubleClickOpenGit = false;
+	private DoubleClickBehaviour dbclick = DoubleClickBehaviour.OpenGitBlit;
 	private Image imgRefesh = null;
 
 	// ------------------------------------------------------------------------
 	// --- Actions
 	// ------------------------------------------------------------------------
-	// Copy selected Project to clipboard
-	Action actionCopyClipboard = null;
-	// Open gitblit summary
-	private Action actionOpenGitBlit = null;
 
 	// ------------------------------------------------------------------------
 	// Separate instance to unregiter listener at dispose cycle
@@ -120,6 +121,7 @@ public class RepoExplorerView extends ViewPart{
 	 */
 	@Override
 	public void createPartControl(Composite parent){
+
 		// --------------------------------------------------------------------
 		// Sync preferences
 		// --------------------------------------------------------------------
@@ -127,25 +129,25 @@ public class RepoExplorerView extends ViewPart{
 		Activator.getDefault().getPreferenceStore().addPropertyChangeListener(propChangeListener);
 		PreferenceMgr.isValidConfig();
 
-		final FormToolkit ftk = new FormToolkit(parent.getDisplay()); 
+		final FormToolkit ftk = new FormToolkit(parent.getDisplay());
 		parent.addDisposeListener(new DisposeListener() {
-			public void widgetDisposed(DisposeEvent e) {
+			public void widgetDisposed(DisposeEvent e){
 				ftk.dispose();
 			}
 		});
-		
+
 		// --- Use Formtoolkit, because of header preparing
 		Form form = ftk.createForm(parent);
 		form.setText("GitBlit Repository Explorer");
 		GridDataFactory.fillDefaults().grab(true, true).applyTo(form);
 		ftk.decorateFormHeading(form);
-		
+
 		final ImageDescriptor refreskImgDesc = getImageFromPlugin("refresh_tab.gif");
 		if(refreskImgDesc != null){
 			imgRefesh = refreskImgDesc.createImage();
 		}
 
-		Action rAction = new Action("Reload Repositories"){
+		Action rAction = new Action("Reload Repositories") {
 			@Override
 			public void run(){
 				initViewModel();
@@ -155,11 +157,11 @@ public class RepoExplorerView extends ViewPart{
 			public ImageDescriptor getImageDescriptor(){
 				return refreskImgDesc;
 			}
-			
+
 		};
 		form.getToolBarManager().add(rAction);
 		form.getToolBarManager().update(true);
-		
+
 		// --------------------------------------------------------------------
 		// Layout
 		// --------------------------------------------------------------------
@@ -171,7 +173,7 @@ public class RepoExplorerView extends ViewPart{
 		gd.grabExcessVerticalSpace = true;
 		gd.horizontalAlignment = SWT.FILL;
 		gd.verticalAlignment = SWT.FILL;
-		
+
 		form.getBody().setLayout(l);
 		form.getBody().setLayoutData(gd);
 
@@ -179,12 +181,12 @@ public class RepoExplorerView extends ViewPart{
 		comp.setLayout(l);
 		comp.setLayoutData(gd);
 
-
 		// --------------------------------------------------------------------
 		// Viewer
 		// --------------------------------------------------------------------
 		PatternFilter filter = new PatternFilter() {
-			// Copied from http://eclipsesource.com/blogs/2012/10/26/filtering-tables-in-swtjface/
+			// Copied from
+			// http://eclipsesource.com/blogs/2012/10/26/filtering-tables-in-swtjface/
 			protected boolean isLeafMatch(final Viewer viewer, final Object element){
 				TreeViewer treeViewer = (TreeViewer) viewer;
 				int numberOfColumns = treeViewer.getTree().getColumnCount();
@@ -205,9 +207,6 @@ public class RepoExplorerView extends ViewPart{
 		viewer.setContentProvider(new RepoContentProvider());
 		viewer.setLabelProvider(new RepoLabelProvider());
 
-		this.actionOpenGitBlit = new OpenGitBlitAction(viewer);
-		this.actionCopyClipboard = new CopyClipBoardAction(viewer);
-
 		l = GridLayoutFactory.swtDefaults().create();
 		gd.grabExcessHorizontalSpace = true;
 		gd.grabExcessVerticalSpace = true;
@@ -222,7 +221,7 @@ public class RepoExplorerView extends ViewPart{
 		colGroup.setAlignment(SWT.LEFT);
 		colGroup.setText("Group / Repository");
 		colGroup.setWidth(280);
-		
+
 		TreeColumn colDesc = new TreeColumn(viewer.getTree(), SWT.LEFT);
 		colDesc.setAlignment(SWT.LEFT);
 		colDesc.setText("Description");
@@ -232,7 +231,7 @@ public class RepoExplorerView extends ViewPart{
 		serverDesc.setAlignment(SWT.LEFT);
 		serverDesc.setText("Gitblit Server");
 		serverDesc.setWidth(320);
-		
+
 		// --------------------------------------------------------------------
 		// Adding viewer interaction
 		// --------------------------------------------------------------------
@@ -242,7 +241,7 @@ public class RepoExplorerView extends ViewPart{
 		viewer.addDoubleClickListener(new IDoubleClickListener() {
 			@Override
 			public void doubleClick(DoubleClickEvent event){
-				getDoubleClickAction(true).run();
+				getDoubleClickAction().run();
 			}
 		});
 
@@ -257,7 +256,16 @@ public class RepoExplorerView extends ViewPart{
 					if(model instanceof ProjectViewModel){
 						ProjectViewModel pm = (ProjectViewModel) model;
 						if(model != null && pm.getGitURL() != null && pm.getGitURL().trim().isEmpty() == false){
-							mgr.add(getDoubleClickAction(false));
+							if(PasteToEGitAction.getEGitCommand() != null){
+								mgr.add(new PasteToEGitAction(viewer));
+								mgr.add(new Separator());
+							}
+							if(pm.hasCommits() == true){
+								mgr.add(new OpenGitBlitAction(viewer));
+								mgr.add(new Separator());
+							}
+							mgr.add(new CopyClipBoardAction(viewer));
+
 						}
 					}
 				}
@@ -266,15 +274,17 @@ public class RepoExplorerView extends ViewPart{
 
 		viewer.getControl().setMenu(mgr.createContextMenu(viewer.getControl()));
 		viewer.setSorter(new RepoViewSorter());
-		
+
 		ColumnViewerToolTipSupport.enableFor(viewer);
 		initViewModel();
 	}
 
 	/**
-	 * Gets the {@link ImageDescriptor} of the passed image
-	 * The image must be located in the "/icons/" folder of the source project 
-	 * @param name Name of the image
+	 * Gets the {@link ImageDescriptor} of the passed image The image must be
+	 * located in the "/icons/" folder of the source project
+	 * 
+	 * @param name
+	 *            Name of the image
 	 * @return {@link ImageDescriptor}
 	 */
 	private final static ImageDescriptor getImageFromPlugin(String name){
@@ -282,7 +292,8 @@ public class RepoExplorerView extends ViewPart{
 	}
 
 	/**
-	 * Reads the repositories from GitBlit and sets the result in the viewre to be displayed
+	 * Reads the repositories from GitBlit and sets the result in the viewre to
+	 * be displayed
 	 */
 	private void initViewModel(){
 		rootModel = readRepositories(true);
@@ -298,16 +309,14 @@ public class RepoExplorerView extends ViewPart{
 	private void initDoubleBehaviour(){
 		try{
 			PreferenceModel pref = PreferenceMgr.readConfig();
-			if(pref == null || DoubleClickBehaviour.OpenGitBlit.equals(pref.getDoubleClick())){
-				isDoubleClickOpenGit = true;
-			}else{
-				isDoubleClickOpenGit = false;
+			if(pref != null){
+				dbclick = pref.getDoubleClick();
 			}
 			return;
 		}catch(GitBlitExplorerException e){
 			EclipseLog.error("Error initializing view with preference settings.", e);
 		}
-		isDoubleClickOpenGit = true;
+		dbclick = DoubleClickBehaviour.OpenGitBlit;
 	}
 
 	private class Holder<T> {
@@ -320,7 +329,8 @@ public class RepoExplorerView extends ViewPart{
 
 	/**
 	 * Reading repos / projects from gitblit
-	 * @return reload Currently not supported 
+	 * 
+	 * @return reload Currently not supported
 	 */
 	private List<GroupViewModel> readRepositories(final boolean reload){
 		final Holder<Boolean> noAccess = new Holder<Boolean>(Boolean.FALSE);
@@ -409,26 +419,26 @@ public class RepoExplorerView extends ViewPart{
 	 * @param dclick
 	 * @return
 	 */
-	public Action getDoubleClickAction(boolean dclick){
-		if(dclick){
-			if(isDoubleClickOpenGit){
-				return actionOpenGitBlit;
-			}else{
-				return actionCopyClipboard;
-			}
-		}else{
-			if(isDoubleClickOpenGit){
-				return actionCopyClipboard;
-			}else{
-				return actionOpenGitBlit;
-			}
+	public Action getDoubleClickAction(){
+		switch (dbclick){
+			case OpenGitBlit:
+				return new OpenGitBlitAction(this.viewer);
+			case CopyUrl:
+				return new CopyClipBoardAction(this.viewer);
+			case PasteEGit:
+				return new PasteToEGitAction(this.viewer);
+			default:
+				return new PasteToEGitAction(this.viewer);
 		}
 	}
 
 	/**
 	 * Shows the message as dialog
-	 * @param level {@link IStatus} codes
-	 * @param msg Message to be displayed
+	 * 
+	 * @param level
+	 *            {@link IStatus} codes
+	 * @param msg
+	 *            Message to be displayed
 	 */
 	private void showMessage(final int level, final String msg){
 		getSite().getShell().getDisplay().asyncExec(new Runnable() {

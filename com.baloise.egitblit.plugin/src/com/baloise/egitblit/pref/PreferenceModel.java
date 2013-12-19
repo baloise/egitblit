@@ -15,7 +15,9 @@ public class PreferenceModel{
 
 	public static enum DoubleClickBehaviour{
 			OpenGitBlit(0),
-			CopyUrl(1);
+			CopyUrl(1),
+			PasteEGit(2);
+			
 			
 		public final int value;
 		DoubleClickBehaviour(int value){
@@ -33,7 +35,7 @@ public class PreferenceModel{
 		}
 	};
 	
-	private DoubleClickBehaviour dbClick = DoubleClickBehaviour.OpenGitBlit;
+	private DoubleClickBehaviour dbClick = DoubleClickBehaviour.PasteEGit;
 	private List<GitBlitServer> repoList = new ArrayList<GitBlitServer>();
 	private boolean ignoreWarnings = false;
 	
