@@ -20,7 +20,7 @@ Eclipse Plugin listing git repositories hosted by gitblit in a view.
 - Search for a repo/project within gitblit repos
 - Copies git repo url to clipboard
 - or via drag&drop to any drag&drop enabled target as text (or as type URL)
-- or starts EGit Clone Wizard with selected repository path
+- or starts EGit Clone Wizard with selected repository path by default
 - Open corresponding gitblit summary page of the selected project
 
 
