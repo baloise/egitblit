@@ -233,7 +233,7 @@ public class GitBlitExplorerPrefPage extends PreferencePage implements IWorkbenc
 		g.setText("Double click on repository");
 
 		btOpenGitBlit = new Button(g, SWT.RADIO);
-		btOpenGitBlit.setText("Open Gitblit in a Browser");
+		btOpenGitBlit.setText("Open Gitblit summary page in a browser");
 
 		btCopyUrl = new Button(g, SWT.RADIO);
 		btCopyUrl.setText("Copy repository path to clipboard");
