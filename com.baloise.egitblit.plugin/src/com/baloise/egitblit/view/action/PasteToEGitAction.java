@@ -1,4 +1,4 @@
-package com.baloise.egitblit.view;
+package com.baloise.egitblit.view.action;
 
 import org.eclipse.core.commands.Command;
 import org.eclipse.core.commands.ExecutionEvent;
@@ -13,52 +13,39 @@ import org.eclipse.ui.dialogs.PreferencesUtil;
 import com.baloise.egitblit.main.EclipseHelper;
 import com.baloise.egitblit.pref.GitBlitExplorerPrefPage;
 import com.baloise.egitblit.view.model.ErrorViewModel;
+import com.baloise.egitblit.view.model.GitBlitViewModel;
 import com.baloise.egitblit.view.model.ProjectViewModel;
 
-public class PasteToEGitAction extends Action{
-
-	private final Viewer viewer;
+public class PasteToEGitAction extends ViewActionBase{
 
 	public final static String CMD_EGIT = "org.eclipse.egit.ui.RepositoriesViewPaste";
 
 	public PasteToEGitAction(Viewer viewer){
-		super("Paste repository Url in EGit");
-		this.viewer = viewer;
+		super(viewer, null, "Paste repository Url in EGit");
 	}
 
 	@Override
-	public void run(){
-		IStructuredSelection selection = (IStructuredSelection) viewer.getSelection();
-		if(selection != null){
-			Object sel = selection.getFirstElement();
-			if(sel instanceof ProjectViewModel){
-				ProjectViewModel model = (ProjectViewModel) selection.getFirstElement();
-				if(model != null){
-					// Copy url to clipboard
-					CopyClipBoardAction cca = new CopyClipBoardAction(viewer);
-					cca.run();
+	public void doRun(){
+		GitBlitViewModel model = getSelectedModel();
+		if(model instanceof ProjectViewModel){
+			ProjectViewModel pm = (ProjectViewModel) model;
+			// Copy url to clipboard
+			CopyClipBoardAction cca = new CopyClipBoardAction(getViewer());
+			cca.run();
 
-					Command cmd= getEGitCommand();
-					if(cmd == null){
-						EclipseHelper.logError("Can't call EGit. Eclipse command service not avail or EGit not installed.");
-						return;
-					}
-					try{
-						cmd.executeWithChecks(new ExecutionEvent());
-					}catch(Exception e){
-						EclipseHelper.logError("Error pasting repository url to EGit", e);
-					}
-				}
+			Command cmd = getEGitCommand();
+			if(cmd == null){
+				EclipseHelper.logError("Can't call EGit. Eclipse command service not avail or EGit not installed.");
+				return;
 			}
-			if(sel instanceof ErrorViewModel){
-				PreferenceDialog dialog = PreferencesUtil.createPreferenceDialogOn(null, GitBlitExplorerPrefPage.ID, null, null);
-				dialog.open();
+			try{
+				cmd.executeWithChecks(new ExecutionEvent());
+			}catch(Exception e){
+				EclipseHelper.logError("Error pasting repository url to EGit", e);
 			}
 		}
 	}
-	
-	
-	
+
 	@Override
 	public boolean isEnabled(){
 		return getEGitCommand() != null;

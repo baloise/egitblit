@@ -66,6 +66,7 @@ public class GitBlitBD{
 	 */
 	public List<GitBlitRepository> readRepositories() throws GitBlitExplorerException{
 		List<GitBlitRepository> bres = new ArrayList<GitBlitRepository>();
+
 		for(GitBlitServer ritem : this.repoList){
 			if(ritem.active == false){
 				// Read only from active servers
