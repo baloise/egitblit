@@ -233,7 +233,7 @@ public class GitBlitExplorerPrefPage extends PreferencePage implements IWorkbenc
 		g.setText("Double click on repository entry");
 
 		btEGitPaste = new Button(g, SWT.RADIO);
-		btEGitPaste.setText("Paste repsitory url in EGit");
+		btEGitPaste.setText("Paste repsitory pszh in EGit");
 
 		btOpenGitBlit = new Button(g, SWT.RADIO);
 		btOpenGitBlit.setText("Open Gitblit summary page in a browser");

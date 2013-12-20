@@ -3,12 +3,10 @@ package com.baloise.egitblit.view;
 import static com.baloise.egitblit.common.GitBlitRepository.GROUP_MAIN;
 
 import java.util.ArrayList;
-import java.util.Hashtable;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 
-import org.eclipse.core.commands.Command;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.IMenuListener;
@@ -41,8 +39,6 @@ import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.TreeColumn;
-import org.eclipse.ui.PlatformUI;
-import org.eclipse.ui.commands.ICommandService;
 import org.eclipse.ui.dialogs.FilteredTree;
 import org.eclipse.ui.dialogs.PatternFilter;
 import org.eclipse.ui.forms.widgets.Form;
@@ -230,7 +226,7 @@ public class RepoExplorerView extends ViewPart{
 		TreeColumn serverDesc = new TreeColumn(viewer.getTree(), SWT.LEFT);
 		serverDesc.setAlignment(SWT.LEFT);
 		serverDesc.setText("Gitblit Server");
-		serverDesc.setWidth(320);
+		serverDesc.setWidth(280);
 
 		// --------------------------------------------------------------------
 		// Adding viewer interaction
