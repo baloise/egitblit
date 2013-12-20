@@ -29,7 +29,7 @@ import org.eclipse.ui.IWorkbenchPreferencePage;
 
 import com.baloise.egitblit.common.GitBlitServer;
 import com.baloise.egitblit.main.Activator;
-import com.baloise.egitblit.main.EclipseLog;
+import com.baloise.egitblit.main.EclipseHelper;
 import com.baloise.egitblit.main.GitBlitExplorerException;
 import com.baloise.egitblit.pref.PreferenceModel.DoubleClickBehaviour;
 
@@ -387,7 +387,7 @@ public class GitBlitExplorerPrefPage extends PreferencePage implements IWorkbenc
 			PreferenceMgr.saveConfig(this.prefModel);
 			firePreferenceChange();
 		}catch(GitBlitExplorerException e){
-			EclipseLog.error("Error saving preferences.", e);
+			EclipseHelper.logError("Error saving preferences.", e);
 			return false;
 		}
 		return super.performOk();
@@ -426,7 +426,7 @@ public class GitBlitExplorerPrefPage extends PreferencePage implements IWorkbenc
 		try{
 			return PreferenceMgr.readConfig();
 		}catch(GitBlitExplorerException e){
-			EclipseLog.error("Error reading preferences.", e);
+			EclipseHelper.logError("Error reading preferences.", e);
 		}
 		return null;
 	}

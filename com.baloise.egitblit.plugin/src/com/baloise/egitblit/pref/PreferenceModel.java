@@ -4,7 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.baloise.egitblit.common.GitBlitServer;
-import com.baloise.egitblit.main.EclipseLog;
+import com.baloise.egitblit.main.EclipseHelper;
 
 /**
  * Model representing the preference settings
@@ -65,7 +65,7 @@ public class PreferenceModel{
 			return;
 		}
 		if(this.repoList.contains(repo)){
-			EclipseLog.error("Can´t add repository location "  + repo.url + ". A repository with this url already exists.");
+			EclipseHelper.logError("Can´t add repository location "  + repo.url + ". A repository with this url already exists.");
 			return;
 		}
 		this.repoList.add(repo);

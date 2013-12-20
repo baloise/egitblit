@@ -9,7 +9,7 @@ import org.eclipse.swt.dnd.DragSourceListener;
 import org.eclipse.swt.dnd.TextTransfer;
 import org.eclipse.swt.dnd.URLTransfer;
 
-import com.baloise.egitblit.main.EclipseLog;
+import com.baloise.egitblit.main.EclipseHelper;
 import com.baloise.egitblit.view.model.GitBlitViewModel;
 import com.baloise.egitblit.view.model.ProjectViewModel;
 
@@ -52,7 +52,7 @@ public class RepoDragListener implements DragSourceListener {
 				event.data = new URL(gitURL);
 			}
 			catch(Exception e){
-				EclipseLog.error("Error while performin drag & drop",e);
+				EclipseHelper.logError("Error while performin drag & drop",e);
 			}
 		}
 	}

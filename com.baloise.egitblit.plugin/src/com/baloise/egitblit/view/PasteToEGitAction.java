@@ -10,7 +10,7 @@ import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.commands.ICommandService;
 import org.eclipse.ui.dialogs.PreferencesUtil;
 
-import com.baloise.egitblit.main.EclipseLog;
+import com.baloise.egitblit.main.EclipseHelper;
 import com.baloise.egitblit.pref.GitBlitExplorerPrefPage;
 import com.baloise.egitblit.view.model.ErrorViewModel;
 import com.baloise.egitblit.view.model.ProjectViewModel;
@@ -40,13 +40,13 @@ public class PasteToEGitAction extends Action{
 
 					Command cmd= getEGitCommand();
 					if(cmd == null){
-						EclipseLog.error("Can't call EGit. Eclipse command service not avail or EGit not installed.");
+						EclipseHelper.logError("Can't call EGit. Eclipse command service not avail or EGit not installed.");
 						return;
 					}
 					try{
 						cmd.executeWithChecks(new ExecutionEvent());
 					}catch(Exception e){
-						EclipseLog.error("Error pasting repository url to EGit", e);
+						EclipseHelper.logError("Error pasting repository url to EGit", e);
 					}
 				}
 			}

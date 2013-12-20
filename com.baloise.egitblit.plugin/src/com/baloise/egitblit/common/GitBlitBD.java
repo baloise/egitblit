@@ -5,7 +5,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
-import com.baloise.egitblit.main.EclipseLog;
+import com.baloise.egitblit.main.EclipseHelper;
 import com.baloise.egitblit.main.GitBlitExplorerException;
 import com.gitblit.models.RepositoryModel;
 import com.gitblit.utils.RpcUtils;
@@ -43,7 +43,7 @@ public class GitBlitBD{
 	 */
 	public void addRepository(GitBlitServer repo) throws GitBlitExplorerException{
 		if(repo == null){
-			EclipseLog.error("Trying to add null value to GitBlidBD.");
+			EclipseHelper.logError("Trying to add null value to GitBlidBD.");
 			return;
 		}
 		if(this.repoList.contains(repo) == true){

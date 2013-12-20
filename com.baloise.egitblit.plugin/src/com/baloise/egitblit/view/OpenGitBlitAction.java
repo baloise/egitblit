@@ -17,7 +17,7 @@ import org.eclipse.ui.dialogs.PreferencesUtil;
 
 import com.baloise.egitblit.common.GitBlitRepository;
 import com.baloise.egitblit.main.Activator;
-import com.baloise.egitblit.main.EclipseLog;
+import com.baloise.egitblit.main.EclipseHelper;
 import com.baloise.egitblit.pref.GitBlitExplorerPrefPage;
 import com.baloise.egitblit.view.model.ErrorViewModel;
 import com.baloise.egitblit.view.model.ProjectViewModel;
@@ -85,7 +85,7 @@ public class OpenGitBlitAction extends Action{
 						URL url = makeGitBlitSummaryUrl(model);
 						PlatformUI.getWorkbench().getBrowserSupport().getExternalBrowser().openURL(url);
 					}catch (Exception e) {
-						EclipseLog.error("Error while performing open Gitblit action",e);
+						EclipseHelper.logError("Error while performing open Gitblit action",e);
 					}
 				}
 			}

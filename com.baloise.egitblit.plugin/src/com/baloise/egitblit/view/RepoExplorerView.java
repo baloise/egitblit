@@ -7,13 +7,11 @@ import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 
-import org.eclipse.core.runtime.IStatus;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.IMenuListener;
 import org.eclipse.jface.action.IMenuManager;
 import org.eclipse.jface.action.MenuManager;
 import org.eclipse.jface.action.Separator;
-import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.layout.GridDataFactory;
 import org.eclipse.jface.layout.GridLayoutFactory;
 import org.eclipse.jface.resource.ImageDescriptor;
@@ -49,7 +47,7 @@ import org.eclipse.ui.plugin.AbstractUIPlugin;
 import com.baloise.egitblit.common.GitBlitBD;
 import com.baloise.egitblit.common.GitBlitRepository;
 import com.baloise.egitblit.main.Activator;
-import com.baloise.egitblit.main.EclipseLog;
+import com.baloise.egitblit.main.EclipseHelper;
 import com.baloise.egitblit.main.GitBlitExplorerException;
 import com.baloise.egitblit.pref.PreferenceMgr;
 import com.baloise.egitblit.pref.PreferenceModel;
@@ -310,7 +308,7 @@ public class RepoExplorerView extends ViewPart{
 			}
 			return;
 		}catch(GitBlitExplorerException e){
-			EclipseLog.error("Error initializing view with preference settings.", e);
+			EclipseHelper.logError("Error initializing view with preference settings.", e);
 		}
 		dbclick = DoubleClickBehaviour.OpenGitBlit;
 	}
@@ -338,7 +336,7 @@ public class RepoExplorerView extends ViewPart{
 					Map<String, List<GitBlitRepository>> groupMap = readGroups();
 					if(groupMap == null || groupMap.isEmpty()){
 						final String msg = "No GitBlit repositories defined. Please add a GitBlit server location via preferences.";
-						showMessage(IStatus.INFO, msg);
+						EclipseHelper.showInfo(msg);
 						modelList.add(new ErrorViewModel(msg));
 						return;
 					}
@@ -360,8 +358,7 @@ public class RepoExplorerView extends ViewPart{
 						}
 					}
 				}catch(Exception e){
-					EclipseLog.error("Error reading project from Gitblit", e);
-					showMessage(IStatus.ERROR, "Error reading project from Gitblit\n" + e.toString());
+					EclipseHelper.showAndLogError("Error reading project from Gitblit", e);
 					modelList.add(new ErrorViewModel("Error reading projects from Gitblit. Check your preference settings, please."));
 				}
 			}
@@ -427,21 +424,4 @@ public class RepoExplorerView extends ViewPart{
 				return new PasteToEGitAction(this.viewer);
 		}
 	}
-
-	/**
-	 * Shows the message as dialog
-	 * 
-	 * @param level
-	 *            {@link IStatus} codes
-	 * @param msg
-	 *            Message to be displayed
-	 */
-	private void showMessage(final int level, final String msg){
-		getSite().getShell().getDisplay().asyncExec(new Runnable() {
-			public void run(){
-				MessageDialog.open(level, getSite().getShell(), "Gitblit Explorer", msg, SWT.NONE);
-			}
-		});
-	}
-
 }
