@@ -1,14 +1,7 @@
 package com.baloise.egitblit.view;
 
-import java.util.Hashtable;
-import java.util.Map;
-
 import org.eclipse.core.commands.Command;
 import org.eclipse.core.commands.ExecutionEvent;
-import org.eclipse.core.commands.ExecutionException;
-import org.eclipse.core.commands.NotEnabledException;
-import org.eclipse.core.commands.NotHandledException;
-import org.eclipse.core.commands.common.NotDefinedException;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.preference.PreferenceDialog;
 import org.eclipse.jface.viewers.IStructuredSelection;
@@ -29,7 +22,7 @@ public class PasteToEGitAction extends Action{
 	public final static String CMD_EGIT = "org.eclipse.egit.ui.RepositoriesViewPaste";
 
 	public PasteToEGitAction(Viewer viewer){
-		super("Paste repository url in EGit");
+		super("Paste repository Url in EGit");
 		this.viewer = viewer;
 	}
 

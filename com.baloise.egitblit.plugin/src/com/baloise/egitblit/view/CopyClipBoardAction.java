@@ -27,7 +27,7 @@ public class CopyClipBoardAction extends Action{
 	private final Viewer viewer;
 
 	public CopyClipBoardAction(Viewer viewer){
-		super("Copy Repository URL");
+		super("Copy Repository Url");
 		this.viewer = viewer;
 	}
 
