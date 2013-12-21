@@ -1,12 +1,14 @@
 package com.baloise.egitblit.view;
 
-import static com.baloise.egitblit.common.GitBlitRepository.GROUP_MAIN;
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 
+import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.Status;
+import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.IMenuListener;
 import org.eclipse.jface.action.IMenuManager;
@@ -25,13 +27,11 @@ import org.eclipse.jface.viewers.ITableLabelProvider;
 import org.eclipse.jface.viewers.TreeViewer;
 import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.swt.SWT;
-import org.eclipse.swt.custom.BusyIndicator;
 import org.eclipse.swt.dnd.DND;
 import org.eclipse.swt.dnd.TextTransfer;
 import org.eclipse.swt.dnd.Transfer;
 import org.eclipse.swt.events.DisposeEvent;
 import org.eclipse.swt.events.DisposeListener;
-import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
@@ -44,11 +44,13 @@ import org.eclipse.ui.forms.widgets.FormToolkit;
 import org.eclipse.ui.part.ViewPart;
 import org.eclipse.ui.plugin.AbstractUIPlugin;
 
-import com.baloise.egitblit.common.GitBlitBD;
-import com.baloise.egitblit.common.GitBlitRepository;
+import com.baloise.egitblit.common.GitBlitExplorerException;
+import com.baloise.egitblit.gitblit.GitBlitBD;
+import com.baloise.egitblit.gitblit.GitBlitRepository;
+import com.baloise.egitblit.gitblit.GitBlitServer;
+import com.baloise.egitblit.gitblit.ProgressToken;
 import com.baloise.egitblit.main.Activator;
 import com.baloise.egitblit.main.EclipseHelper;
-import com.baloise.egitblit.main.GitBlitExplorerException;
 import com.baloise.egitblit.pref.PreferenceMgr;
 import com.baloise.egitblit.pref.PreferenceModel;
 import com.baloise.egitblit.pref.PreferenceModel.DoubleClickBehaviour;
@@ -72,7 +74,37 @@ public class RepoExplorerView extends ViewPart{
 	private List<GroupViewModel> rootModel;
 
 	private DoubleClickBehaviour dbclick = DoubleClickBehaviour.OpenGitBlit;
-	private Image imgRefesh = null;
+
+	private PreferenceModel prefModel = null;
+	private List<GitBlitServer> serverList = null;
+
+	private boolean omitServerErrors = false;
+
+	private class OmitAction extends Action{
+		@Override
+		public void run(){
+			omitServerErrors = !omitServerErrors;
+			setChecked(omitServerErrors);
+			try{
+				prefModel.setOmitServerErrors(omitServerErrors);
+				PreferenceMgr.saveConfig(prefModel);
+			}catch(Exception e){
+				EclipseHelper.logError("Error saving preference settings.", e);
+			}
+			loadRepositories(!omitServerErrors);
+		}
+
+		public void refreshLabel(){
+			setText("Ignore unavailable servers" + " (" + getOmittedServerSize() + " servers omitted)");
+		}
+
+		@Override
+		public ImageDescriptor getImageDescriptor(){
+			return null;
+		}
+	};
+
+	private OmitAction omitAction = new OmitAction();
 
 	// ------------------------------------------------------------------------
 	// --- Actions
@@ -85,7 +117,8 @@ public class RepoExplorerView extends ViewPart{
 		public void propertyChange(PropertyChangeEvent event){
 			String prop = event.getProperty();
 			if(prop != null && prop.startsWith(PreferenceMgr.KEY_GITBLIT_ROOT) && viewer != null){
-				initViewModel();
+				initPreferences();
+				loadRepositories(true);
 			}
 		}
 	};
@@ -94,19 +127,9 @@ public class RepoExplorerView extends ViewPart{
 	public RepoExplorerView(){
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see org.eclipse.ui.part.WorkbenchPart#dispose()
-	 */
 	@Override
 	public void dispose(){
 		super.dispose();
-		Activator.getDefault().getPreferenceStore().removePropertyChangeListener(propChangeListener);
-		if(imgRefesh != null){
-			imgRefesh.dispose();
-			imgRefesh = null;
-		}
 	}
 
 	/*
@@ -122,9 +145,8 @@ public class RepoExplorerView extends ViewPart{
 		// --------------------------------------------------------------------
 		// Sync preferences
 		// --------------------------------------------------------------------
-		initDoubleBehaviour();
 		Activator.getDefault().getPreferenceStore().addPropertyChangeListener(propChangeListener);
-		PreferenceMgr.isValidConfig();
+		initPreferences();
 
 		final FormToolkit ftk = new FormToolkit(parent.getDisplay());
 		parent.addDisposeListener(new DisposeListener() {
@@ -140,25 +162,25 @@ public class RepoExplorerView extends ViewPart{
 		ftk.decorateFormHeading(form);
 
 		final ImageDescriptor refreskImgDesc = getImageFromPlugin("refresh_tab.gif");
-		if(refreskImgDesc != null){
-			imgRefesh = refreskImgDesc.createImage();
-		}
 
 		Action rAction = new Action("Reload Repositories") {
 			@Override
 			public void run(){
-				initViewModel();
+				loadRepositories(true);
 			}
 
 			@Override
 			public ImageDescriptor getImageDescriptor(){
 				return refreskImgDesc;
 			}
-
 		};
 		form.getToolBarManager().add(rAction);
+		omitAction.setChecked(this.prefModel.isOmitServerErrors());
 		form.getToolBarManager().update(true);
 
+		IMenuManager hmgr = form.getMenuManager();
+		hmgr.add(omitAction);
+		hmgr.update(true);
 		// --------------------------------------------------------------------
 		// Layout
 		// --------------------------------------------------------------------
@@ -273,7 +295,21 @@ public class RepoExplorerView extends ViewPart{
 		viewer.setSorter(new RepoViewSorter());
 
 		ColumnViewerToolTipSupport.enableFor(viewer);
-		initViewModel();
+
+		loadRepositories(true);
+	}
+
+	private void initPreferences(){
+		try{
+			this.prefModel = PreferenceMgr.readConfig();
+			if(prefModel != null){
+				dbclick = prefModel.getDoubleClick();
+				omitServerErrors = prefModel.isOmitServerErrors();
+			}
+			return;
+		}catch(GitBlitExplorerException e){
+			EclipseHelper.logError("Error initializing view with preference settings.", e);
+		}
 	}
 
 	/**
@@ -288,60 +324,97 @@ public class RepoExplorerView extends ViewPart{
 		return AbstractUIPlugin.imageDescriptorFromPlugin(Activator.PLUGIN_ID, "/icons/" + name);
 	}
 
-	/**
-	 * Reads the repositories from GitBlit and sets the result in the viewre to
-	 * be displayed
-	 */
-	private void initViewModel(){
-		rootModel = readRepositories(true);
-		if(viewer != null){
-			viewer.setInput(rootModel);
-		}
-		initDoubleBehaviour();
-	}
-
-	/**
-	 * Init double click behaviour based on preference settings
-	 */
-	private void initDoubleBehaviour(){
-		try{
-			PreferenceModel pref = PreferenceMgr.readConfig();
-			if(pref != null){
-				dbclick = pref.getDoubleClick();
+	private int getOmittedServerSize(){
+		int val = 0;
+		for(GitBlitServer item : this.serverList){
+			if(item.serverError == true){
+				val++;
 			}
-			return;
-		}catch(GitBlitExplorerException e){
-			EclipseHelper.logError("Error initializing view with preference settings.", e);
 		}
-		dbclick = DoubleClickBehaviour.OpenGitBlit;
+		return val;
 	}
 
-	private class Holder<T> {
-		public T value;
+	private void initServerList(boolean reload){
+		List<GitBlitServer> slist = null;
 
-		public Holder(T value){
-			this.value = value;
+		if(reload == true){
+			// Reload server definitions to do a full refresh
+			initPreferences();
 		}
-	};
+		try{
+			slist = this.prefModel.getServerList();
+		}catch(Exception e){
+			EclipseHelper.logError("Error reading preferences", e);
+			return;
+		}
+		if(reload == true || this.serverList == null || this.serverList.isEmpty() || omitServerErrors == false){
+			this.serverList = slist;
+			// return with initial list & sate
+			return;
+		}
+	}
 
 	/**
 	 * Reading repos / projects from gitblit
 	 * 
 	 * @return reload Currently not supported
 	 */
-	private List<GroupViewModel> readRepositories(final boolean reload){
-		final Holder<Boolean> noAccess = new Holder<Boolean>(Boolean.FALSE);
+	private void loadRepositories(boolean reload){
+		initServerList(reload);
+		this.omitAction.refreshLabel();
+		
+		Job job = new Job("Gitblit Repository Explorer") {
+			@Override
+			protected IStatus run(IProgressMonitor monitor){
+				final List<GroupViewModel> modelList = new ArrayList<GroupViewModel>();
 
-		final List<GroupViewModel> modelList = new ArrayList<GroupViewModel>();
-		BusyIndicator.showWhile(Display.getDefault(), new Runnable() {
-			public void run(){
 				try{
-					Map<String, List<GitBlitRepository>> groupMap = readGroups();
+					final IProgressMonitor fmon = monitor;
+
+					// --- Read preferences
+					int size = serverList.size();
+					monitor.beginTask("Reading repositories form Gitblit Server", size + 1);
+
+					ProgressToken token = new ProgressToken() {
+						@Override
+						public void startWork(String msg){
+							fmon.subTask(msg);
+						}
+
+						@Override
+						public void endWork(){
+							fmon.worked(1);
+						}
+					};
+
+					// --- Reading grouped by grooup
+					Map<String, List<GitBlitRepository>> groupMap = new TreeMap<String, List<GitBlitRepository>>();
+
+					GitBlitBD bd = new GitBlitBD(serverList);
+					List<GitBlitRepository> projList = bd.readRepositories(token, true, omitServerErrors);
+
+					for(GitBlitRepository item : projList){
+						if(item.groupName == null)
+							item.groupName = GitBlitRepository.GROUP_MAIN;
+						List<GitBlitRepository> rlist = groupMap.get(item.groupName);
+						if(rlist == null){
+							rlist = new ArrayList<GitBlitRepository>();
+							groupMap.put(item.groupName, rlist);
+						}
+						if(rlist.contains(item) == false){
+							rlist.add(item);
+						}
+					}
+
+					fmon.subTask("Preparing result.");
+					// --- Prepare view model
 					if(groupMap == null || groupMap.isEmpty()){
-						final String msg = "No GitBlit repositories defined. Please add a GitBlit server location via preferences.";
+						final String msg = "No GitBlit server is active or all servers are unreachable. Please add and/or activate a GitBlit server via preferences.";
 						EclipseHelper.showInfo(msg);
 						modelList.add(new ErrorViewModel(msg));
-						return;
+						rootModel = modelList;
+						syncWithUi();
+						return Status.CANCEL_STATUS;
 					}
 					GroupViewModel gModel;
 					for(String groupName : groupMap.keySet()){
@@ -355,54 +428,34 @@ public class RepoExplorerView extends ViewPart{
 						for(GitBlitRepository item : pList){
 							pModel = new ProjectViewModel(item);
 							if(item.hasCommits == false){
-								pModel.setToolTip("Repository has no commits. Can´t show repository summary  in GitBlit");
+								pModel.setToolTip("Repository has no commits. Can´t show repository summary in GitBlit");
 							}
 							gModel.addChild(pModel);
 						}
 					}
+					fmon.worked(1);
+					rootModel = modelList;
+					syncWithUi();
+					return Status.OK_STATUS;
 				}catch(Exception e){
-					EclipseHelper.showAndLogError("Error reading project from Gitblit", e);
-					modelList.add(new ErrorViewModel("Error reading projects from Gitblit. Check your preference settings, please."));
+					EclipseHelper.showError("", e);
+					modelList.add(new ErrorViewModel("Error reading projects from Gitblit. Check your preference settings.."));
+					rootModel = modelList;
+					syncWithUi();
+					return Status.CANCEL_STATUS;
 				}
 			}
-		});
-
-		if(noAccess.value){
-			modelList.add(new ErrorViewModel("Please configure Gitblit Explorer in preferences, first."));
-		}
-		return modelList;
+		};
+		job.schedule();
 	}
 
-	/**
-	 * Read repositories and sort them by group
-	 * 
-	 * @return Map of repositories by group name
-	 * @throws GitBlitExplorerException
-	 * @throws Exception
-	 */
-	public Map<String, List<GitBlitRepository>> readGroups() throws GitBlitExplorerException{
-		Map<String, List<GitBlitRepository>> res = new TreeMap<String, List<GitBlitRepository>>();
-
-		// Read preferences
-		PreferenceModel prefModel = PreferenceMgr.readConfig();
-
-		// Get GitBlit BD
-		GitBlitBD bd = new GitBlitBD(prefModel.getServerList());
-		List<GitBlitRepository> projList = bd.readRepositories();
-
-		for(GitBlitRepository item : projList){
-			if(item.groupName == null)
-				item.groupName = GROUP_MAIN;
-			List<GitBlitRepository> rlist = res.get(item.groupName);
-			if(rlist == null){
-				rlist = new ArrayList<GitBlitRepository>();
-				res.put(item.groupName, rlist);
+	private void syncWithUi(){
+		Display.getDefault().asyncExec(new Runnable() {
+			public void run(){
+				omitAction.refreshLabel();
+				viewer.setInput(rootModel);
 			}
-			if(rlist.contains(item) == false){
-				rlist.add(item);
-			}
-		}
-		return res;
+		});
 	}
 
 	@Override
@@ -416,7 +469,7 @@ public class RepoExplorerView extends ViewPart{
 	 * @return
 	 */
 	public Action getDoubleClickAction(){
-		switch (dbclick){
+		switch(dbclick){
 			case OpenGitBlit:
 				return new OpenGitBlitAction(this.viewer);
 			case CopyUrl:

@@ -1,4 +1,4 @@
-package com.baloise.egitblit.common;
+package com.baloise.egitblit.gitblit;
 
 import java.util.List;
 
@@ -8,10 +8,14 @@ import java.util.List;
  *
  */
 public class GitBlitServer{
-	public boolean active;
+	// Server settings
 	public String url;
 	public String user;
 	public String password;
+
+	// Status / Confiig fields
+	public boolean active = true;
+	public boolean serverError = false;
 	
 	private List<GitBlitRepository> projectList;
 	
@@ -21,7 +25,6 @@ public class GitBlitServer{
 		this.password = pwd;
 		this.active = active;
 	}
-	
 	
 	public GitBlitServer(){
 		this(null,true,null,null);

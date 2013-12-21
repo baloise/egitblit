@@ -1,4 +1,4 @@
-package com.baloise.egitblit.common;
+package com.baloise.egitblit.gitblit;
 
 import com.gitblit.models.RepositoryModel;
 

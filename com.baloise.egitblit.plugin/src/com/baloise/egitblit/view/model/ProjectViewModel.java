@@ -1,6 +1,6 @@
 package com.baloise.egitblit.view.model;
 
-import com.baloise.egitblit.common.GitBlitRepository;
+import com.baloise.egitblit.gitblit.GitBlitRepository;
 
 /**
  * ViewModel wrapping GitBlitProject (Git Repository entry)

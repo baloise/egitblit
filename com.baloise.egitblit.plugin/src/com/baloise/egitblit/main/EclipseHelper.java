@@ -76,5 +76,8 @@ public class EclipseHelper{
 		handleMessage(IStatus.ERROR, StatusManager.SHOW | StatusManager.LOG,msg, e);
 	}
 	
+	public final static void showAndLogError(Throwable e){
+		handleMessage(IStatus.ERROR, StatusManager.SHOW | StatusManager.LOG, "",e);
+	}
 
 }

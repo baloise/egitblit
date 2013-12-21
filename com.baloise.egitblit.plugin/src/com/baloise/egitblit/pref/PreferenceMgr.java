@@ -3,9 +3,9 @@ package com.baloise.egitblit.pref;
 import org.eclipse.equinox.security.storage.ISecurePreferences;
 import org.eclipse.equinox.security.storage.SecurePreferencesFactory;
 
-import com.baloise.egitblit.common.GitBlitServer;
+import com.baloise.egitblit.common.GitBlitExplorerException;
+import com.baloise.egitblit.gitblit.GitBlitServer;
 import com.baloise.egitblit.main.EclipseHelper;
-import com.baloise.egitblit.main.GitBlitExplorerException;
 
 /**
  * Handling preference settings
@@ -20,6 +20,7 @@ public class PreferenceMgr{
 
 	// --- global settings under root node
 	public final static String KEY_GITBLIT_DCLICK = "com.baloise.gitblit.dobuleclick";
+	public final static String KEY_GITBLIT_OMIT_SERVER_ERROR = "com.baloise.gitblit.general.omitServerInError";
 
 	// Node containing the list of servers
 	public final static String KEY_GITBLIT_SERVER = "com.baloise.gitblit.server";
@@ -55,20 +56,21 @@ public class PreferenceMgr{
 			int val = pref.getInt(KEY_GITBLIT_DCLICK, PreferenceModel.DoubleClickBehaviour.OpenGitBlit.value);
 			prefModel.setDoubleClick(PreferenceModel.DoubleClickBehaviour.getValue(val));
 
+			boolean bval = pref.getBoolean(KEY_GITBLIT_OMIT_SERVER_ERROR, false);
+			prefModel.setOmitServerErrors(bval);
+			
 			// ---- Read list of servers
 			// Root node
 			ISecurePreferences serverNode = pref.node(KEY_GITBLIT_SERVER);
 			// An entry
 			ISecurePreferences entryNode;
-			String url, user, pwd, urlSep;
+			String url, user, pwd;
 			boolean active;
 
 			String[] names = serverNode.childrenNames();
 			for(String item : names){
 				entryNode = serverNode.node(item);
 				url = entryNode.get(KEY_GITBLIT_SERVER_URL, null);
-				// urlSep = entryNode.get(KEY_GITBLIT_SERVER_URL_SEP,
-				// VALUE_GITBLIT_URL_SEPERATOR);
 				active = entryNode.getBoolean(KEY_GITBLIT_SERVER_ACTIVE, true);
 				user = entryNode.get(KEY_GITBLIT_SERVER_USER, null);
 				pwd = entryNode.get(KEY_GITBLIT_SERVER_PASSWORD, null);
@@ -97,7 +99,8 @@ public class PreferenceMgr{
 		try{
 			// --- Saving global settings
 			pref.putInt(KEY_GITBLIT_DCLICK, prefModel.getDoubleClick().value, false);
-
+			pref.putBoolean(KEY_GITBLIT_OMIT_SERVER_ERROR, prefModel.isOmitServerErrors(),false);
+			
 			ISecurePreferences serverNode = pref.node(KEY_GITBLIT_SERVER);
 			ISecurePreferences entryNode;
 
@@ -109,10 +112,10 @@ public class PreferenceMgr{
 			// --- Write new settings
 			int count = 0;
 			serverNode = pref.node(KEY_GITBLIT_SERVER);
+			
 			for(GitBlitServer item : prefModel.getServerList()){
 				entryNode = serverNode.node(KEY_GITBLIT_SERVER_URL + "_" + count++);
 				entryNode.put(KEY_GITBLIT_SERVER_URL, trim(item.url), false);
-				// entryNode.put(KEY_GITBLIT_SERVER_URL_SEP, item.urlSeparator);
 				entryNode.putBoolean(KEY_GITBLIT_SERVER_ACTIVE, item.active, false);
 				entryNode.put(KEY_GITBLIT_SERVER_USER, trim(item.user), false);
 				entryNode.put(KEY_GITBLIT_SERVER_PASSWORD, item.password, true);

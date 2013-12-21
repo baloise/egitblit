@@ -3,7 +3,7 @@ package com.baloise.egitblit.pref;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.baloise.egitblit.common.GitBlitServer;
+import com.baloise.egitblit.gitblit.GitBlitServer;
 import com.baloise.egitblit.main.EclipseHelper;
 
 /**
@@ -37,7 +37,7 @@ public class PreferenceModel{
 	
 	private DoubleClickBehaviour dbClick = DoubleClickBehaviour.PasteEGit;
 	private List<GitBlitServer> repoList = new ArrayList<GitBlitServer>();
-	private boolean ignoreWarnings = false;
+	private boolean omitServerErrors = false;
 	
 	public PreferenceModel(){
 	}
@@ -82,13 +82,11 @@ public class PreferenceModel{
 		return this.repoList.remove(repo);
 	}
 
-	
-	public boolean isIgnoreWarnings(){
-		return this.ignoreWarnings;
+	public void setOmitServerErrors(boolean val){
+		this.omitServerErrors = val;
 	}
-	
-	public void setIgnoreWarnings(boolean doIgnore){
-		this.ignoreWarnings = doIgnore;
+	public boolean isOmitServerErrors(){
+		return this.omitServerErrors;
 	}
 
 }

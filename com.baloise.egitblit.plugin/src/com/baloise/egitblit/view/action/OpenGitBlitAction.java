@@ -8,7 +8,7 @@ import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.ui.ISharedImages;
 import org.eclipse.ui.PlatformUI;
 
-import com.baloise.egitblit.common.GitBlitRepository;
+import com.baloise.egitblit.gitblit.GitBlitRepository;
 import com.baloise.egitblit.main.EclipseHelper;
 import com.baloise.egitblit.view.model.GitBlitViewModel;
 import com.baloise.egitblit.view.model.ProjectViewModel;

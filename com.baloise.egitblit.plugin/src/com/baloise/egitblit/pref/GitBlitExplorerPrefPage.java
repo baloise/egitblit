@@ -27,10 +27,10 @@ import org.eclipse.swt.widgets.TableItem;
 import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.IWorkbenchPreferencePage;
 
-import com.baloise.egitblit.common.GitBlitServer;
+import com.baloise.egitblit.common.GitBlitExplorerException;
+import com.baloise.egitblit.gitblit.GitBlitServer;
 import com.baloise.egitblit.main.Activator;
 import com.baloise.egitblit.main.EclipseHelper;
-import com.baloise.egitblit.main.GitBlitExplorerException;
 import com.baloise.egitblit.pref.PreferenceModel.DoubleClickBehaviour;
 
 /**
