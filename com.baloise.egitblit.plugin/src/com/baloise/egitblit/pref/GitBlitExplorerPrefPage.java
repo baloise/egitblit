@@ -176,7 +176,6 @@ public class GitBlitExplorerPrefPage extends PreferencePage implements IWorkbenc
 		final Button btEdit = new Button(btComp, SWT.PUSH);
 		btEdit.setText("Edit...");
 		btEdit.addSelectionListener(new SelectionListener() {
-
 			@Override
 			public void widgetSelected(SelectionEvent e){
 				Object sel = viewer.getSelection();
@@ -199,7 +198,6 @@ public class GitBlitExplorerPrefPage extends PreferencePage implements IWorkbenc
 		final Button btRemove = new Button(btComp, SWT.PUSH);
 		btRemove.setText("Remove");
 		btRemove.addSelectionListener(new SelectionListener() {
-
 			@Override
 			public void widgetSelected(SelectionEvent e){
 				Object sel = viewer.getSelection();
@@ -208,16 +206,16 @@ public class GitBlitExplorerPrefPage extends PreferencePage implements IWorkbenc
 					sel = ssel.getFirstElement();
 					if(sel instanceof GitBlitServer){
 						prefModel.removeRepository((GitBlitServer) sel);
+						viewer.remove((GitBlitServer) sel);
+						viewer.refresh();
 					}
 				}
-				viewer.refresh();
 			}
 
 			@Override
 			public void widgetDefaultSelected(SelectionEvent e){
 			}
 		});
-
 		// --- container for double click behaviour radio buttons
 		l = GridLayoutFactory.swtDefaults().create();
 		l.numColumns = 1;
@@ -272,6 +270,17 @@ public class GitBlitExplorerPrefPage extends PreferencePage implements IWorkbenc
 			}
 		});
 		
+//		 viewer.getTable().addListener(SWT.Selection, new Listener() {
+//		      public void handleEvent(Event event) {
+//		    	  Widget w = event.item;
+//		    	  if(w instanceof TableItem){
+//		    		  Object obj = w.getData();
+//		    		  if(obj instanceof GitBlitServer){
+//		    			  ((GitBlitServer)obj).active = ((TableItem)w).getChecked();
+//		    		  }
+//		    	  }
+//		      }
+//		    });
 		initData();
 		return root;
 	}
@@ -373,7 +382,7 @@ public class GitBlitExplorerPrefPage extends PreferencePage implements IWorkbenc
 	 */
 	@Override
 	public boolean performCancel(){
-		initData();
+		//initData();
 		return super.performCancel();
 	}
 
