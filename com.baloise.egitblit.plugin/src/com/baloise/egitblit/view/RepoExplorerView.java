@@ -95,7 +95,7 @@ public class RepoExplorerView extends ViewPart{
 		}
 
 		public void refreshLabel(){
-			setText("Ignore unavailable servers" + " (" + getOmittedServerSize() + " servers omitted)");
+			setText("Ignore unavailable servers" + " (" + getOmittedServerSize() + " servers are omitted)");
 		}
 
 		@Override
