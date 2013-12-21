@@ -1,5 +1,9 @@
 package com.baloise.egitblit.view.model;
 
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
+
 import com.baloise.egitblit.gitblit.GitBlitRepository;
 
 /**
@@ -79,7 +83,62 @@ public class ProjectViewModel implements GitBlitViewModel{
 		return this.entry.description;
 	}
 	
+	public List<String> getOwners(){
+		if(this.entry == null){
+			return null;
+		}
+		return this.entry.owners;
+	}
+
+	public Date getLastChange(){
+		if(this.entry == null){
+			return null;
+		}
+		return this.entry.lastChange;
+	}
 	
+	public Boolean isFrozen(){
+		if(this.entry == null){
+			return null;
+		}
+		return this.entry.isFrozen;
+	}
+	
+	public Boolean isFederated(){
+		if(this.entry == null){
+			return null;
+		}
+		return this.entry.isFederated;
+	}
+
+	public Boolean isBare(){
+		if(this.entry == null){
+			return null;
+		}
+		return this.entry.isBare;
+	}
+
+	public String getFrequency(){
+		if(this.entry == null){
+			return null;
+		}
+		return this.entry.frequency;
+	}
+
+	public String getOriginRepository(){
+		if(this.entry == null){
+			return null;
+		}
+		return this.entry.originRepository;
+	}
+	
+	public String getSize(){
+		if(this.entry == null){
+			return null;
+		}
+		return this.entry.size;
+	}
+
 	public void setToolTip(String msg){
 		this.toolTip = msg;
 	}

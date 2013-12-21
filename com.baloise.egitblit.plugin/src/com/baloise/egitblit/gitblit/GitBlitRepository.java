@@ -1,5 +1,9 @@
 package com.baloise.egitblit.gitblit;
 
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
+
 import com.gitblit.models.RepositoryModel;
 
 /**
@@ -18,6 +22,16 @@ public class GitBlitRepository {
 	public String projectPath;
 	public boolean hasCommits;
 	public String description;
+	
+	public List<String> owners = new ArrayList<String>();
+	public Date lastChange;
+	public boolean isFrozen;
+	public boolean isFederated;
+	public String frequency;
+	public boolean isBare;
+	public String originRepository;
+	public String size;
+
 	// ....more properties to come
 	
 	public GitBlitRepository(){
@@ -40,6 +54,16 @@ public class GitBlitRepository {
 		repo.hasCommits = model.hasCommits;
 		repo.description = model.description;
 		repo.serverUrl = serverUrl;
+		
+		repo.owners.addAll(model.owners);
+		repo.lastChange = model.lastChange;
+		repo.isFrozen = model.isFrozen;
+		repo.isFederated = model.isFederated;
+		repo.frequency = model.frequency;
+		repo.isBare = model.isBare;
+		repo.originRepository = model.originRepository;
+		repo.size = model.size;
+
 		return repo;
 	}
 
@@ -131,31 +155,21 @@ public class GitBlitRepository {
 }
 
 //*** fields from com.gitblit.models.RepositoryModel
-//public String name;
-//public String description;
-//public String owner;
-//public Date lastChange;
-//public boolean hasCommits;
 //public boolean showRemoteBranches;
 //public boolean useTickets;
 //public boolean useDocs;
 //public AccessRestrictionType accessRestriction;
 //public AuthorizationControl authorizationControl;
 //public boolean allowAuthenticated;
-//public boolean isFrozen;
 //public boolean showReadme;
 //public FederationStrategy federationStrategy;
 //public List<String> federationSets;
-//public boolean isFederated;
 //public boolean skipSizeCalculation;
 //public boolean skipSummaryMetrics;
-//public String frequency;
-//public boolean isBare;
 //public String origin;
 //public String HEAD;
 //public List<String> availableRefs;
 //public List<String> indexedBranches;
-//public String size;
 //public List<String> preReceiveScripts;
 //public List<String> postReceiveScripts;
 //public List<String> mailingLists;
@@ -164,7 +178,6 @@ public class GitBlitRepository {
 //private String displayName;
 //public boolean allowForks;
 //public Set<String> forks;
-//public String originRepository;
 //public boolean verifyCommitter;
 //public String gcThreshold;
 //public int gcPeriod;

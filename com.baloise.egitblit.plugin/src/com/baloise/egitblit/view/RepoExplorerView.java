@@ -132,16 +132,9 @@ public class RepoExplorerView extends ViewPart{
 		super.dispose();
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * org.eclipse.ui.part.WorkbenchPart#createPartControl(org.eclipse.swt.widgets
-	 * .Composite)
-	 */
 	@Override
 	public void createPartControl(Composite parent){
-
+			 
 		// --------------------------------------------------------------------
 		// Sync preferences
 		// --------------------------------------------------------------------
@@ -181,6 +174,8 @@ public class RepoExplorerView extends ViewPart{
 		IMenuManager hmgr = form.getMenuManager();
 		hmgr.add(omitAction);
 		hmgr.update(true);
+		
+		
 		// --------------------------------------------------------------------
 		// Layout
 		// --------------------------------------------------------------------
@@ -239,21 +234,37 @@ public class RepoExplorerView extends ViewPart{
 		viewer.getTree().setLinesVisible(true);
 		colGroup.setAlignment(SWT.LEFT);
 		colGroup.setText("Group / Repository");
-		colGroup.setWidth(280);
+		colGroup.setWidth(240);
 
 		TreeColumn colDesc = new TreeColumn(viewer.getTree(), SWT.LEFT);
 		colDesc.setAlignment(SWT.LEFT);
 		colDesc.setText("Description");
-		colDesc.setWidth(320);
+		colDesc.setWidth(180);
+
+		TreeColumn ownerDesc = new TreeColumn(viewer.getTree(), SWT.LEFT);
+		ownerDesc.setAlignment(SWT.LEFT);
+		ownerDesc.setText("Owner");
+		ownerDesc.setWidth(120);
+
+		TreeColumn changeDesc = new TreeColumn(viewer.getTree(), SWT.LEFT);
+		changeDesc.setAlignment(SWT.LEFT);
+		changeDesc.setText("LastChange");
+		changeDesc.setWidth(80);
+
+		TreeColumn sizeDesc = new TreeColumn(viewer.getTree(), SWT.LEFT);
+		sizeDesc.setAlignment(SWT.RIGHT);
+		sizeDesc.setText("Size");
+		sizeDesc.setWidth(80);
 
 		TreeColumn serverDesc = new TreeColumn(viewer.getTree(), SWT.LEFT);
 		serverDesc.setAlignment(SWT.LEFT);
 		serverDesc.setText("Gitblit Server");
-		serverDesc.setWidth(280);
+		serverDesc.setWidth(180);
 
 		// --------------------------------------------------------------------
 		// Adding viewer interaction
 		// --------------------------------------------------------------------
+	
 		int operations = DND.DROP_COPY | DND.DROP_MOVE;
 		Transfer[] transferTypes = new Transfer[] { TextTransfer.getInstance() };
 		viewer.addDragSupport(operations, transferTypes, new RepoDragListener(viewer));
