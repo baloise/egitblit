@@ -349,7 +349,7 @@ public class RepoExplorerView extends ViewPart{
 		}
 		if(reload == true || this.serverList == null || this.serverList.isEmpty() || omitServerErrors == false){
 			this.serverList = slist;
-			// return with initial list & sate
+			// return with initial list & state
 			return;
 		}
 	}
