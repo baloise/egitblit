@@ -231,13 +231,13 @@ public class GitBlitExplorerPrefPage extends PreferencePage implements IWorkbenc
 		g.setText("Double click on repository entry");
 
 		btEGitPaste = new Button(g, SWT.RADIO);
-		btEGitPaste.setText("Paste repsitory url in EGit");
+		btEGitPaste.setText("Paste repsitory Url in EGit");
 
 		btOpenGitBlit = new Button(g, SWT.RADIO);
 		btOpenGitBlit.setText("Open Gitblit summary page in a browser");
 
 		btCopyUrl = new Button(g, SWT.RADIO);
-		btCopyUrl.setText("Copy repository path to clipboard");
+		btCopyUrl.setText("Copy repository Url to clipboard");
 
 		// --- Open edit dialog when a given row is double clicked 
 		viewer.setContentProvider(new PreferenceModelProvider());
