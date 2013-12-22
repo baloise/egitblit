@@ -36,8 +36,14 @@ public class OpenGitBlitAction extends Action{
 	private final Viewer viewer; 
 	
 	
-	public OpenGitBlitAction(Viewer viewer){
-		super("Open GitBlit");
+	public OpenGitBlitAction(Viewer viewer) {
+		super("Browse");
+		try {
+			ImageDescriptor im = ImageDescriptor.createFromURL(new URL("platform:/plugin/org.eclipse.ui.browser/icons/obj16/external_browser.gif"));
+			setImageDescriptor(im);
+		} catch (MalformedURLException e) {
+			e.printStackTrace();
+		}
 		this.viewer = viewer;
 	}
 	
@@ -78,7 +84,7 @@ public class OpenGitBlitAction extends Action{
 				ProjectViewModel model = (ProjectViewModel) selection.getFirstElement();
 				if(model != null) {
 					if(model.hasCommits() == false){
-						MessageDialog.open(IStatus.INFO,viewer.getControl().getShell(),"Gitblit Repository Explorer","The selected repository has no commits. Can´t open an empty repository in GitBlit.",SWT.NONE);
+						MessageDialog.open(IStatus.INFO,viewer.getControl().getShell(),"Gitblit Repository Explorer","The selected repository has no commits. Canï¿½t open an empty repository in GitBlit.",SWT.NONE);
 						return;
 					}
 					try{
@@ -97,8 +103,4 @@ public class OpenGitBlitAction extends Action{
 	}
 	
 
-	@Override
-	public ImageDescriptor getImageDescriptor() {
-		return Activator.getDefault().getImageRegistry().getDescriptor(ISharedImages.IMG_TOOL_COPY);
-	}
 }

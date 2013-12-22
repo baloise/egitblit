@@ -9,6 +9,7 @@ import org.eclipse.swt.dnd.Clipboard;
 import org.eclipse.swt.dnd.TextTransfer;
 import org.eclipse.swt.dnd.Transfer;
 import org.eclipse.ui.ISharedImages;
+import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.dialogs.PreferencesUtil;
 
 import com.baloise.egitblit.main.Activator;
@@ -27,8 +28,12 @@ public class CopyClipBoardAction extends Action{
 	private final Viewer viewer;
 
 	public CopyClipBoardAction(Viewer viewer){
-		super("Copy Repository URL");
+		super("Copy");
 		this.viewer = viewer;
+		ImageDescriptor img = PlatformUI.getWorkbench().getSharedImages().getImageDescriptor(ISharedImages.IMG_TOOL_COPY);
+		setImageDescriptor(img);
+		ImageDescriptor imgDisabled = PlatformUI.getWorkbench().getSharedImages().getImageDescriptor(ISharedImages.IMG_TOOL_COPY_DISABLED);
+		setDisabledImageDescriptor(imgDisabled);
 	}
 
 	@Override
@@ -50,8 +55,4 @@ public class CopyClipBoardAction extends Action{
 		}
 	}
 
-	@Override
-	public ImageDescriptor getImageDescriptor(){
-		return Activator.getDefault().getImageRegistry().getDescriptor(ISharedImages.IMG_TOOL_COPY);
-	}
 }

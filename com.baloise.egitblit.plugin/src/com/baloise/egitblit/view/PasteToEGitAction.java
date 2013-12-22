@@ -1,5 +1,7 @@
 package com.baloise.egitblit.view;
 
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.util.Hashtable;
 import java.util.Map;
 
@@ -11,8 +13,10 @@ import org.eclipse.core.commands.NotHandledException;
 import org.eclipse.core.commands.common.NotDefinedException;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.preference.PreferenceDialog;
+import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.Viewer;
+import org.eclipse.ui.ISharedImages;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.commands.ICommandService;
 import org.eclipse.ui.dialogs.PreferencesUtil;
@@ -29,7 +33,13 @@ public class PasteToEGitAction extends Action{
 	public final static String CMD_EGIT = "org.eclipse.egit.ui.RepositoriesViewPaste";
 
 	public PasteToEGitAction(Viewer viewer){
-		super("Paste repository url in EGit");
+		super("Clone");
+		try {
+			ImageDescriptor im = ImageDescriptor.createFromURL(new URL("platform:/plugin/org.eclipse.egit.ui/icons/obj16/cloneGit.gif"));
+			setImageDescriptor(im);
+		} catch (MalformedURLException e) {
+			e.printStackTrace();
+		}
 		this.viewer = viewer;
 	}
 
