@@ -7,6 +7,11 @@ import com.baloise.egitblit.view.model.GitBlitViewModel;
 import com.baloise.egitblit.view.model.GroupViewModel;
 import com.baloise.egitblit.view.model.ProjectViewModel;
 
+/**
+ * Sorting view asc.
+ * @author MicBag
+ *
+ */
 public class RepoViewSorter extends ViewerSorter{
 
 	@Override

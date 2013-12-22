@@ -24,7 +24,7 @@ import com.gitblit.utils.ArrayUtils;
 
 /**
  * @see CellLabelProvider
- * @author MicBag extends CellLabelProvider
+ * @author MicBag 
  **/
 
 public class RepoLabelProvider implements ITableLabelProvider, ITableColorProvider, ITableFontProvider{
