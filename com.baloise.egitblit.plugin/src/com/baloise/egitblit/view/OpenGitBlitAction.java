@@ -98,13 +98,7 @@ public class OpenGitBlitAction extends Action{
 					}
 					try{
 						URL url = makeGitBlitSummaryUrl(model);
-						IWebBrowser browser;
-						if(useInternalBrowser){
-							browser = getWorkbench().getBrowserSupport().createBrowser("gitblit");
-						} else {
-							browser = getWorkbench().getBrowserSupport().getExternalBrowser();
-						}
-						browser.openURL(url);
+						getWorkbench().getBrowserSupport().createBrowser("gitblit").openURL(url);
 					}catch (Exception e) {
 						EclipseLog.error("Error while performing open Gitblit action",e);
 					}
