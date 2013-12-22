@@ -68,7 +68,8 @@ public class OpenGitBlitAction extends ViewActionBase{
 				return;
 			}
 			try{
-				PlatformUI.getWorkbench().getBrowserSupport().getExternalBrowser().openURL(makeGitBlitSummaryUrl(pm));
+				PlatformUI.getWorkbench().getBrowserSupport().createBrowser("Gitblit summary page").openURL(makeGitBlitSummaryUrl(pm)); 
+				//PlatformUI.getWorkbench().getBrowserSupport().getExternalBrowser().openURL(makeGitBlitSummaryUrl(pm));
 			}catch(Exception e){
 				EclipseHelper.logError("Error while performing open Gitblit action", e);
 			}
