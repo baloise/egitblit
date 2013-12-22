@@ -24,9 +24,6 @@ public class CopyClipBoardAction extends ViewActionBase{
 
 	@Override
 	public void doRun(){
-		if(handleErrorModel() == true){
-			return; // Error state: Can't perform action
-		}
 		GitBlitViewModel model = getSelectedModel();
 		if(model != null){
 			if(model instanceof ProjectViewModel){

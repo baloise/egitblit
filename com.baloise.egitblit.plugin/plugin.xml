@@ -13,7 +13,7 @@
             class="com.baloise.egitblit.view.RepoExplorerView"
             icon="/icons/git-black-16x16.png"
             id="com.baloise.egitblit.view.navigator"
-            name="GitBlit Repository Explorer"
+            name="Gitblit Repository Explorer"
             restorable="true">
       </view>
    </extension>
