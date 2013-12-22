@@ -2,6 +2,7 @@ package com.baloise.egitblit.view.action;
 
 import org.eclipse.core.commands.Command;
 import org.eclipse.core.commands.ExecutionEvent;
+import org.eclipse.jface.action.Action;
 import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.commands.ICommandService;
@@ -10,6 +11,12 @@ import com.baloise.egitblit.main.EclipseHelper;
 import com.baloise.egitblit.view.model.GitBlitViewModel;
 import com.baloise.egitblit.view.model.ProjectViewModel;
 
+/**
+ * Action to paste git repository url to clipboard and calls corrsponding EGit command to open clone wizard
+ * @see Action  
+ * @author MicBag
+ *
+ */
 public class PasteToEGitAction extends ViewActionBase{
 
 	public final static String CMD_EGIT = "org.eclipse.egit.ui.RepositoriesViewPaste";
@@ -22,7 +29,6 @@ public class PasteToEGitAction extends ViewActionBase{
 	public void doRun(){
 		GitBlitViewModel model = getSelectedModel();
 		if(model instanceof ProjectViewModel){
-			ProjectViewModel pm = (ProjectViewModel) model;
 			// Copy url to clipboard
 			CopyClipBoardAction cca = new CopyClipBoardAction(getViewer());
 			cca.run();

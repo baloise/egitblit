@@ -8,11 +8,11 @@ import com.gitblit.models.RepositoryModel;
 
 /**
  * Represents a GitBlit Repository 
- * 
+ * This class contains the gitblit repository properties as copy.
  * @author MicBag
  * 
  */
-public class GitBlitRepository {
+public class GitBlitRepository{
 
 	public static final String GROUP_MAIN = "main";
 	public String serverUrl;
@@ -57,6 +57,7 @@ public class GitBlitRepository {
 		
 		repo.owners.addAll(model.owners);
 		repo.lastChange = model.lastChange;
+		
 		repo.isFrozen = model.isFrozen;
 		repo.isFederated = model.isFederated;
 		repo.frequency = model.frequency;
@@ -149,9 +150,6 @@ public class GitBlitRepository {
 	public String toString(){
 		return "\nGitblit Repository [gitUrl=" + gitUrl + ", groupName=" + groupName + ", projectName=" + projectName + ", projectPath=" + projectPath + ", description=" + description + "]";
 	}
-	
-	
-
 }
 
 //*** fields from com.gitblit.models.RepositoryModel

@@ -14,6 +14,12 @@ import com.baloise.egitblit.pref.GitBlitExplorerPrefPage;
 import com.baloise.egitblit.view.model.ErrorViewModel;
 import com.baloise.egitblit.view.model.GitBlitViewModel;
 
+/**
+ * Base class for handling viewer actions (get selection etc.)
+ * @see Action 
+ * @author MicBag
+ *
+ */
 public abstract class ViewActionBase extends Action{
 
 	private Viewer viewer;
@@ -40,6 +46,10 @@ public abstract class ViewActionBase extends Action{
 		return this.viewer;
 	}
 
+	/**
+	 * Determinate the selected view model from the viewer
+	 * @return Selected model
+	 */
 	protected GitBlitViewModel getSelectedModel(){
 		if(this.viewer == null){
 			EclipseHelper.logError("Internal error: Can't determinate selected ProjectViewModel. Viewer is null (This is a bug).");
@@ -61,6 +71,12 @@ public abstract class ViewActionBase extends Action{
 		return null;
 	}
 	
+	/**
+	 * If the viewer is displaying a error model, an error dialog will be displayed
+	 * This is the general implementation, just showing an error dialog 
+	 * 
+	 * @return error has occured
+	 */
 	protected boolean handleErrorModel(){
 		GitBlitViewModel model = getSelectedModel();
 		if(model != null && model instanceof ErrorViewModel){

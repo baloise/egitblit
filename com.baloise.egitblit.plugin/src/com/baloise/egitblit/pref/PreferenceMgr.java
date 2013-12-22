@@ -21,6 +21,7 @@ public class PreferenceMgr{
 	// --- global settings under root node
 	public final static String KEY_GITBLIT_DCLICK = "com.baloise.gitblit.dobuleclick";
 	public final static String KEY_GITBLIT_OMIT_SERVER_ERROR = "com.baloise.gitblit.general.omitServerInError";
+	public final static String KEY_GITBLIT_OMIT_COLOR_COLUMS = "com.baloise.gitblit.general.viewer.coloring";
 
 	// Node containing the list of servers
 	public final static String KEY_GITBLIT_SERVER = "com.baloise.gitblit.server";
@@ -58,6 +59,9 @@ public class PreferenceMgr{
 
 			boolean bval = pref.getBoolean(KEY_GITBLIT_OMIT_SERVER_ERROR, false);
 			prefModel.setOmitServerErrors(bval);
+			
+			bval = pref.getBoolean(KEY_GITBLIT_OMIT_COLOR_COLUMS, false);
+			prefModel.setColorColumns(bval);
 			
 			// ---- Read list of servers
 			// Root node
@@ -100,6 +104,7 @@ public class PreferenceMgr{
 			// --- Saving global settings
 			pref.putInt(KEY_GITBLIT_DCLICK, prefModel.getDoubleClick().value, false);
 			pref.putBoolean(KEY_GITBLIT_OMIT_SERVER_ERROR, prefModel.isOmitServerErrors(),false);
+			pref.putBoolean(KEY_GITBLIT_OMIT_COLOR_COLUMS, prefModel.isColorColumns(), false);
 			
 			ISecurePreferences serverNode = pref.node(KEY_GITBLIT_SERVER);
 			ISecurePreferences entryNode;

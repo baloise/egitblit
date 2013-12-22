@@ -19,7 +19,7 @@ import com.baloise.egitblit.view.model.ProjectViewModel;
 public class CopyClipBoardAction extends ViewActionBase{
 
 	public CopyClipBoardAction(Viewer viewer){
-		super(viewer,ISharedImages.IMG_TOOL_COPY, "Copy Repository Url");
+		super(viewer,ISharedImages.IMG_TOOL_COPY, "Copy repository Url");
 	}
 
 	@Override

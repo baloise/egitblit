@@ -2,7 +2,7 @@ package com.baloise.egitblit.gitblit;
 
 /**
  * Like Eclipse ProgressMonitor: For indicating start/end of a process
- * This class has been created, because this package should not use Eclipse classes
+ * This class has been created, because this package (layer) should not use Eclipse classes
  *  
  * @author MicBag
  *

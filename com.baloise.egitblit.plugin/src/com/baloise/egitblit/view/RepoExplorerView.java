@@ -2,8 +2,6 @@ package com.baloise.egitblit.view;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
-import java.util.TreeMap;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
@@ -72,13 +70,14 @@ public class RepoExplorerView extends ViewPart{
 
 	private TreeViewer viewer;
 	private List<GroupViewModel> rootModel;
-
+	private RepoLabelProvider labelProvider;
 	private DoubleClickBehaviour dbclick = DoubleClickBehaviour.OpenGitBlit;
 
 	private PreferenceModel prefModel = null;
 	private List<GitBlitServer> serverList = null;
 
 	private boolean omitServerErrors = false;
+	private boolean coloringColumns = false;
 
 	private class OmitAction extends Action{
 		@Override
@@ -119,6 +118,7 @@ public class RepoExplorerView extends ViewPart{
 			if(prop != null && prop.startsWith(PreferenceMgr.KEY_GITBLIT_ROOT) && viewer != null){
 				initPreferences();
 				loadRepositories(true);
+				
 			}
 		}
 	};
@@ -219,7 +219,8 @@ public class RepoExplorerView extends ViewPart{
 
 		// viewer = new TreeViewer(parent, SWT.H_SCROLL | SWT.V_SCROLL);
 		viewer.setContentProvider(new RepoContentProvider());
-		viewer.setLabelProvider(new RepoLabelProvider());
+		this.labelProvider = new RepoLabelProvider(viewer);
+		viewer.setLabelProvider(this.labelProvider);
 
 		l = GridLayoutFactory.swtDefaults().create();
 		gd.grabExcessHorizontalSpace = true;
@@ -247,9 +248,9 @@ public class RepoExplorerView extends ViewPart{
 		ownerDesc.setWidth(120);
 
 		TreeColumn changeDesc = new TreeColumn(viewer.getTree(), SWT.LEFT);
-		changeDesc.setAlignment(SWT.LEFT);
+		changeDesc.setAlignment(SWT.RIGHT);
 		changeDesc.setText("LastChange");
-		changeDesc.setWidth(80);
+		changeDesc.setWidth(100);
 
 		TreeColumn sizeDesc = new TreeColumn(viewer.getTree(), SWT.LEFT);
 		sizeDesc.setAlignment(SWT.RIGHT);
@@ -316,6 +317,10 @@ public class RepoExplorerView extends ViewPart{
 			if(prefModel != null){
 				dbclick = prefModel.getDoubleClick();
 				omitServerErrors = prefModel.isOmitServerErrors();
+				if(labelProvider != null){
+					labelProvider.setDecorateLabels(prefModel.isColorColumns());
+				}
+
 			}
 			return;
 		}catch(GitBlitExplorerException e){
@@ -398,28 +403,15 @@ public class RepoExplorerView extends ViewPart{
 						}
 					};
 
-					// --- Reading grouped by grooup
-					Map<String, List<GitBlitRepository>> groupMap = new TreeMap<String, List<GitBlitRepository>>();
-
+					// --- Reading & prepare grouped
 					GitBlitBD bd = new GitBlitBD(serverList);
 					List<GitBlitRepository> projList = bd.readRepositories(token, true, omitServerErrors);
 
-					for(GitBlitRepository item : projList){
-						if(item.groupName == null)
-							item.groupName = GitBlitRepository.GROUP_MAIN;
-						List<GitBlitRepository> rlist = groupMap.get(item.groupName);
-						if(rlist == null){
-							rlist = new ArrayList<GitBlitRepository>();
-							groupMap.put(item.groupName, rlist);
-						}
-						if(rlist.contains(item) == false){
-							rlist.add(item);
-						}
-					}
-
 					fmon.subTask("Preparing result.");
-					// --- Prepare view model
-					if(groupMap == null || groupMap.isEmpty()){
+
+					// --- prepare & get groups
+					List<String> groupNames = prepareGroups(projList);
+					if(groupNames.isEmpty()){
 						final String msg = "No GitBlit server is active or all servers are unreachable. Please add and/or activate a GitBlit server via preferences.";
 						EclipseHelper.showInfo(msg);
 						modelList.add(new ErrorViewModel(msg));
@@ -427,18 +419,19 @@ public class RepoExplorerView extends ViewPart{
 						syncWithUi();
 						return Status.CANCEL_STATUS;
 					}
+					// Prepare group & child repos
 					GroupViewModel gModel;
-					for(String groupName : groupMap.keySet()){
-						// Adding group
-						gModel = new GroupViewModel(groupName);
+					ProjectViewModel pModel;
+					List<GitBlitRepository> grList;
+					for(String item : groupNames){
+						// Get repos by group
+						grList = getReposByGroup(projList,item);
+						gModel = new GroupViewModel(item);
 						modelList.add(gModel);
-
-						// Adding childs of group
-						ProjectViewModel pModel;
-						List<GitBlitRepository> pList = groupMap.get(groupName);
-						for(GitBlitRepository item : pList){
-							pModel = new ProjectViewModel(item);
-							if(item.hasCommits == false){
+						// add childs
+						for(GitBlitRepository pitem : grList){
+							pModel = new ProjectViewModel(pitem);
+							if(pitem.hasCommits == false){
 								pModel.setToolTip("Repository has no commits. Can´t show repository summary in GitBlit");
 							}
 							gModel.addChild(pModel);
@@ -449,7 +442,7 @@ public class RepoExplorerView extends ViewPart{
 					syncWithUi();
 					return Status.OK_STATUS;
 				}catch(Exception e){
-					EclipseHelper.showError("", e);
+					EclipseHelper.showAndLogError("", e);
 					modelList.add(new ErrorViewModel("Error reading projects from Gitblit. Check your preference settings.."));
 					rootModel = modelList;
 					syncWithUi();
@@ -459,7 +452,45 @@ public class RepoExplorerView extends ViewPart{
 		};
 		job.schedule();
 	}
+	
+	private List<String> prepareGroups(List<GitBlitRepository> list){
+		List<String> res = new ArrayList<String>();
+		if(list == null){
+			return res;
+		}
+		
+		for(GitBlitRepository item : list){
+			if(item.groupName == null){
+				// Set defaults
+				item.groupName = GitBlitRepository.GROUP_MAIN;
+			}
+			if(res.contains(item.groupName) == false){
+				res.add(item.groupName);
+			}
+		}
+		return res;
+	}
 
+	
+	private List<GitBlitRepository> getReposByGroup(List<GitBlitRepository> list, String groupName){
+		List<GitBlitRepository> res = new ArrayList<GitBlitRepository>();
+		if(list == null || list.isEmpty()){
+			return res;
+		}
+		if(groupName == null){
+			res.addAll(list);
+			return res;
+		}
+		for(GitBlitRepository item : list){
+			if(groupName.equalsIgnoreCase(item.groupName)){
+				if(res.contains(item) == false){
+					res.add(item);
+				}
+			}
+		}
+		return res;
+	}
+	
 	private void syncWithUi(){
 		Display.getDefault().asyncExec(new Runnable() {
 			public void run(){

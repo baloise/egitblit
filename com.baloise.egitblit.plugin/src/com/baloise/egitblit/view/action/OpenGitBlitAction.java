@@ -14,10 +14,10 @@ import com.baloise.egitblit.view.model.GitBlitViewModel;
 import com.baloise.egitblit.view.model.ProjectViewModel;
 
 /**
- * Opens the gitblit summary page for a repository
+ * Opens the Gitblit summary page of the selected repository path
  * 
  * @see Action
- * @author Mike
+ * @author MicBag
  * 
  */
 public class OpenGitBlitAction extends ViewActionBase{
@@ -26,7 +26,7 @@ public class OpenGitBlitAction extends ViewActionBase{
 	public final static String GIT_URL_POSTFIX = ".git";
 
 	public OpenGitBlitAction(Viewer viewer){
-		super(viewer, ISharedImages.IMG_TOOL_COPY, "Open GitBlit");
+		super(viewer, ISharedImages.IMG_TOOL_COPY, "Open Gitblit summary page");
 	}
 
 	/**
@@ -68,8 +68,7 @@ public class OpenGitBlitAction extends ViewActionBase{
 				return;
 			}
 			try{
-				URL url = makeGitBlitSummaryUrl(pm);
-				PlatformUI.getWorkbench().getBrowserSupport().getExternalBrowser().openURL(url);
+				PlatformUI.getWorkbench().getBrowserSupport().getExternalBrowser().openURL(makeGitBlitSummaryUrl(pm));
 			}catch(Exception e){
 				EclipseHelper.logError("Error while performing open Gitblit action", e);
 			}

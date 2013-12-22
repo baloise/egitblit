@@ -38,6 +38,8 @@ public class PreferenceModel{
 	private DoubleClickBehaviour dbClick = DoubleClickBehaviour.PasteEGit;
 	private List<GitBlitServer> repoList = new ArrayList<GitBlitServer>();
 	private boolean omitServerErrors = false;
+	private boolean colorColums = false;
+	
 	
 	public PreferenceModel(){
 	}
@@ -80,6 +82,14 @@ public class PreferenceModel{
 			return false;
 		}
 		return this.repoList.remove(repo);
+	}
+	
+	public void setColorColumns(boolean yesNo){
+		this.colorColums = yesNo;
+	}
+	
+	public boolean isColorColumns(){
+		return this.colorColums;
 	}
 
 	public void setOmitServerErrors(boolean val){

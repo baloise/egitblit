@@ -21,6 +21,7 @@ import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Group;
+import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Table;
 import org.eclipse.swt.widgets.TableColumn;
 import org.eclipse.swt.widgets.TableItem;
@@ -48,6 +49,8 @@ public class GitBlitExplorerPrefPage extends PreferencePage implements IWorkbenc
 	private Button btOpenGitBlit;
 	private Button btCopyUrl;
 	private Button btEGitPaste;
+	private Button btColViewer;
+	
 	/*
 	 * (non-Javadoc)
 	 * 
@@ -222,9 +225,10 @@ public class GitBlitExplorerPrefPage extends PreferencePage implements IWorkbenc
 
 		gd = GridDataFactory.swtDefaults().create();
 		gd.verticalAlignment = SWT.TOP;
+		gd.horizontalAlignment = SWT.FILL;
 		gd.grabExcessHorizontalSpace = true;
+		gd.grabExcessVerticalSpace = false;
 
-		// --- rb group
 		Group g = new Group(root, SWT.SHADOW_IN);
 		g.setLayout(l);
 		g.setLayoutData(gd);
@@ -270,17 +274,27 @@ public class GitBlitExplorerPrefPage extends PreferencePage implements IWorkbenc
 			}
 		});
 		
-//		 viewer.getTable().addListener(SWT.Selection, new Listener() {
-//		      public void handleEvent(Event event) {
-//		    	  Widget w = event.item;
-//		    	  if(w instanceof TableItem){
-//		    		  Object obj = w.getData();
-//		    		  if(obj instanceof GitBlitServer){
-//		    			  ((GitBlitServer)obj).active = ((TableItem)w).getChecked();
-//		    		  }
-//		    	  }
-//		      }
-//		    });
+		new Label(root,SWT.NONE);
+		
+		// --- Viewer configuration
+		g = new Group(root, SWT.SHADOW_IN);
+		g.setText("Appearance");
+		g.setLayout(l);
+		g.setLayoutData(gd);
+
+		btColViewer = new Button(g, SWT.CHECK);
+		btColViewer.setText("Decorate repository table");
+		btColViewer.addSelectionListener(new SelectionListener() {
+			@Override
+			public void widgetSelected(SelectionEvent e){
+				prefModel.setColorColumns(btColViewer.getSelection());
+			}
+			
+			@Override
+			public void widgetDefaultSelected(SelectionEvent e){
+			}
+		});
+		
 		initData();
 		return root;
 	}
@@ -299,6 +313,7 @@ public class GitBlitExplorerPrefPage extends PreferencePage implements IWorkbenc
 			viewer.setInput(this.prefModel);
 			synchDoubleClick(true);
 			syncActive(true);
+			this.btColViewer.setSelection(prefModel.isColorColumns());
 		}
 	}
 	
