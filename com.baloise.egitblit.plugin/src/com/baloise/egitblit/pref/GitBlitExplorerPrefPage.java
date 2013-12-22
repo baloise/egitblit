@@ -21,16 +21,17 @@ import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Group;
+import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Table;
 import org.eclipse.swt.widgets.TableColumn;
 import org.eclipse.swt.widgets.TableItem;
 import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.IWorkbenchPreferencePage;
 
-import com.baloise.egitblit.common.GitBlitServer;
+import com.baloise.egitblit.common.GitBlitExplorerException;
+import com.baloise.egitblit.gitblit.GitBlitServer;
 import com.baloise.egitblit.main.Activator;
-import com.baloise.egitblit.main.EclipseLog;
-import com.baloise.egitblit.main.GitBlitExplorerException;
+import com.baloise.egitblit.main.EclipseHelper;
 import com.baloise.egitblit.pref.PreferenceModel.DoubleClickBehaviour;
 
 /**
@@ -48,6 +49,8 @@ public class GitBlitExplorerPrefPage extends PreferencePage implements IWorkbenc
 	private Button btOpenGitBlit;
 	private Button btCopyUrl;
 	private Button btEGitPaste;
+	private Button btColViewer;
+	
 	/*
 	 * (non-Javadoc)
 	 * 
@@ -176,7 +179,6 @@ public class GitBlitExplorerPrefPage extends PreferencePage implements IWorkbenc
 		final Button btEdit = new Button(btComp, SWT.PUSH);
 		btEdit.setText("Edit...");
 		btEdit.addSelectionListener(new SelectionListener() {
-
 			@Override
 			public void widgetSelected(SelectionEvent e){
 				Object sel = viewer.getSelection();
@@ -199,7 +201,6 @@ public class GitBlitExplorerPrefPage extends PreferencePage implements IWorkbenc
 		final Button btRemove = new Button(btComp, SWT.PUSH);
 		btRemove.setText("Remove");
 		btRemove.addSelectionListener(new SelectionListener() {
-
 			@Override
 			public void widgetSelected(SelectionEvent e){
 				Object sel = viewer.getSelection();
@@ -208,38 +209,39 @@ public class GitBlitExplorerPrefPage extends PreferencePage implements IWorkbenc
 					sel = ssel.getFirstElement();
 					if(sel instanceof GitBlitServer){
 						prefModel.removeRepository((GitBlitServer) sel);
+						viewer.remove((GitBlitServer) sel);
+						viewer.refresh();
 					}
 				}
-				viewer.refresh();
 			}
 
 			@Override
 			public void widgetDefaultSelected(SelectionEvent e){
 			}
 		});
-
 		// --- container for double click behaviour radio buttons
 		l = GridLayoutFactory.swtDefaults().create();
 		l.numColumns = 1;
 
 		gd = GridDataFactory.swtDefaults().create();
 		gd.verticalAlignment = SWT.TOP;
+		gd.horizontalAlignment = SWT.FILL;
 		gd.grabExcessHorizontalSpace = true;
+		gd.grabExcessVerticalSpace = false;
 
-		// --- rb group
 		Group g = new Group(root, SWT.SHADOW_IN);
 		g.setLayout(l);
 		g.setLayoutData(gd);
 		g.setText("Double click on repository entry");
 
 		btEGitPaste = new Button(g, SWT.RADIO);
-		btEGitPaste.setText("Paste repsitory url in EGit");
+		btEGitPaste.setText("Paste repsitory Url in EGit");
 
 		btOpenGitBlit = new Button(g, SWT.RADIO);
 		btOpenGitBlit.setText("Open Gitblit summary page in a browser");
 
 		btCopyUrl = new Button(g, SWT.RADIO);
-		btCopyUrl.setText("Copy repository path to clipboard");
+		btCopyUrl.setText("Copy repository Url to clipboard");
 
 		// --- Open edit dialog when a given row is double clicked 
 		viewer.setContentProvider(new PreferenceModelProvider());
@@ -272,6 +274,27 @@ public class GitBlitExplorerPrefPage extends PreferencePage implements IWorkbenc
 			}
 		});
 		
+		new Label(root,SWT.NONE);
+		
+		// --- Viewer configuration
+		g = new Group(root, SWT.SHADOW_IN);
+		g.setText("Appearance");
+		g.setLayout(l);
+		g.setLayoutData(gd);
+
+		btColViewer = new Button(g, SWT.CHECK);
+		btColViewer.setText("Decorate repository table");
+		btColViewer.addSelectionListener(new SelectionListener() {
+			@Override
+			public void widgetSelected(SelectionEvent e){
+				prefModel.setColorColumns(btColViewer.getSelection());
+			}
+			
+			@Override
+			public void widgetDefaultSelected(SelectionEvent e){
+			}
+		});
+		
 		initData();
 		return root;
 	}
@@ -290,6 +313,7 @@ public class GitBlitExplorerPrefPage extends PreferencePage implements IWorkbenc
 			viewer.setInput(this.prefModel);
 			synchDoubleClick(true);
 			syncActive(true);
+			this.btColViewer.setSelection(prefModel.isColorColumns());
 		}
 	}
 	
@@ -373,7 +397,7 @@ public class GitBlitExplorerPrefPage extends PreferencePage implements IWorkbenc
 	 */
 	@Override
 	public boolean performCancel(){
-		initData();
+		//initData();
 		return super.performCancel();
 	}
 
@@ -387,7 +411,7 @@ public class GitBlitExplorerPrefPage extends PreferencePage implements IWorkbenc
 			PreferenceMgr.saveConfig(this.prefModel);
 			firePreferenceChange();
 		}catch(GitBlitExplorerException e){
-			EclipseLog.error("Error saving preferences.", e);
+			EclipseHelper.logError("Error saving preferences.", e);
 			return false;
 		}
 		return super.performOk();
@@ -426,7 +450,7 @@ public class GitBlitExplorerPrefPage extends PreferencePage implements IWorkbenc
 		try{
 			return PreferenceMgr.readConfig();
 		}catch(GitBlitExplorerException e){
-			EclipseLog.error("Error reading preferences.", e);
+			EclipseHelper.logError("Error reading preferences.", e);
 		}
 		return null;
 	}

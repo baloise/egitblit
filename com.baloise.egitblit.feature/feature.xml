@@ -223,6 +223,8 @@
       <import plugin="org.eclipse.jface"/>
       <import plugin="org.eclipse.jface.text"/>
       <import plugin="org.eclipse.swt"/>
+      <import plugin="org.eclipse.ui.forms"/>
+      <import plugin="org.eclipse.equinox.security"/>
    </requires>
 
    <plugin

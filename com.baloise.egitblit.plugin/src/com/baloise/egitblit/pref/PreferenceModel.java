@@ -3,8 +3,8 @@ package com.baloise.egitblit.pref;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.baloise.egitblit.common.GitBlitServer;
-import com.baloise.egitblit.main.EclipseLog;
+import com.baloise.egitblit.gitblit.GitBlitServer;
+import com.baloise.egitblit.main.EclipseHelper;
 
 /**
  * Model representing the preference settings
@@ -37,7 +37,9 @@ public class PreferenceModel{
 	
 	private DoubleClickBehaviour dbClick = DoubleClickBehaviour.PasteEGit;
 	private List<GitBlitServer> repoList = new ArrayList<GitBlitServer>();
-	private boolean ignoreWarnings = false;
+	private boolean omitServerErrors = false;
+	private boolean colorColums = false;
+	
 	
 	public PreferenceModel(){
 	}
@@ -65,7 +67,7 @@ public class PreferenceModel{
 			return;
 		}
 		if(this.repoList.contains(repo)){
-			EclipseLog.error("Can´t add repository location "  + repo.url + ". A repository with this url already exists.");
+			EclipseHelper.logError("Can´t add repository location "  + repo.url + ". A repository with this url already exists.");
 			return;
 		}
 		this.repoList.add(repo);
@@ -81,14 +83,20 @@ public class PreferenceModel{
 		}
 		return this.repoList.remove(repo);
 	}
-
 	
-	public boolean isIgnoreWarnings(){
-		return this.ignoreWarnings;
+	public void setColorColumns(boolean yesNo){
+		this.colorColums = yesNo;
 	}
 	
-	public void setIgnoreWarnings(boolean doIgnore){
-		this.ignoreWarnings = doIgnore;
+	public boolean isColorColumns(){
+		return this.colorColums;
+	}
+
+	public void setOmitServerErrors(boolean val){
+		this.omitServerErrors = val;
+	}
+	public boolean isOmitServerErrors(){
+		return this.omitServerErrors;
 	}
 
 }

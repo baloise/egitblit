@@ -1,4 +1,4 @@
-package com.baloise.egitblit.main;
+package com.baloise.egitblit.common;
 
 /**
  * Exception which will be used by all GitBlit Explorer classes (this is just a wrapper)
