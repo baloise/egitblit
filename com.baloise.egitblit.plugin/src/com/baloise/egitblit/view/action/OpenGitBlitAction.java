@@ -1,11 +1,12 @@
 package com.baloise.egitblit.view.action;
 
+import static org.eclipse.core.runtime.Platform.getPreferencesService;
+
 import java.net.MalformedURLException;
 import java.net.URL;
 
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.viewers.Viewer;
-import org.eclipse.ui.ISharedImages;
 import org.eclipse.ui.PlatformUI;
 
 import com.baloise.egitblit.gitblit.GitBlitRepository;
@@ -26,7 +27,13 @@ public class OpenGitBlitAction extends ViewActionBase{
 	public final static String GIT_URL_POSTFIX = ".git";
 
 	public OpenGitBlitAction(Viewer viewer){
-		super(viewer, ISharedImages.IMG_TOOL_COPY, "Open Gitblit summary page");
+		super(viewer, "Browse");
+		boolean useInternalBrowser = 0 == getPreferencesService().getInt("org.eclipse.ui.browser", "browser-choice", 1, null); 
+		if(useInternalBrowser){
+			setImageDescriptorFromURL("platform:/plugin/org.eclipse.ui.browser/icons/obj16/internal_browser.gif");
+		} else {
+			setImageDescriptorFromURL("platform:/plugin/org.eclipse.ui.browser/icons/obj16/external_browser.gif");
+		}
 	}
 
 	/**
@@ -64,7 +71,7 @@ public class OpenGitBlitAction extends ViewActionBase{
 		if(model instanceof ProjectViewModel){
 			ProjectViewModel pm = (ProjectViewModel) model;
 			if(pm.hasCommits() == false){
-				EclipseHelper.showInfo("The selected repository has no commits. Can´t open an empty repository in GitBlit.");
+				EclipseHelper.showInfo("The selected repository has no commits. Canï¿½t open an empty repository in GitBlit.");
 				return;
 			}
 			try{

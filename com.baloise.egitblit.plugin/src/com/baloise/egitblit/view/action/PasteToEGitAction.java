@@ -22,7 +22,8 @@ public class PasteToEGitAction extends ViewActionBase{
 	public final static String CMD_EGIT = "org.eclipse.egit.ui.RepositoriesViewPaste";
 
 	public PasteToEGitAction(Viewer viewer){
-		super(viewer, null, "Paste repository Url in EGit");
+		super(viewer, "Clone");
+		setImageDescriptorFromURL("platform:/plugin/org.eclipse.egit.ui/icons/obj16/cloneGit.gif");
 	}
 
 	@Override

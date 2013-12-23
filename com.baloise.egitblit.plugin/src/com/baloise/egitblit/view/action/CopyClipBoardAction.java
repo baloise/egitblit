@@ -1,6 +1,9 @@
 package com.baloise.egitblit.view.action;
 
+import static org.eclipse.ui.PlatformUI.getWorkbench;
+
 import org.eclipse.jface.action.Action;
+import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.swt.dnd.Clipboard;
 import org.eclipse.swt.dnd.TextTransfer;
@@ -19,7 +22,11 @@ import com.baloise.egitblit.view.model.ProjectViewModel;
 public class CopyClipBoardAction extends ViewActionBase{
 
 	public CopyClipBoardAction(Viewer viewer){
-		super(viewer,ISharedImages.IMG_TOOL_COPY, "Copy repository Url");
+		super(viewer, "Copy");
+		ImageDescriptor img = getWorkbench().getSharedImages().getImageDescriptor(ISharedImages.IMG_TOOL_COPY);
+		setImageDescriptor(img);
+		ImageDescriptor imgDisabled = getWorkbench().getSharedImages().getImageDescriptor(ISharedImages.IMG_TOOL_COPY_DISABLED);
+		setDisabledImageDescriptor(imgDisabled);
 	}
 
 	@Override
