@@ -53,7 +53,7 @@ public class CloneOneClickAction extends CloneAction {
 	public CloneOneClickAction(Viewer viewer) {
 		super(viewer);
 		setText("Clone One-Click");
-		//setImageDescriptorFromURL("platform:/plugin/org.eclipse.egit.ui/icons/obj16/cloneGit.gif");
+		setImageDescriptorFromURL("platform:/plugin/"+Activator.PLUGIN_ID+"/icons/cloneGitOneClick.gif");
 	}
 
 	@Override
