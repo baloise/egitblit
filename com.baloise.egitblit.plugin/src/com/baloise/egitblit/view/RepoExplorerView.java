@@ -53,6 +53,7 @@ import com.baloise.egitblit.pref.PreferenceMgr;
 import com.baloise.egitblit.pref.PreferenceModel;
 import com.baloise.egitblit.pref.PreferenceModel.DoubleClickBehaviour;
 import com.baloise.egitblit.view.action.CopyClipBoardAction;
+import com.baloise.egitblit.view.action.FastCloneAction;
 import com.baloise.egitblit.view.action.OpenGitBlitAction;
 import com.baloise.egitblit.view.action.PasteToEGitAction;
 import com.baloise.egitblit.view.model.ErrorViewModel;
@@ -289,6 +290,7 @@ public class RepoExplorerView extends ViewPart{
 						if(model != null && pm.getGitURL() != null && pm.getGitURL().trim().isEmpty() == false){
 							if(PasteToEGitAction.getEGitCommand() != null){
 								mgr.add(new PasteToEGitAction(viewer));
+								mgr.add(new FastCloneAction(viewer));
 								mgr.add(new Separator());
 							}
 							if(pm.hasCommits() == true){
@@ -432,7 +434,7 @@ public class RepoExplorerView extends ViewPart{
 						for(GitBlitRepository pitem : grList){
 							pModel = new ProjectViewModel(pitem);
 							if(pitem.hasCommits == false){
-								pModel.setToolTip("Repository has no commits. Can´t show repository summary in GitBlit");
+								pModel.setToolTip("Repository has no commits. Canï¿½t show repository summary in GitBlit");
 							}
 							gModel.addChild(pModel);
 						}

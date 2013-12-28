@@ -12,7 +12,9 @@ Require-Bundle: org.eclipse.ui,
  org.eclipse.jface.text,
  org.eclipse.swt,
  org.eclipse.equinox.security,
- org.eclipse.core.resources
+ org.eclipse.core.resources,
+ org.eclipse.egit.core,
+ org.eclipse.egit.ui
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Bundle-ActivationPolicy: lazy
 Bundle-ClassPath: .,
@@ -22,3 +24,5 @@ Bundle-ClassPath: .,
  lib/gson-1.7.2.jar,
  lib/jdom-1.0.jar,
  lib/rome-0.9.jar
+Import-Package: org.eclipse.jgit.lib,
+ org.eclipse.jgit.transport
