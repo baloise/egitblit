@@ -238,25 +238,29 @@ public class StyledLabelProvider extends StyledCellLabelProvider{
 		TimeAgo ago = TimeAgo.getAgo(diff);
 
 		StringBuilder buff = new StringBuilder();
-		buff.append(ago.getValue(diff));
-
+		diff = ago.getValue(diff);
 		switch(ago){
 			case Now:
 				buff.append("just now");
 				break;
 			case Mins:
+				buff.append(diff);
 				buff.append(" mins ago");
 				break;
 			case Hours:
+				buff.append(diff);
 				buff.append(" hours ago");
 				break;
 			case Days:
+				buff.append(diff);
 				buff.append(" days ago");
 				break;
 			case Months:
+				buff.append(diff);
 				buff.append(" month ago");
 				break;
 			case Years:
+				buff.append(diff);
 				buff.append(" years ago");
 				break;
 		}
