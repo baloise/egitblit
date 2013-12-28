@@ -47,10 +47,10 @@ import com.baloise.egitblit.view.model.ProjectViewModel;
  * @author culmat
  * 
  */
-public class FastCloneAction extends PasteToEGitAction {
+public class CloneOneClickAction extends CloneAction {
 
 
-	public FastCloneAction(Viewer viewer) {
+	public CloneOneClickAction(Viewer viewer) {
 		super(viewer);
 		setText("Clone One-Click");
 		//setImageDescriptorFromURL("platform:/plugin/org.eclipse.egit.ui/icons/obj16/cloneGit.gif");

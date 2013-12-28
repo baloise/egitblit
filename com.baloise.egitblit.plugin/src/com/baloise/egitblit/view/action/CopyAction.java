@@ -19,9 +19,9 @@ import com.baloise.egitblit.view.model.ProjectViewModel;
  * @author MicBag
  *
  */
-public class CopyClipBoardAction extends ViewActionBase{
+public class CopyAction extends ViewActionBase{
 
-	public CopyClipBoardAction(Viewer viewer){
+	public CopyAction(Viewer viewer){
 		super(viewer, "Copy");
 		ImageDescriptor img = getWorkbench().getSharedImages().getImageDescriptor(ISharedImages.IMG_TOOL_COPY);
 		setImageDescriptor(img);

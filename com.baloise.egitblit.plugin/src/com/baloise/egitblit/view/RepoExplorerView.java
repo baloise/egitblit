@@ -52,10 +52,10 @@ import com.baloise.egitblit.main.EclipseHelper;
 import com.baloise.egitblit.pref.PreferenceMgr;
 import com.baloise.egitblit.pref.PreferenceModel;
 import com.baloise.egitblit.pref.PreferenceModel.DoubleClickBehaviour;
-import com.baloise.egitblit.view.action.CopyClipBoardAction;
-import com.baloise.egitblit.view.action.FastCloneAction;
-import com.baloise.egitblit.view.action.OpenGitBlitAction;
-import com.baloise.egitblit.view.action.PasteToEGitAction;
+import com.baloise.egitblit.view.action.CopyAction;
+import com.baloise.egitblit.view.action.CloneOneClickAction;
+import com.baloise.egitblit.view.action.BrowseAction;
+import com.baloise.egitblit.view.action.CloneAction;
 import com.baloise.egitblit.view.model.ErrorViewModel;
 import com.baloise.egitblit.view.model.GitBlitViewModel;
 import com.baloise.egitblit.view.model.GroupViewModel;
@@ -288,16 +288,16 @@ public class RepoExplorerView extends ViewPart{
 					if(model instanceof ProjectViewModel){
 						ProjectViewModel pm = (ProjectViewModel) model;
 						if(model != null && pm.getGitURL() != null && pm.getGitURL().trim().isEmpty() == false){
-							if(PasteToEGitAction.getEGitCommand() != null){
-								mgr.add(new PasteToEGitAction(viewer));
-								mgr.add(new FastCloneAction(viewer));
+							if(CloneAction.getEGitCommand() != null){
+								mgr.add(new CloneAction(viewer));
+								mgr.add(new CloneOneClickAction(viewer));
 								mgr.add(new Separator());
 							}
 							if(pm.hasCommits() == true){
-								mgr.add(new OpenGitBlitAction(viewer));
+								mgr.add(new BrowseAction(viewer));
 								mgr.add(new Separator());
 							}
-							mgr.add(new CopyClipBoardAction(viewer));
+							mgr.add(new CopyAction(viewer));
 
 						}
 					}
@@ -515,13 +515,13 @@ public class RepoExplorerView extends ViewPart{
 	public Action getDoubleClickAction(){
 		switch(dbclick){
 			case OpenGitBlit:
-				return new OpenGitBlitAction(this.viewer);
+				return new BrowseAction(this.viewer);
 			case CopyUrl:
-				return new CopyClipBoardAction(this.viewer);
+				return new CopyAction(this.viewer);
 			case PasteEGit:
-				return new PasteToEGitAction(this.viewer);
+				return new CloneAction(this.viewer);
 			default:
-				return new PasteToEGitAction(this.viewer);
+				return new CloneAction(this.viewer);
 		}
 	}
 }
