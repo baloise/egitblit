@@ -28,10 +28,10 @@ public class BrowseAction extends ViewActionBase{
 
 	public BrowseAction(Viewer viewer){
 		super(viewer, "Browse");
-		boolean useInternalBrowser = 0 == getPreferencesService().getInt("org.eclipse.ui.browser", "browser-choice", 1, null); 
+		boolean useInternalBrowser = 0 == getPreferencesService().getInt("org.eclipse.ui.browser", "browser-choice", 1, null);
 		if(useInternalBrowser){
 			setImageDescriptorFromURL("platform:/plugin/org.eclipse.ui.browser/icons/obj16/internal_browser.gif");
-		} else {
+		}else{
 			setImageDescriptorFromURL("platform:/plugin/org.eclipse.ui.browser/icons/obj16/external_browser.gif");
 		}
 	}
@@ -71,12 +71,12 @@ public class BrowseAction extends ViewActionBase{
 		if(model instanceof ProjectViewModel){
 			ProjectViewModel pm = (ProjectViewModel) model;
 			if(pm.hasCommits() == false){
-				Activator.showInfo("The selected repository has no commits. Can�t open an empty repository in GitBlit.");
+				Activator.showInfo("The selected repository has no commits. Can't open an empty repository in GitBlit.");
 				return;
 			}
 			try{
-				PlatformUI.getWorkbench().getBrowserSupport().createBrowser("Gitblit summary page").openURL(makeGitBlitSummaryUrl(pm)); 
-				//PlatformUI.getWorkbench().getBrowserSupport().getExternalBrowser().openURL(makeGitBlitSummaryUrl(pm));
+				PlatformUI.getWorkbench().getBrowserSupport().createBrowser("Gitblit summary page").openURL(makeGitBlitSummaryUrl(pm));
+				// PlatformUI.getWorkbench().getBrowserSupport().getExternalBrowser().openURL(makeGitBlitSummaryUrl(pm));
 			}catch(Exception e){
 				Activator.logError("Error while performing open Gitblit action", e);
 			}

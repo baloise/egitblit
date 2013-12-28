@@ -55,9 +55,10 @@ import com.baloise.egitblit.main.Activator;
 import com.baloise.egitblit.pref.PreferenceMgr;
 import com.baloise.egitblit.pref.PreferenceModel;
 import com.baloise.egitblit.pref.PreferenceModel.DoubleClickBehaviour;
-import com.baloise.egitblit.view.action.CopyClipBoardAction;
-import com.baloise.egitblit.view.action.OpenGitBlitAction;
-import com.baloise.egitblit.view.action.PasteToEGitAction;
+import com.baloise.egitblit.view.action.BrowseAction;
+import com.baloise.egitblit.view.action.CloneAction;
+import com.baloise.egitblit.view.action.CloneOneClickAction;
+import com.baloise.egitblit.view.action.CopyAction;
 import com.baloise.egitblit.view.model.ErrorViewModel;
 import com.baloise.egitblit.view.model.GitBlitViewModel;
 import com.baloise.egitblit.view.model.GroupViewModel;
@@ -346,11 +347,10 @@ public class RepoExplorerView extends ViewPart{
 		// --------------------------------------------------------------------
 		// Context menu of a selected row
 		// --------------------------------------------------------------------
-		final MenuManager mmgr = new MenuManager();
-		mmgr.setRemoveAllWhenShown(true);
-		mmgr.setVisible(true);
+		final MenuManager mgr = new MenuManager();
+		mgr.setRemoveAllWhenShown(true);
 
-		mmgr.addMenuListener(new IMenuListener() {
+		mgr.addMenuListener(new IMenuListener() {
 			public void menuAboutToShow(IMenuManager manager){
 				IStructuredSelection selection = (IStructuredSelection) viewer.getSelection();
 				if(selection != null){
@@ -358,17 +358,19 @@ public class RepoExplorerView extends ViewPart{
 					if(model instanceof ProjectViewModel){
 						ProjectViewModel pm = (ProjectViewModel) model;
 						if(model != null && pm.getGitURL() != null && pm.getGitURL().trim().isEmpty() == false){
-							if(PasteToEGitAction.getEGitCommand() != null){
-								mmgr.add(new PasteToEGitAction(viewer));
-								mmgr.add(new Separator());
+							if(CloneAction.getEGitCommand() != null){
+								mgr.add(new CloneAction(viewer));
+								mgr.add(new CloneOneClickAction(viewer));
+								mgr.add(new Separator());
 							}
 							if(pm.hasCommits() == true){
-								mmgr.add(new OpenGitBlitAction(viewer));
-								mmgr.add(new Separator());
+								mgr.add(new BrowseAction(viewer));
+								mgr.add(new Separator());
 							}
-							mmgr.add(new CopyClipBoardAction(viewer));
+							mgr.add(new CopyAction(viewer));
 
 						}
+
 					}
 				}
 			}
@@ -376,7 +378,7 @@ public class RepoExplorerView extends ViewPart{
 
 
 		// Final assembling & initialization
-		viewer.getControl().setMenu(mmgr.createContextMenu(viewer.getControl()));
+		viewer.getControl().setMenu(mgr.createContextMenu(viewer.getControl()));
 		viewer.setSorter(new RepoViewSorter());
 		ColumnViewerToolTipSupport.enableFor(viewer);
 		loadRepositories(true);
@@ -695,13 +697,13 @@ public class RepoExplorerView extends ViewPart{
 	public Action getDoubleClickAction(){
 		switch(dbclick){
 			case OpenGitBlit:
-				return new OpenGitBlitAction(this.viewer);
+				return new BrowseAction(this.viewer);
 			case CopyUrl:
-				return new CopyClipBoardAction(this.viewer);
+				return new CopyAction(this.viewer);
 			case PasteEGit:
-				return new PasteToEGitAction(this.viewer);
+				return new CloneAction(this.viewer);
 			default:
-				return new PasteToEGitAction(this.viewer);
+				return new CloneAction(this.viewer);
 		}
 	}
 }
