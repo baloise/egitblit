@@ -109,7 +109,7 @@ public class StyledLabelProvider extends StyledCellLabelProvider{
 					bgCol = getBackgroundColor(model, columnIndex);
 					if(model instanceof GroupViewModel){
 						if(columnIndex > 0){
-							fgCol = this.viewer.getTree().getDisplay().getSystemColor(SWT.COLOR_GRAY);
+							fgCol = this.viewer.getTree().getDisplay().getSystemColor(SWT.COLOR_DARK_GRAY);
 						}
 						//cell.setBackground(this.viewer.getTree().getDisplay().getSystemColor(SWT.COLOR_TITLE_INACTIVE_BACKGROUND_GRADIENT));
 					}
