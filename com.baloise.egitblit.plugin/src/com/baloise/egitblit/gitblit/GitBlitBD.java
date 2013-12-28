@@ -6,7 +6,7 @@ import java.util.List;
 import java.util.Map;
 
 import com.baloise.egitblit.common.GitBlitExplorerException;
-import com.baloise.egitblit.main.EclipseHelper;
+import com.baloise.egitblit.main.Activator;
 import com.gitblit.models.RepositoryModel;
 import com.gitblit.utils.RpcUtils;
 
@@ -51,8 +51,7 @@ public class GitBlitBD{
 	 */
 	public void addRepository(GitBlitServer repo) throws GitBlitExplorerException{
 		if(repo == null){
-			EclipseHelper.logError("Trying to add null value to GitBlidBD.");
-			return;
+			Activator.logError("Trying to add null value to GitBlidBD (this is a bug).");
 		}
 		if(this.repoList.contains(repo) == true){
 			throw new GitBlitExplorerException("Repository " + repo.url + " already registered.");
@@ -93,6 +92,9 @@ public class GitBlitBD{
 		for(GitBlitServer ritem : this.repoList){
 			if(token != null){
 				token.startWork(ritem.url);
+				if(token.isCanceled()){
+					return bres;
+				}
 			}
 			if((activeOnly == true && ritem.active == false) ||	// Read only active servers
 			   (omitHasError == true && ritem.serverError == true)){ // Read only servers which are working / avail
@@ -112,7 +114,7 @@ public class GitBlitBD{
 					bres.add(GitBlitRepository.create(ritem.url, item, res.get(item)));
 				}
 			}catch(Exception e){
-				EclipseHelper.logError("Error accessing Gitblit server " + ritem.url, e);
+				Activator.logError("Error accessing Gitblit server " + ritem.url, e);
 				ritem.serverError = true;
 				// Add error to list
 				serverErrorList.add(ritem.url);

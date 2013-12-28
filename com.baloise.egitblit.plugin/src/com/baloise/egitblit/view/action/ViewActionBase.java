@@ -1,15 +1,18 @@
 package com.baloise.egitblit.view.action;
 
+import static org.eclipse.jface.resource.ImageDescriptor.createFromURL;
+
+import java.net.MalformedURLException;
+import java.net.URL;
+
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.preference.PreferenceDialog;
-import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.dialogs.PreferencesUtil;
 
 import com.baloise.egitblit.main.Activator;
-import com.baloise.egitblit.main.EclipseHelper;
 import com.baloise.egitblit.pref.GitBlitExplorerPrefPage;
 import com.baloise.egitblit.view.model.ErrorViewModel;
 import com.baloise.egitblit.view.model.GitBlitViewModel;
@@ -23,12 +26,10 @@ import com.baloise.egitblit.view.model.GitBlitViewModel;
 public abstract class ViewActionBase extends Action{
 
 	private Viewer viewer;
-	private String imgDesc = null;
 
-	public ViewActionBase(Viewer viewer, String imgDesc, String label){
+	public ViewActionBase(Viewer viewer, String label){
 		super(label);
 		this.viewer = viewer;
-		this.imgDesc = imgDesc;
 	}
 	
 	
@@ -52,14 +53,14 @@ public abstract class ViewActionBase extends Action{
 	 */
 	protected GitBlitViewModel getSelectedModel(){
 		if(this.viewer == null){
-			EclipseHelper.logError("Internal error: Can't determinate selected ProjectViewModel. Viewer is null (This is a bug).");
+			Activator.logError("Internal error: Can't determinate selected ProjectViewModel. Viewer is null (This is a bug).");
 			return null;
 		}
 
 		IStructuredSelection selection = (IStructuredSelection) viewer.getSelection();
 		if(selection == null || selection.isEmpty()){
 			// No selectiuon, no fun....
-			EclipseHelper.logError("Internal error: Action called with no selected ProjectViewModel (This is a bug).");			
+			Activator.logError("Internal error: Action called with no selected ProjectViewModel (This is a bug).");			
 			return null;
 		}
 
@@ -67,7 +68,7 @@ public abstract class ViewActionBase extends Action{
 		if(sel instanceof GitBlitViewModel){
 			return (GitBlitViewModel) selection.getFirstElement();
 		}
-		EclipseHelper.logError("Internal error: Can't determinate selected ProjectViewModel. Selection is not of expected type (This is a bug).");
+		Activator.logError("Internal error: Can't determinate selected ProjectViewModel. Selection is not of expected type (This is a bug).");
 		return null;
 	}
 	
@@ -89,17 +90,18 @@ public abstract class ViewActionBase extends Action{
 	
 	protected Display getDisplay(){
 		if(this.viewer == null){
-			EclipseHelper.logError("Internal error: Can't determinate selected ProjectViewModel. Viewer is null (This is a bug).");
+			Activator.logError("Internal error: Can't determinate selected ProjectViewModel. Viewer is null (This is a bug).");
 			return null;
 		}
 		return this.viewer.getControl().getDisplay();
 	}
-
-	@Override
-	public ImageDescriptor getImageDescriptor(){
-		if(this.imgDesc != null){
-			return Activator.getDefault().getImageRegistry().getDescriptor(this.imgDesc);
+	
+	protected void setImageDescriptorFromURL(String spec) {
+		try {
+			setImageDescriptor(createFromURL(new URL(spec)));
+		} catch (MalformedURLException e) {
+			Activator.logError("Could not load image from url "+spec, e);
 		}
-		return super.getImageDescriptor();
 	}
+
 }

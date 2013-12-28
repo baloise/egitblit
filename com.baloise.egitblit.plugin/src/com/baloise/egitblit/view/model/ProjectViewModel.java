@@ -145,5 +145,12 @@ public class ProjectViewModel implements GitBlitViewModel{
 	public String getToolTip(){
 		return this.toolTip;
 	}
+	
+	public String getColor(){
+		if(this.entry == null){
+			return null;
+		}
+		return this.entry.repoRGB;
+	}
 			
 }

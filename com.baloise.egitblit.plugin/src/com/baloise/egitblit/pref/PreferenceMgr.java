@@ -5,7 +5,7 @@ import org.eclipse.equinox.security.storage.SecurePreferencesFactory;
 
 import com.baloise.egitblit.common.GitBlitExplorerException;
 import com.baloise.egitblit.gitblit.GitBlitServer;
-import com.baloise.egitblit.main.EclipseHelper;
+import com.baloise.egitblit.main.Activator;
 
 /**
  * Handling preference settings
@@ -49,7 +49,7 @@ public class PreferenceMgr{
 
 			if(pref == null){
 				final String msg = "Can´t access preferences for Gitblit explorer. Continue with new (empty) settings.";
-				EclipseHelper.logError(msg);
+				Activator.logError(msg);
 				return prefModel;
 			}
 
@@ -81,7 +81,7 @@ public class PreferenceMgr{
 				prefModel.addRepository(url, active, user, pwd);
 			}
 		}catch(Exception e){
-			EclipseHelper.logError("Error reading preferences. Continue with configuration settings which have been read so far.", e);
+			Activator.logError("Error reading preferences. Continue with configuration settings which have been read so far.", e);
 		}
 		return prefModel;
 	}
@@ -89,14 +89,14 @@ public class PreferenceMgr{
 	public static void saveConfig(PreferenceModel prefModel) throws GitBlitExplorerException{
 		if(prefModel == null){
 			final String msg = "Error saving Gitblit Explorer settings: No preference model avail (internal error). Configuration will not be saved.";
-			EclipseHelper.logError(msg);
+			Activator.logError(msg);
 			throw new GitBlitExplorerException(msg);
 		}
 		ISecurePreferences pref = SecurePreferencesFactory.getDefault().node(KEY_GITBLIT_ROOT);
 
 		if(pref == null){
 			final String msg = "Can´t access preferences for Gitblit Explorer. Confriguration will not be saved.";
-			EclipseHelper.logError(msg);
+			Activator.logError(msg);
 			throw new GitBlitExplorerException(msg);
 		}
 
@@ -127,7 +127,7 @@ public class PreferenceMgr{
 			}
 			pref.flush();
 		}catch(Exception e){
-			EclipseHelper.logError("Error saving Gitblit preference settings: Can´t remove older server settings.", e);
+			Activator.logError("Error saving Gitblit preference settings: Can´t remove older server settings.", e);
 		}
 	}
 

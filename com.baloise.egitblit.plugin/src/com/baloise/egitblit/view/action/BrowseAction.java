@@ -21,12 +21,12 @@ import com.baloise.egitblit.view.model.ProjectViewModel;
  * @author MicBag
  * 
  */
-public class OpenGitBlitAction extends ViewActionBase{
+public class BrowseAction extends ViewActionBase{
 
 	public final static String GITBLIT_SUMMARY_PATH = "summary/?r=";
 	public final static String GIT_URL_POSTFIX = ".git";
 
-	public OpenGitBlitAction(Viewer viewer){
+	public BrowseAction(Viewer viewer){
 		super(viewer, "Browse");
 		boolean useInternalBrowser = 0 == getPreferencesService().getInt("org.eclipse.ui.browser", "browser-choice", 1, null); 
 		if(useInternalBrowser){

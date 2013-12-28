@@ -10,7 +10,8 @@ egitblit
         </a>
       </td>
       <td style="vertical-align: middle; text-align: left; border: none;">
-        ← Drag it to your eclipse workbench to install! (I recommand Main Toolbar as Drop Target)
+        ← Drag it to your eclipse workbench to install! (I recommand Main Toolbar as Drop Target)<br/>
+        &nbsp;&nbsp;&nbsp;&nbsp; Requires http://www.eclipse.org/egit/ to be installed.
       </td>
     </tr>
   </tbody>

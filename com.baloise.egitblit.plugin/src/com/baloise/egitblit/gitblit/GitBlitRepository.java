@@ -5,6 +5,7 @@ import java.util.Date;
 import java.util.List;
 
 import com.gitblit.models.RepositoryModel;
+import com.gitblit.utils.StringUtils;
 
 /**
  * Represents a GitBlit Repository 
@@ -31,6 +32,8 @@ public class GitBlitRepository{
 	public boolean isBare;
 	public String originRepository;
 	public String size;
+	
+	public String repoRGB;
 
 	// ....more properties to come
 	
@@ -64,6 +67,8 @@ public class GitBlitRepository{
 		repo.isBare = model.isBare;
 		repo.originRepository = model.originRepository;
 		repo.size = model.size;
+		
+		repo.repoRGB = StringUtils.getColor(repo.projectName);
 
 		return repo;
 	}

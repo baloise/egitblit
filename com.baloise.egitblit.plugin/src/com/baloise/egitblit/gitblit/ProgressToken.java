@@ -12,5 +12,9 @@ public abstract class ProgressToken{
 	public abstract void startWork(String msg);
 	public abstract void endWork();
 	
+	public boolean isCanceled(){
+		return false;
+	}
+	
 	public ProgressToken(){};
 }

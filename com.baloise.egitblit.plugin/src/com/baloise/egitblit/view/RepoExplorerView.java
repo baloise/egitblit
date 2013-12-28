@@ -6,12 +6,15 @@ import java.util.List;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
+import org.eclipse.core.runtime.jobs.IJobChangeEvent;
+import org.eclipse.core.runtime.jobs.IJobChangeListener;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.IMenuListener;
 import org.eclipse.jface.action.IMenuManager;
 import org.eclipse.jface.action.MenuManager;
 import org.eclipse.jface.action.Separator;
+import org.eclipse.jface.dialogs.IMessageProvider;
 import org.eclipse.jface.layout.GridDataFactory;
 import org.eclipse.jface.layout.GridLayoutFactory;
 import org.eclipse.jface.resource.ImageDescriptor;
@@ -33,10 +36,11 @@ import org.eclipse.swt.events.DisposeListener;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
-import org.eclipse.swt.widgets.Display;
+import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.TreeColumn;
 import org.eclipse.ui.dialogs.FilteredTree;
 import org.eclipse.ui.dialogs.PatternFilter;
+import org.eclipse.ui.forms.IMessage;
 import org.eclipse.ui.forms.widgets.Form;
 import org.eclipse.ui.forms.widgets.FormToolkit;
 import org.eclipse.ui.part.ViewPart;
@@ -48,7 +52,6 @@ import com.baloise.egitblit.gitblit.GitBlitRepository;
 import com.baloise.egitblit.gitblit.GitBlitServer;
 import com.baloise.egitblit.gitblit.ProgressToken;
 import com.baloise.egitblit.main.Activator;
-import com.baloise.egitblit.main.EclipseHelper;
 import com.baloise.egitblit.pref.PreferenceMgr;
 import com.baloise.egitblit.pref.PreferenceModel;
 import com.baloise.egitblit.pref.PreferenceModel.DoubleClickBehaviour;
@@ -70,15 +73,20 @@ public class RepoExplorerView extends ViewPart{
 
 	private TreeViewer viewer;
 	private List<GroupViewModel> rootModel;
-	private RepoLabelProvider labelProvider;
+	private StyledLabelProvider labelProvider;
 	private DoubleClickBehaviour dbclick = DoubleClickBehaviour.OpenGitBlit;
 
 	private PreferenceModel prefModel = null;
 	private List<GitBlitServer> serverList = null;
+	private Action refreshAction;
 
+	private Form form;
 	private boolean omitServerErrors = false;
-	private boolean coloringColumns = false;
 
+
+	// ------------------------------------------------------------------------
+	// --- Local actions
+	// ------------------------------------------------------------------------
 	private class OmitAction extends Action{
 		@Override
 		public void run(){
@@ -88,13 +96,13 @@ public class RepoExplorerView extends ViewPart{
 				prefModel.setOmitServerErrors(omitServerErrors);
 				PreferenceMgr.saveConfig(prefModel);
 			}catch(Exception e){
-				EclipseHelper.logError("Error saving preference settings.", e);
+				Activator.logError("Error saving preference settings.", e);
 			}
 			loadRepositories(!omitServerErrors);
 		}
 
 		public void refreshLabel(){
-			setText("Ignore unavailable servers" + " (" + getOmittedServerSize() + " servers are omitted)");
+			setText("Ignore unavailable servers");
 		}
 
 		@Override
@@ -103,11 +111,60 @@ public class RepoExplorerView extends ViewPart{
 		}
 	};
 
-	private OmitAction omitAction = new OmitAction();
+	/**
+	 * Internal class for showing messages at the form header
+	 * 
+	 * @author MicBag
+	 */
+	private class ServerMsg implements IMessage{
 
-	// ------------------------------------------------------------------------
-	// --- Actions
-	// ------------------------------------------------------------------------
+		private String msg;
+		private int type = IMessageProvider.NONE;
+
+		public ServerMsg(String msg, int type){
+			setMessage(msg, type);
+		}
+
+		public void setMessage(String msg, int type){
+			this.msg = msg;
+			this.type = type;
+		}
+
+		@Override
+		public String getMessage(){
+			return msg;
+		}
+
+		@Override
+		public int getMessageType(){
+			return this.type;
+		}
+
+		@Override
+		public Object getKey(){
+			return null;
+		}
+
+		@Override
+		public Object getData(){
+			return null;
+		}
+
+		@Override
+		public Control getControl(){
+			return null;
+		}
+
+		@Override
+		public String getPrefix(){
+			return null;
+		}
+	};
+
+	/**
+	 * Action shown as menu item in form header to omit unavailable servers
+	 */
+	private OmitAction omitAction = new OmitAction();
 
 	// ------------------------------------------------------------------------
 	// Separate instance to unregiter listener at dispose cycle
@@ -116,9 +173,7 @@ public class RepoExplorerView extends ViewPart{
 		public void propertyChange(PropertyChangeEvent event){
 			String prop = event.getProperty();
 			if(prop != null && prop.startsWith(PreferenceMgr.KEY_GITBLIT_ROOT) && viewer != null){
-				initPreferences();
 				loadRepositories(true);
-				
 			}
 		}
 	};
@@ -126,15 +181,24 @@ public class RepoExplorerView extends ViewPart{
 	// ------------------------------------------------------------------------
 	public RepoExplorerView(){
 	}
+	
+	
 
 	@Override
 	public void dispose(){
+		Activator.getDefault().getPreferenceStore().removePropertyChangeListener(propChangeListener);
 		super.dispose();
 	}
 
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see
+	 * org.eclipse.ui.part.WorkbenchPart#createPartControl(org.eclipse.swt.widgets
+	 * .Composite)
+	 */
 	@Override
 	public void createPartControl(Composite parent){
-			 
 		// --------------------------------------------------------------------
 		// Sync preferences
 		// --------------------------------------------------------------------
@@ -149,14 +213,15 @@ public class RepoExplorerView extends ViewPart{
 		});
 
 		// --- Use Formtoolkit, because of header preparing
-		Form form = ftk.createForm(parent);
+		this.form = ftk.createForm(parent);
 		form.setText("GitBlit Repository Explorer");
 		GridDataFactory.fillDefaults().grab(true, true).applyTo(form);
 		ftk.decorateFormHeading(form);
 
 		final ImageDescriptor refreskImgDesc = getImageFromPlugin("refresh_tab.gif");
 
-		Action rAction = new Action("Reload Repositories") {
+		// --------------------------------------------------------------------
+		refreshAction = new Action("Reload Repositories") {
 			@Override
 			public void run(){
 				loadRepositories(true);
@@ -167,19 +232,18 @@ public class RepoExplorerView extends ViewPart{
 				return refreskImgDesc;
 			}
 		};
-		form.getToolBarManager().add(rAction);
-		omitAction.setChecked(this.prefModel.isOmitServerErrors());
-		form.getToolBarManager().update(true);
-
+		
+		this.form.getToolBarManager().add(refreshAction);
+		this.form.getToolBarManager().update(true);
+		
 		IMenuManager hmgr = form.getMenuManager();
 		hmgr.add(omitAction);
+		omitAction.setChecked(this.prefModel.isOmitServerErrors());
 		hmgr.update(true);
-		
 		
 		// --------------------------------------------------------------------
 		// Layout
 		// --------------------------------------------------------------------
-
 		GridLayout l = GridLayoutFactory.swtDefaults().create();
 		GridData gd = GridDataFactory.swtDefaults().create();
 		l.numColumns = 1;
@@ -214,14 +278,18 @@ public class RepoExplorerView extends ViewPart{
 			}
 		};
 
+		// --------------------------------------------------------------------
 		FilteredTree filteredTree = new FilteredTree(comp, SWT.FULL_SELECTION | SWT.BORDER | SWT.H_SCROLL | SWT.V_SCROLL, filter, true);
 		viewer = filteredTree.getViewer();
 
 		// viewer = new TreeViewer(parent, SWT.H_SCROLL | SWT.V_SCROLL);
 		viewer.setContentProvider(new RepoContentProvider());
-		this.labelProvider = new RepoLabelProvider(viewer);
+		this.labelProvider = new StyledLabelProvider(viewer);
 		viewer.setLabelProvider(this.labelProvider);
 
+		// --------------------------------------------------------------------
+		// --- table columns
+		// --------------------------------------------------------------------
 		l = GridLayoutFactory.swtDefaults().create();
 		gd.grabExcessHorizontalSpace = true;
 		gd.grabExcessVerticalSpace = true;
@@ -249,7 +317,7 @@ public class RepoExplorerView extends ViewPart{
 
 		TreeColumn changeDesc = new TreeColumn(viewer.getTree(), SWT.LEFT);
 		changeDesc.setAlignment(SWT.RIGHT);
-		changeDesc.setText("LastChange");
+		changeDesc.setText("Last Change");
 		changeDesc.setWidth(100);
 
 		TreeColumn sizeDesc = new TreeColumn(viewer.getTree(), SWT.LEFT);
@@ -265,7 +333,6 @@ public class RepoExplorerView extends ViewPart{
 		// --------------------------------------------------------------------
 		// Adding viewer interaction
 		// --------------------------------------------------------------------
-	
 		int operations = DND.DROP_COPY | DND.DROP_MOVE;
 		Transfer[] transferTypes = new Transfer[] { TextTransfer.getInstance() };
 		viewer.addDragSupport(operations, transferTypes, new RepoDragListener(viewer));
@@ -276,10 +343,14 @@ public class RepoExplorerView extends ViewPart{
 			}
 		});
 
-		final MenuManager mgr = new MenuManager();
-		mgr.setRemoveAllWhenShown(true);
+		// --------------------------------------------------------------------
+		// Context menu of a selected row
+		// --------------------------------------------------------------------
+		final MenuManager mmgr = new MenuManager();
+		mmgr.setRemoveAllWhenShown(true);
+		mmgr.setVisible(true);
 
-		mgr.addMenuListener(new IMenuListener() {
+		mmgr.addMenuListener(new IMenuListener() {
 			public void menuAboutToShow(IMenuManager manager){
 				IStructuredSelection selection = (IStructuredSelection) viewer.getSelection();
 				if(selection != null){
@@ -288,14 +359,14 @@ public class RepoExplorerView extends ViewPart{
 						ProjectViewModel pm = (ProjectViewModel) model;
 						if(model != null && pm.getGitURL() != null && pm.getGitURL().trim().isEmpty() == false){
 							if(PasteToEGitAction.getEGitCommand() != null){
-								mgr.add(new PasteToEGitAction(viewer));
-								mgr.add(new Separator());
+								mmgr.add(new PasteToEGitAction(viewer));
+								mmgr.add(new Separator());
 							}
 							if(pm.hasCommits() == true){
-								mgr.add(new OpenGitBlitAction(viewer));
-								mgr.add(new Separator());
+								mmgr.add(new OpenGitBlitAction(viewer));
+								mmgr.add(new Separator());
 							}
-							mgr.add(new CopyClipBoardAction(viewer));
+							mmgr.add(new CopyClipBoardAction(viewer));
 
 						}
 					}
@@ -303,14 +374,17 @@ public class RepoExplorerView extends ViewPart{
 			}
 		});
 
-		viewer.getControl().setMenu(mgr.createContextMenu(viewer.getControl()));
+
+		// Final assembling & initialization
+		viewer.getControl().setMenu(mmgr.createContextMenu(viewer.getControl()));
 		viewer.setSorter(new RepoViewSorter());
-
 		ColumnViewerToolTipSupport.enableFor(viewer);
-
 		loadRepositories(true);
 	}
-
+	
+	/**
+	 * Loads & sync the preferences with view
+	 */
 	private void initPreferences(){
 		try{
 			this.prefModel = PreferenceMgr.readConfig();
@@ -324,7 +398,7 @@ public class RepoExplorerView extends ViewPart{
 			}
 			return;
 		}catch(GitBlitExplorerException e){
-			EclipseHelper.logError("Error initializing view with preference settings.", e);
+			Activator.logError("Error initializing view with preference settings.", e);
 		}
 	}
 
@@ -340,16 +414,21 @@ public class RepoExplorerView extends ViewPart{
 		return AbstractUIPlugin.imageDescriptorFromPlugin(Activator.PLUGIN_ID, "/icons/" + name);
 	}
 
-	private int getOmittedServerSize(){
-		int val = 0;
+	private List<String> getOmittedServerUrls(){
+		List<String> res = new ArrayList<String>();
 		for(GitBlitServer item : this.serverList){
 			if(item.serverError == true){
-				val++;
+				res.add(item.url);
 			}
 		}
-		return val;
+		return res;
 	}
 
+	/**
+	 * Init the server list to use from preferences
+	 * 
+	 * @param reload
+	 */
 	private void initServerList(boolean reload){
 		List<GitBlitServer> slist = null;
 
@@ -360,7 +439,7 @@ public class RepoExplorerView extends ViewPart{
 		try{
 			slist = this.prefModel.getServerList();
 		}catch(Exception e){
-			EclipseHelper.logError("Error reading preferences", e);
+			Activator.logError("Error reading preferences", e);
 			return;
 		}
 		if(reload == true || this.serverList == null || this.serverList.isEmpty() || omitServerErrors == false){
@@ -377,13 +456,11 @@ public class RepoExplorerView extends ViewPart{
 	 */
 	private void loadRepositories(boolean reload){
 		initServerList(reload);
-		this.omitAction.refreshLabel();
-		
+
 		Job job = new Job("Gitblit Repository Explorer") {
 			@Override
 			protected IStatus run(IProgressMonitor monitor){
 				final List<GroupViewModel> modelList = new ArrayList<GroupViewModel>();
-
 				try{
 					final IProgressMonitor fmon = monitor;
 
@@ -401,22 +478,27 @@ public class RepoExplorerView extends ViewPart{
 						public void endWork(){
 							fmon.worked(1);
 						}
+
+						@Override
+						public boolean isCanceled(){
+							return fmon.isCanceled();
+						}
 					};
 
 					// --- Reading & prepare grouped
 					GitBlitBD bd = new GitBlitBD(serverList);
 					List<GitBlitRepository> projList = bd.readRepositories(token, true, omitServerErrors);
-
+					
+					// Not canceling here to prepare the result which we have received so far
 					fmon.subTask("Preparing result.");
 
 					// --- prepare & get groups
 					List<String> groupNames = prepareGroups(projList);
 					if(groupNames.isEmpty()){
 						final String msg = "No GitBlit server is active or all servers are unreachable. Please add and/or activate a GitBlit server via preferences.";
-						EclipseHelper.showInfo(msg);
+						Activator.showInfo(msg);
 						modelList.add(new ErrorViewModel(msg));
 						rootModel = modelList;
-						syncWithUi();
 						return Status.CANCEL_STATUS;
 					}
 					// Prepare group & child repos
@@ -425,7 +507,7 @@ public class RepoExplorerView extends ViewPart{
 					List<GitBlitRepository> grList;
 					for(String item : groupNames){
 						// Get repos by group
-						grList = getReposByGroup(projList,item);
+						grList = getReposByGroup(projList, item);
 						gModel = new GroupViewModel(item);
 						modelList.add(gModel);
 						// add childs
@@ -439,26 +521,130 @@ public class RepoExplorerView extends ViewPart{
 					}
 					fmon.worked(1);
 					rootModel = modelList;
-					syncWithUi();
 					return Status.OK_STATUS;
 				}catch(Exception e){
-					EclipseHelper.showAndLogError("", e);
+					Activator.showAndLogError("", e);
 					modelList.add(new ErrorViewModel("Error reading projects from Gitblit. Check your preference settings.."));
 					rootModel = modelList;
-					syncWithUi();
 					return Status.CANCEL_STATUS;
 				}
 			}
 		};
+
+		job.addJobChangeListener(new IJobChangeListener() {
+			@Override
+			public void sleeping(IJobChangeEvent event){
+			}
+
+			@Override
+			public void scheduled(IJobChangeEvent event){
+				enableRefreshButton(false);
+			}
+
+			@Override
+			public void running(IJobChangeEvent event){
+			}
+
+			@Override
+			public void done(IJobChangeEvent event){
+				syncWithUi();
+				enableRefreshButton(true);
+			}
+
+			@Override
+			public void awake(IJobChangeEvent event){
+			}
+
+			@Override
+			public void aboutToRun(IJobChangeEvent event){
+			}
+		});
+
 		job.schedule();
 	}
-	
+
+	/**
+	 * Enables / disables refresh button while performing an refresh action
+	 * @param enalbe true = enabled, false = nope
+	 */
+	private void enableRefreshButton(final boolean enable){
+		if(this.form == null || this.form.isDisposed() == true){
+			// Sometimes, this happns. Grrr.. don't know how and why (but always when preferences is open while applying changes)
+			Activator.logError("Form is disposed. Can't refresh ui fields. State of ui is undefined");
+			//Activator.showInfo("An internal error occured. \nPlease use the refesh button or reopen the Gitblit repository explorer view");
+			return;
+		}
+		this.form.getDisplay().asyncExec(new Runnable() {
+			public void run(){
+				if(refreshAction != null){
+					refreshAction.setEnabled(enable);
+					form.setBusy(!enable);
+				}
+			}
+		});
+	}
+
+	/**
+	 * Sync ui fields out of another thread
+	 */
+	private void syncWithUi(){
+		if(this.form == null || this.form.isDisposed() == true){
+			// Sometimes, this happns. Grrr.. don't know how and why (but always when preferences is open while applying changes)
+			Activator.logError("Form is disposed. Can't refresh ui fields. State of ui is undefined");
+			//Activator.showInfo("An internal error occured. \nPlease use the refesh button or reopen the Gitblit repository explorer view");
+			return;
+		}
+
+		this.form.getDisplay().asyncExec(new Runnable() {
+			public void run(){
+				omitAction.refreshLabel();
+				viewer.setInput(rootModel);
+				viewer.refresh();
+				setHeaderMessage(getOmittedServerUrls());
+			}
+		});
+	}
+
+	/**
+	 * Set a header message
+	 * @param msgs messages to display
+	 */
+	private void setHeaderMessage(List<String> msgs){
+		// setBusy needed. Otherwise the menu at the form title will be disposed ...strange!? Maybe eclipse bug or just "RFM"
+		boolean orgState = this.form.isBusy();
+		this.form.setBusy(true);
+		if(msgs != null && msgs.size() > 0){
+			List<ServerMsg> msgList = new ArrayList<ServerMsg>();
+			for(String item : msgs){
+				msgList.add(new ServerMsg(item + " is unavailable", IMessageProvider.INFORMATION));
+			}
+			int status = IMessageProvider.ERROR;
+			if(omitServerErrors == true){
+				status = IMessageProvider.WARNING;
+			}
+			if(msgs.size() == 1){
+				this.form.setMessage("There is one omitted Gitblit server", status, msgList.toArray(new ServerMsg[msgs.size()]));
+			}else{
+				this.form.setMessage("There are " + msgs.size() + " omitted Gitblit servers", status, msgList.toArray(new ServerMsg[msgs.size()]));
+			}
+		}
+		else{
+			this.form.setMessage(null);
+		}
+		this.form.setBusy(orgState);
+	}
+
+	/**
+	 * Extract the list of groups of the passed repos
+	 * @param list
+	 * @return
+	 */
 	private List<String> prepareGroups(List<GitBlitRepository> list){
 		List<String> res = new ArrayList<String>();
 		if(list == null){
 			return res;
 		}
-		
+
 		for(GitBlitRepository item : list){
 			if(item.groupName == null){
 				// Set defaults
@@ -471,7 +657,12 @@ public class RepoExplorerView extends ViewPart{
 		return res;
 	}
 
-	
+	/**
+	 * Get repositories by group
+	 * @param list
+	 * @param groupName
+	 * @return
+	 */
 	private List<GitBlitRepository> getReposByGroup(List<GitBlitRepository> list, String groupName){
 		List<GitBlitRepository> res = new ArrayList<GitBlitRepository>();
 		if(list == null || list.isEmpty()){
@@ -489,15 +680,6 @@ public class RepoExplorerView extends ViewPart{
 			}
 		}
 		return res;
-	}
-	
-	private void syncWithUi(){
-		Display.getDefault().asyncExec(new Runnable() {
-			public void run(){
-				omitAction.refreshLabel();
-				viewer.setInput(rootModel);
-			}
-		});
 	}
 
 	@Override

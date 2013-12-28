@@ -17,11 +17,11 @@ import com.baloise.egitblit.view.model.ProjectViewModel;
  * @author MicBag
  *
  */
-public class PasteToEGitAction extends ViewActionBase{
+public class CloneAction extends ViewActionBase{
 
 	public final static String CMD_EGIT = "org.eclipse.egit.ui.RepositoriesViewPaste";
 
-	public PasteToEGitAction(Viewer viewer){
+	public CloneAction(Viewer viewer){
 		super(viewer, "Clone");
 		setImageDescriptorFromURL("platform:/plugin/org.eclipse.egit.ui/icons/obj16/cloneGit.gif");
 	}
@@ -31,7 +31,7 @@ public class PasteToEGitAction extends ViewActionBase{
 		GitBlitViewModel model = getSelectedModel();
 		if(model instanceof ProjectViewModel){
 			// Copy url to clipboard
-			CopyClipBoardAction cca = new CopyClipBoardAction(getViewer());
+			CopyAction cca = new CopyAction(getViewer());
 			cca.run();
 
 			Command cmd = getEGitCommand();

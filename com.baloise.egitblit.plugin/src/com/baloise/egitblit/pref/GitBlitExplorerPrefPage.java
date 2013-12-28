@@ -11,6 +11,8 @@ import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.jface.viewers.TableViewerColumn;
+import org.eclipse.jface.viewers.Viewer;
+import org.eclipse.jface.viewers.ViewerSorter;
 import org.eclipse.jface.window.Window;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionEvent;
@@ -31,7 +33,6 @@ import org.eclipse.ui.IWorkbenchPreferencePage;
 import com.baloise.egitblit.common.GitBlitExplorerException;
 import com.baloise.egitblit.gitblit.GitBlitServer;
 import com.baloise.egitblit.main.Activator;
-import com.baloise.egitblit.main.EclipseHelper;
 import com.baloise.egitblit.pref.PreferenceModel.DoubleClickBehaviour;
 
 /**
@@ -82,15 +83,27 @@ public class GitBlitExplorerPrefPage extends PreferencePage implements IWorkbenc
 		gd.verticalAlignment = SWT.FILL;
 
 		// Table which shows all server properties
-		viewer = new TableViewer(root, SWT.CHECK | SWT.H_SCROLL | SWT.V_SCROLL | SWT.FULL_SELECTION | SWT.BORDER);
-		Table table = viewer.getTable();
+		this.viewer = new TableViewer(root, SWT.CHECK | SWT.H_SCROLL | SWT.V_SCROLL | SWT.FULL_SELECTION | SWT.BORDER);
+		Table table = this.viewer.getTable();
 		table.setHeaderVisible(true);
 		table.setLinesVisible(true);
 		table.setLayout(l);
 		table.setLayoutData(gd);
 
+		this.viewer.setSorter(new ViewerSorter(){
+			@Override
+			public int compare(Viewer viewer, Object e1, Object e2){
+				if(viewer == null || e1 instanceof GitBlitServer == false || e2 instanceof GitBlitServer == false){
+					return super.compare(viewer, e1, e2);
+				}
+				String v1 = ((GitBlitServer)e1).url;
+				v1 = v1 == null ? "" : v1;
+				return v1.compareTo(((GitBlitServer)e2).url);
+			}
+		});
+		
 		// --- add activation check box
-		TableViewerColumn colActive = createColumn(viewer, "Active", 50);
+		TableViewerColumn colActive = createColumn(this.viewer, "Active", 50);
 		colActive.setLabelProvider(new ColumnLabelProvider() {
 			@Override
 			public String getText(Object element){
@@ -99,7 +112,7 @@ public class GitBlitExplorerPrefPage extends PreferencePage implements IWorkbenc
 		});
 
 		// --- add url column
-		TableViewerColumn colURL = createColumn(viewer, "URL", 150);
+		TableViewerColumn colURL = createColumn(this.viewer, "URL", 150);
 		colURL.setLabelProvider(new ColumnLabelProvider() {
 			@Override
 			public String getText(Object element){
@@ -111,7 +124,7 @@ public class GitBlitExplorerPrefPage extends PreferencePage implements IWorkbenc
 		});
 
 		// --- add user column
-		TableViewerColumn colUser = createColumn(viewer, "User", 100);
+		TableViewerColumn colUser = createColumn(this.viewer, "User", 100);
 		colUser.setLabelProvider(new ColumnLabelProvider() {
 			@Override
 			public String getText(Object element){
@@ -123,7 +136,7 @@ public class GitBlitExplorerPrefPage extends PreferencePage implements IWorkbenc
 		});
 
 		// --- add masked password column 
-		TableViewerColumn colPwd = createColumn(viewer, "Password", 100);
+		TableViewerColumn colPwd = createColumn(this.viewer, "Password", 100);
 		colPwd.getColumn().setText("Password");
 		colPwd.setLabelProvider(new ColumnLabelProvider() {
 			@Override
@@ -265,7 +278,7 @@ public class GitBlitExplorerPrefPage extends PreferencePage implements IWorkbenc
 		btRemove.setEnabled(false);
 
 		// --- Sync button state corresponding to table selection
-		viewer.addSelectionChangedListener(new ISelectionChangedListener() {
+		this.viewer.addSelectionChangedListener(new ISelectionChangedListener() {
 			@Override
 			public void selectionChanged(SelectionChangedEvent event){
 				boolean sel = !event.getSelection().isEmpty();
@@ -411,7 +424,7 @@ public class GitBlitExplorerPrefPage extends PreferencePage implements IWorkbenc
 			PreferenceMgr.saveConfig(this.prefModel);
 			firePreferenceChange();
 		}catch(GitBlitExplorerException e){
-			EclipseHelper.logError("Error saving preferences.", e);
+			Activator.logError("Error saving preferences.", e);
 			return false;
 		}
 		return super.performOk();
@@ -450,7 +463,7 @@ public class GitBlitExplorerPrefPage extends PreferencePage implements IWorkbenc
 		try{
 			return PreferenceMgr.readConfig();
 		}catch(GitBlitExplorerException e){
-			EclipseHelper.logError("Error reading preferences.", e);
+			Activator.logError("Error reading preferences.", e);
 		}
 		return null;
 	}
