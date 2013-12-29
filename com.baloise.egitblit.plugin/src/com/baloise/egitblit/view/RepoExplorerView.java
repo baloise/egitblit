@@ -503,7 +503,7 @@ public class RepoExplorerView extends ViewPart{
 					// --- prepare & get groups
 					List<String> groupNames = prepareGroups(projList);
 					if(groupNames.isEmpty()){
-						final String msg = "No GitBlit server is active or all servers are unreachable. Please add and/or activate a GitBlit server via preferences.";
+						String msg = "No GitBlit server is active or all servers are unreachable.";
 						Activator.showInfo(msg);
 						modelList.add(new ErrorViewModel(msg));
 						syncWithUi(modelList);

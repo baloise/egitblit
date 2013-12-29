@@ -116,7 +116,12 @@ public class StyledLabelProvider extends StyledCellLabelProvider implements Repo
 				if(this.decorateLabels){
 					fgCol = getForgroundColor(model, columnIndex);
 					bgCol = getBackgroundColor(model, columnIndex);
-					if(model instanceof GroupViewModel){
+					if(model instanceof ErrorViewModel){
+						if(columnIndex == 0){
+							image = PlatformUI.getWorkbench().getSharedImages().getImage(ISharedImages.IMG_OBJS_ERROR_TSK);
+						}
+					}
+					else if(model instanceof GroupViewModel){
 						switch(columnIndex){
 							case 0:
 								image = PlatformUI.getWorkbench().getSharedImages().getImage(ISharedImages.IMG_OBJ_FOLDER);
@@ -125,8 +130,8 @@ public class StyledLabelProvider extends StyledCellLabelProvider implements Repo
 								fgCol = this.viewer.getTree().getDisplay().getSystemColor(SWT.COLOR_DARK_GRAY);
 						}
 					}
-					// Assign font and other decorations
-					if(model instanceof ProjectViewModel){
+					else if(model instanceof ProjectViewModel){
+						// Assign font and other decorations
 						switch(columnIndex){
 							case 0:
 								image = getImage(cell.getControl().getDisplay(),((ProjectViewModel) model).getColor());
