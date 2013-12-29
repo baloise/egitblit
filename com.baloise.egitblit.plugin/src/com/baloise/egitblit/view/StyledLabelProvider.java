@@ -36,7 +36,7 @@ import com.gitblit.utils.ArrayUtils;
  * @author MicBag
  * 
  */
-public class StyledLabelProvider extends StyledCellLabelProvider{
+public class StyledLabelProvider extends StyledCellLabelProvider implements RepoLabelProvider{
 
 	private TreeViewer viewer;
 	private boolean decorateLabels = false;
@@ -46,8 +46,6 @@ public class StyledLabelProvider extends StyledCellLabelProvider{
 	private Font boldFont;
 	private Font boldItalicFont;
 
-	private int cellHeight;
-	
 	public StyledLabelProvider(TreeViewer viewer){
 		this.viewer = viewer;
 

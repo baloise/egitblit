@@ -269,7 +269,7 @@ public class RepoExplorerView extends ViewPart{
 			protected boolean isLeafMatch(final Viewer viewer, final Object element){
 				TreeViewer treeViewer = (TreeViewer) viewer;
 				int numberOfColumns = treeViewer.getTree().getColumnCount();
-				StyledLabelProvider labelProvider = (StyledLabelProvider) treeViewer.getLabelProvider();
+				RepoLabelProvider labelProvider = (RepoLabelProvider) treeViewer.getLabelProvider();
 				boolean isMatch = false;
 				for(int columnIndex = 0; columnIndex < numberOfColumns; columnIndex++){
 					String labelText = labelProvider.getColumnText((GitBlitViewModel)element, columnIndex);
@@ -600,7 +600,7 @@ public class RepoExplorerView extends ViewPart{
 		this.form.getDisplay().asyncExec(new Runnable() {
 			public void run(){
 				omitAction.refreshLabel();
-				viewer.setInput(rootModel);
+				//viewer.setInput(rootModel);
 				viewer.refresh();
 				setHeaderMessage(getOmittedServerUrls());
 			}
