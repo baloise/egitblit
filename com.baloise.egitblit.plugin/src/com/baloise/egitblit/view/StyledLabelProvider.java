@@ -14,9 +14,13 @@ import org.eclipse.swt.events.DisposeListener;
 import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.graphics.Font;
 import org.eclipse.swt.graphics.FontData;
+import org.eclipse.swt.graphics.GC;
+import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.graphics.RGB;
 import org.eclipse.swt.graphics.TextStyle;
 import org.eclipse.swt.widgets.Display;
+import org.eclipse.ui.ISharedImages;
+import org.eclipse.ui.PlatformUI;
 
 import com.baloise.egitblit.gitblit.GitBlitRepository;
 import com.baloise.egitblit.main.Activator;
@@ -37,10 +41,13 @@ public class StyledLabelProvider extends StyledCellLabelProvider{
 	private TreeViewer viewer;
 	private boolean decorateLabels = false;
 	private Map<String, Color> colMap = new HashMap<String, Color>();
+	private Map<String, Image> imgMap = new HashMap<String, Image>();
 	private Font italicFont;
 	private Font boldFont;
 	private Font boldItalicFont;
 
+	private int cellHeight;
+	
 	public StyledLabelProvider(TreeViewer viewer){
 		this.viewer = viewer;
 
@@ -50,6 +57,7 @@ public class StyledLabelProvider extends StyledCellLabelProvider{
 			public void widgetDisposed(DisposeEvent e){
 				disposeColors();
 				disposeFonts();
+				disposeImages();
 			}
 		});
 	}
@@ -98,29 +106,35 @@ public class StyledLabelProvider extends StyledCellLabelProvider{
 			Color fgCol = null;
 			Color bgCol = null;
 			Font font = null;
+			Image image = null;
 
 			if(label != null){
+				Font tfont = cell.getFont();
+				tfont.getFontData();
 				int lstart = 0;
 				int lend = label.length();
-
+				
 				StyledString text = new StyledString();
 				if(this.decorateLabels){
 					fgCol = getForgroundColor(model, columnIndex);
 					bgCol = getBackgroundColor(model, columnIndex);
 					if(model instanceof GroupViewModel){
-						if(columnIndex > 0){
-							fgCol = this.viewer.getTree().getDisplay().getSystemColor(SWT.COLOR_DARK_GRAY);
+						switch(columnIndex){
+							case 0:
+								image = PlatformUI.getWorkbench().getSharedImages().getImage(ISharedImages.IMG_OBJ_FOLDER);
+								break;
+							default:
+								fgCol = this.viewer.getTree().getDisplay().getSystemColor(SWT.COLOR_DARK_GRAY);
 						}
+//						TreeItem item = (TreeItem) cell.getItem();
+//						item.setImage(getImage(cell.getControl().getDisplay(),"#FFFFFF"));
 						//cell.setBackground(this.viewer.getTree().getDisplay().getSystemColor(SWT.COLOR_TITLE_INACTIVE_BACKGROUND_GRADIENT));
 					}
+					// Assign font and other decorations
 					if(model instanceof ProjectViewModel){
 						switch(columnIndex){
 							case 0:
-								// Repo name decoration: Add repo color image (just some blanks with background color set to repo color)
-								label = "    " + label;
-								fgCol = getRepoColor((ProjectViewModel) model);
-								bgCol = fgCol;
-								lend = 3;
+								image = getImage(cell.getControl().getDisplay(),((ProjectViewModel) model).getColor());
 								break;
 							case 3:
 								long diff = System.currentTimeMillis() - ((ProjectViewModel) element).getLastChange().getTime();
@@ -163,13 +177,46 @@ public class StyledLabelProvider extends StyledCellLabelProvider{
 				}
 				text.append(label);
 				text.setStyle(lstart, lend, new BaseStyler(font, fgCol, bgCol));
+				if(model instanceof GroupViewModel && columnIndex == 0 && decorateLabels == true){
+					int size = ((GroupViewModel)model).getChilds().size();
+					if(size > 0){
+						text.append(" (" + size + ")",StyledString.COUNTER_STYLER);
+					}
+				}
+				cell.setImage(image);
 				cell.setText(text.toString());
 				cell.setStyleRanges(text.getStyleRanges());
+				
 			}
 		}
 		super.update(cell);
 	}
+	
+	private Image getImage(Display disp, String scol) {
+		if(disp == null || scol == null){
+			return null;
+		}
+		
+		int height = viewer.getTree().getItemHeight();
+		height = height <= 0 ? 8 : height;
 
+		Image image = imgMap.get(scol);
+		if(image != null){
+			return image;
+		}
+	   image = new Image(disp, height>>1, height);
+	    GC gc = new GC(image);
+	    Color col = getRepoColor(scol);
+	    if(col == null){
+	    	return null;
+	    }
+	    gc.setBackground(col);
+	    gc.fillRectangle(0, 0, height>>1, height);
+	    imgMap.put(scol, image);
+	    return image;
+	}
+	
+	
 	/**
 	 * Get the label of the column
 	 * 
@@ -346,37 +393,28 @@ public class StyledLabelProvider extends StyledCellLabelProvider{
 	 * @param model
 	 * @return
 	 */
-	public Color getRepoColor(ProjectViewModel model){
-		if(model == null){
+	public Color getRepoColor(String scol){
+		if(scol == null){
 			return null;
 		}
-		String scol = model.getColor();
 		if(scol == null || scol.length() < 7){
 			return null;
 		}
-		if(this.colMap.get(scol) == null){
-			try{
-				RGB rgb = new RGB(Integer.parseInt(scol.substring(1, 3), 16), Integer.parseInt(scol.substring(3, 5), 16), Integer.parseInt(scol.substring(5, 7), 16));
-				Color col = new Color(this.viewer.getTree().getDisplay(), rgb);
-				this.colMap.put(scol, col);
-				return col;
-			}catch(Exception e){
-				Activator.logError("Error creating repository color", e);
-			}
+		Color col = this.colMap.get(scol);
+		if(col != null){
+			return col;
 		}
-		return this.colMap.get(scol);
-	}
-
-	private void disposeColors(){
-		for(String item : this.colMap.keySet()){
-			Color col = this.colMap.get(item);
-			if(col.isDisposed() == false){
-				col.dispose();
-			}
+		try{
+			RGB rgb = new RGB(Integer.parseInt(scol.substring(1, 3), 16), Integer.parseInt(scol.substring(3, 5), 16), Integer.parseInt(scol.substring(5, 7), 16));
+			col = new Color(this.viewer.getTree().getDisplay(), rgb);
+			this.colMap.put(scol, col);
+			return col;
+		}catch(Exception e){
+			Activator.logError("Error creating repository color", e);
 		}
-		this.colMap.clear();
+		return null;
 	}
-
+	
 	private void initFonts(){
 		this.italicFont 	= createFont(SWT.ITALIC);
 		this.boldFont 		= createFont(SWT.BOLD);
@@ -390,6 +428,25 @@ public class StyledLabelProvider extends StyledCellLabelProvider{
 		}
 		return new Font(this.viewer.getTree().getDisplay(), fontData);
 		
+	}
+	
+	private void disposeImages(){
+		for(String item : this.imgMap.keySet()){
+			Image img = this.imgMap.get(item);
+			if(img.isDisposed() == false){
+				img.dispose();
+			}
+		}
+		this.imgMap.clear();
+	}
+	private void disposeColors(){
+		for(String item : this.colMap.keySet()){
+			Color col = this.colMap.get(item);
+			if(col.isDisposed() == false){
+				col.dispose();
+			}
+		}
+		this.colMap.clear();
 	}
 
 	private void disposeFonts(){

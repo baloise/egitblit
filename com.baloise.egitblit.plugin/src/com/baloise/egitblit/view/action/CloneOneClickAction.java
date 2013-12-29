@@ -50,18 +50,16 @@ public class CloneOneClickAction extends CloneAction{
 
 	public CloneOneClickAction(Viewer viewer){
 		super(viewer);
-		setText("Clone One-Click");
+		setText("Clone && Import Project");
 		setImageDescriptorFromURL("platform:/plugin/" + Activator.PLUGIN_ID + "/icons/cloneGitOneClick.gif");
 	}
 
 	@Override
 	public void doRun(){
 		try{
-
 			GitBlitViewModel model = getSelectedModel();
 			if(model instanceof ProjectViewModel){
 				ProjectViewModel project = (ProjectViewModel) model;
-				System.out.println(project.getGitURL());
 				performClone(project);
 			}
 		}catch(Exception e){

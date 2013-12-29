@@ -24,7 +24,6 @@ import org.eclipse.jface.viewers.ColumnViewerToolTipSupport;
 import org.eclipse.jface.viewers.DoubleClickEvent;
 import org.eclipse.jface.viewers.IDoubleClickListener;
 import org.eclipse.jface.viewers.IStructuredSelection;
-import org.eclipse.jface.viewers.ITableLabelProvider;
 import org.eclipse.jface.viewers.TreeViewer;
 import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.swt.SWT;
@@ -84,6 +83,7 @@ public class RepoExplorerView extends ViewPart{
 	private Form form;
 	private boolean omitServerErrors = false;
 
+	private final static String jobFamily = "com.baloise.egitblit.read";
 
 	// ------------------------------------------------------------------------
 	// --- Local actions
@@ -269,10 +269,10 @@ public class RepoExplorerView extends ViewPart{
 			protected boolean isLeafMatch(final Viewer viewer, final Object element){
 				TreeViewer treeViewer = (TreeViewer) viewer;
 				int numberOfColumns = treeViewer.getTree().getColumnCount();
-				ITableLabelProvider labelProvider = (ITableLabelProvider) treeViewer.getLabelProvider();
+				StyledLabelProvider labelProvider = (StyledLabelProvider) treeViewer.getLabelProvider();
 				boolean isMatch = false;
 				for(int columnIndex = 0; columnIndex < numberOfColumns; columnIndex++){
-					String labelText = labelProvider.getColumnText(element, columnIndex);
+					String labelText = labelProvider.getColumnText((GitBlitViewModel)element, columnIndex);
 					isMatch |= wordMatches(labelText);
 				}
 				return isMatch;
@@ -299,9 +299,10 @@ public class RepoExplorerView extends ViewPart{
 		viewer.getControl().setLayoutData(gd);
 
 		viewer.getTree().setHeaderVisible(true);
-
-		TreeColumn colGroup = new TreeColumn(viewer.getTree(), SWT.LEFT);
 		viewer.getTree().setLinesVisible(true);
+		
+		
+		TreeColumn colGroup = new TreeColumn(viewer.getTree(), SWT.LEFT);
 		colGroup.setAlignment(SWT.LEFT);
 		colGroup.setText("Group / Repository");
 		colGroup.setWidth(240);
@@ -561,7 +562,6 @@ public class RepoExplorerView extends ViewPart{
 			public void aboutToRun(IJobChangeEvent event){
 			}
 		});
-
 		job.schedule();
 	}
 

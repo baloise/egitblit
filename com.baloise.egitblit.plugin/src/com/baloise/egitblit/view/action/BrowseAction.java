@@ -76,7 +76,6 @@ public class BrowseAction extends ViewActionBase{
 			}
 			try{
 				PlatformUI.getWorkbench().getBrowserSupport().createBrowser("Gitblit summary page").openURL(makeGitBlitSummaryUrl(pm));
-				// PlatformUI.getWorkbench().getBrowserSupport().getExternalBrowser().openURL(makeGitBlitSummaryUrl(pm));
 			}catch(Exception e){
 				Activator.logError("Error while performing open Gitblit action", e);
 			}
