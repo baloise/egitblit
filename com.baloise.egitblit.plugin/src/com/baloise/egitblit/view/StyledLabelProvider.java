@@ -124,9 +124,6 @@ public class StyledLabelProvider extends StyledCellLabelProvider implements Repo
 							default:
 								fgCol = this.viewer.getTree().getDisplay().getSystemColor(SWT.COLOR_DARK_GRAY);
 						}
-//						TreeItem item = (TreeItem) cell.getItem();
-//						item.setImage(getImage(cell.getControl().getDisplay(),"#FFFFFF"));
-						//cell.setBackground(this.viewer.getTree().getDisplay().getSystemColor(SWT.COLOR_TITLE_INACTIVE_BACKGROUND_GRADIENT));
 					}
 					// Assign font and other decorations
 					if(model instanceof ProjectViewModel){
@@ -266,7 +263,7 @@ public class StyledLabelProvider extends StyledCellLabelProvider implements Repo
 				break;
 
 		}
-		return null;
+		return "";
 	}
 
 	/**

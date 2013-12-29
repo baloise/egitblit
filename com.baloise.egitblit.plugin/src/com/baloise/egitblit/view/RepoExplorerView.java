@@ -1,6 +1,7 @@
 package com.baloise.egitblit.view;
 
 import java.util.ArrayList;
+import java.util.GregorianCalendar;
 import java.util.List;
 
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -72,7 +73,7 @@ import com.baloise.egitblit.view.model.ProjectViewModel;
 public class RepoExplorerView extends ViewPart{
 
 	private TreeViewer viewer;
-	private List<GroupViewModel> rootModel;
+	private List<GroupViewModel> rootModel = new ArrayList<GroupViewModel>();
 	private StyledLabelProvider labelProvider;
 	private DoubleClickBehaviour dbclick = DoubleClickBehaviour.OpenGitBlit;
 
@@ -182,8 +183,6 @@ public class RepoExplorerView extends ViewPart{
 	// ------------------------------------------------------------------------
 	public RepoExplorerView(){
 	}
-	
-	
 
 	@Override
 	public void dispose(){
@@ -233,15 +232,15 @@ public class RepoExplorerView extends ViewPart{
 				return refreskImgDesc;
 			}
 		};
-		
+
 		this.form.getToolBarManager().add(refreshAction);
 		this.form.getToolBarManager().update(true);
-		
+
 		IMenuManager hmgr = form.getMenuManager();
 		hmgr.add(omitAction);
 		omitAction.setChecked(this.prefModel.isOmitServerErrors());
 		hmgr.update(true);
-		
+
 		// --------------------------------------------------------------------
 		// Layout
 		// --------------------------------------------------------------------
@@ -272,7 +271,7 @@ public class RepoExplorerView extends ViewPart{
 				RepoLabelProvider labelProvider = (RepoLabelProvider) treeViewer.getLabelProvider();
 				boolean isMatch = false;
 				for(int columnIndex = 0; columnIndex < numberOfColumns; columnIndex++){
-					String labelText = labelProvider.getColumnText((GitBlitViewModel)element, columnIndex);
+					String labelText = labelProvider.getColumnText((GitBlitViewModel) element, columnIndex);
 					isMatch |= wordMatches(labelText);
 				}
 				return isMatch;
@@ -300,8 +299,7 @@ public class RepoExplorerView extends ViewPart{
 
 		viewer.getTree().setHeaderVisible(true);
 		viewer.getTree().setLinesVisible(true);
-		
-		
+
 		TreeColumn colGroup = new TreeColumn(viewer.getTree(), SWT.LEFT);
 		colGroup.setAlignment(SWT.LEFT);
 		colGroup.setText("Group / Repository");
@@ -377,14 +375,20 @@ public class RepoExplorerView extends ViewPart{
 			}
 		});
 
-
 		// Final assembling & initialization
 		viewer.getControl().setMenu(mgr.createContextMenu(viewer.getControl()));
 		viewer.setSorter(new RepoViewSorter());
+		viewer.setInput(rootModel);
 		ColumnViewerToolTipSupport.enableFor(viewer);
 		loadRepositories(true);
 	}
-	
+
+	private void setRepoList(final List<GroupViewModel> list){
+		rootModel.clear();
+		rootModel.addAll(list);
+		viewer.refresh(true);
+	}
+
 	/**
 	 * Loads & sync the preferences with view
 	 */
@@ -491,8 +495,9 @@ public class RepoExplorerView extends ViewPart{
 					// --- Reading & prepare grouped
 					GitBlitBD bd = new GitBlitBD(serverList);
 					List<GitBlitRepository> projList = bd.readRepositories(token, true, omitServerErrors);
-					
-					// Not canceling here to prepare the result which we have received so far
+
+					// Not canceling here to prepare the result which we have
+					// received so far
 					fmon.subTask("Preparing result.");
 
 					// --- prepare & get groups
@@ -501,7 +506,7 @@ public class RepoExplorerView extends ViewPart{
 						final String msg = "No GitBlit server is active or all servers are unreachable. Please add and/or activate a GitBlit server via preferences.";
 						Activator.showInfo(msg);
 						modelList.add(new ErrorViewModel(msg));
-						rootModel = modelList;
+						syncWithUi(modelList);
 						return Status.CANCEL_STATUS;
 					}
 					// Prepare group & child repos
@@ -523,12 +528,12 @@ public class RepoExplorerView extends ViewPart{
 						}
 					}
 					fmon.worked(1);
-					rootModel = modelList;
+					syncWithUi(modelList);
 					return Status.OK_STATUS;
 				}catch(Exception e){
 					Activator.showAndLogError("", e);
 					modelList.add(new ErrorViewModel("Error reading projects from Gitblit. Check your preference settings.."));
-					rootModel = modelList;
+					syncWithUi(modelList);
 					return Status.CANCEL_STATUS;
 				}
 			}
@@ -550,7 +555,6 @@ public class RepoExplorerView extends ViewPart{
 
 			@Override
 			public void done(IJobChangeEvent event){
-				syncWithUi();
 				enableRefreshButton(true);
 			}
 
@@ -567,13 +571,16 @@ public class RepoExplorerView extends ViewPart{
 
 	/**
 	 * Enables / disables refresh button while performing an refresh action
-	 * @param enalbe true = enabled, false = nope
+	 * 
+	 * @param enalbe
+	 *            true = enabled, false = nope
 	 */
 	private void enableRefreshButton(final boolean enable){
 		if(this.form == null || this.form.isDisposed() == true){
-			// Sometimes, this happns. Grrr.. don't know how and why (but always when preferences is open while applying changes)
+			// Sometimes, this happns. Grrr.. don't know how and why (but always
+			// when preferences is open while applying changes)
 			Activator.logError("Form is disposed. Can't refresh ui fields. State of ui is undefined");
-			//Activator.showInfo("An internal error occured. \nPlease use the refesh button or reopen the Gitblit repository explorer view");
+			// Activator.showInfo("An internal error occured. \nPlease use the refesh button or reopen the Gitblit repository explorer view");
 			return;
 		}
 		this.form.getDisplay().asyncExec(new Runnable() {
@@ -589,19 +596,19 @@ public class RepoExplorerView extends ViewPart{
 	/**
 	 * Sync ui fields out of another thread
 	 */
-	private void syncWithUi(){
+	private void syncWithUi(final List<GroupViewModel> list){
 		if(this.form == null || this.form.isDisposed() == true){
-			// Sometimes, this happns. Grrr.. don't know how and why (but always when preferences is open while applying changes)
+			// Sometimes, this happns. Grrr.. don't know how and why (but always
+			// when preferences is open while applying changes)
 			Activator.logError("Form is disposed. Can't refresh ui fields. State of ui is undefined");
-			//Activator.showInfo("An internal error occured. \nPlease use the refesh button or reopen the Gitblit repository explorer view");
+			// Activator.showInfo("An internal error occured. \nPlease use the refesh button or reopen the Gitblit repository explorer view");
 			return;
 		}
 
 		this.form.getDisplay().asyncExec(new Runnable() {
 			public void run(){
 				omitAction.refreshLabel();
-				//viewer.setInput(rootModel);
-				viewer.refresh();
+				setRepoList(list);
 				setHeaderMessage(getOmittedServerUrls());
 			}
 		});
@@ -609,10 +616,13 @@ public class RepoExplorerView extends ViewPart{
 
 	/**
 	 * Set a header message
-	 * @param msgs messages to display
+	 * 
+	 * @param msgs
+	 *            messages to display
 	 */
 	private void setHeaderMessage(List<String> msgs){
-		// setBusy needed. Otherwise the menu at the form title will be disposed ...strange!? Maybe eclipse bug or just "RFM"
+		// setBusy needed. Otherwise the menu at the form title will be disposed
+		// ...strange!? Maybe eclipse bug or just "RFM"
 		boolean orgState = this.form.isBusy();
 		this.form.setBusy(true);
 		if(msgs != null && msgs.size() > 0){
@@ -629,8 +639,7 @@ public class RepoExplorerView extends ViewPart{
 			}else{
 				this.form.setMessage("There are " + msgs.size() + " omitted Gitblit servers", status, msgList.toArray(new ServerMsg[msgs.size()]));
 			}
-		}
-		else{
+		}else{
 			this.form.setMessage(null);
 		}
 		this.form.setBusy(orgState);
@@ -638,6 +647,7 @@ public class RepoExplorerView extends ViewPart{
 
 	/**
 	 * Extract the list of groups of the passed repos
+	 * 
 	 * @param list
 	 * @return
 	 */
@@ -661,6 +671,7 @@ public class RepoExplorerView extends ViewPart{
 
 	/**
 	 * Get repositories by group
+	 * 
 	 * @param list
 	 * @param groupName
 	 * @return
