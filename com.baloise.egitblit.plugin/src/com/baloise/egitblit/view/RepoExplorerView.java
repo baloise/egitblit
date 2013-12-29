@@ -1,15 +1,17 @@
 package com.baloise.egitblit.view;
 
 import java.util.ArrayList;
-import java.util.GregorianCalendar;
 import java.util.List;
 
+import org.eclipse.core.commands.Command;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.IJobChangeEvent;
 import org.eclipse.core.runtime.jobs.IJobChangeListener;
+import org.eclipse.core.runtime.jobs.IJobManager;
 import org.eclipse.core.runtime.jobs.Job;
+import org.eclipse.egit.ui.JobFamilies;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.IMenuListener;
 import org.eclipse.jface.action.IMenuManager;
@@ -38,6 +40,8 @@ import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.TreeColumn;
+import org.eclipse.ui.PlatformUI;
+import org.eclipse.ui.commands.ICommandService;
 import org.eclipse.ui.dialogs.FilteredTree;
 import org.eclipse.ui.dialogs.PatternFilter;
 import org.eclipse.ui.forms.IMessage;
@@ -83,8 +87,6 @@ public class RepoExplorerView extends ViewPart{
 
 	private Form form;
 	private boolean omitServerErrors = false;
-
-	private final static String jobFamily = "com.baloise.egitblit.read";
 
 	// ------------------------------------------------------------------------
 	// --- Local actions
@@ -209,6 +211,37 @@ public class RepoExplorerView extends ViewPart{
 		parent.addDisposeListener(new DisposeListener() {
 			public void widgetDisposed(DisposeEvent e){
 				ftk.dispose();
+			}
+		});
+
+		IJobManager jobMan = Job.getJobManager();
+		jobMan.addJobChangeListener(new IJobChangeListener() {
+			@Override
+			public void sleeping(IJobChangeEvent event){
+			}
+
+			@Override
+			public void scheduled(IJobChangeEvent event){
+			}
+
+			@Override
+			public void running(IJobChangeEvent event){
+			}
+
+			@Override
+			public void done(IJobChangeEvent event){
+				Job job = event.getJob();
+				if(job != null && job.belongsTo(JobFamilies.PUSH) == true){
+					loadRepositories(true);
+				}
+			}
+
+			@Override
+			public void awake(IJobChangeEvent event){
+			}
+
+			@Override
+			public void aboutToRun(IJobChangeEvent event){
 			}
 		});
 
@@ -381,6 +414,18 @@ public class RepoExplorerView extends ViewPart{
 		viewer.setInput(rootModel);
 		ColumnViewerToolTipSupport.enableFor(viewer);
 		loadRepositories(true);
+	}
+
+	public final static String CMD_EGIT_PUSH = "org.eclipse.egit.ui.team.Push";
+
+	// org.eclipse.egit.ui.team.Push handler
+	private final static Command getEGitCommand(String cmd){
+		ICommandService commandService = (ICommandService) PlatformUI.getWorkbench().getActiveWorkbenchWindow().getService(ICommandService.class);
+		if(commandService == null){
+			// Eclipse not ready
+			return null;
+		}
+		return commandService.getCommand(cmd);
 	}
 
 	private void setRepoList(final List<GroupViewModel> list){
