@@ -4,5 +4,5 @@ import com.baloise.egitblit.view.model.GitBlitViewModel;
 
 public interface RepoLabelProvider{
 
-	public String getColumnText(GitBlitViewModel element, int columnIndex);
+	public String getColumnText(GitBlitViewModel element, ColumnDesc column);
 }

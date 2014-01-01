@@ -116,7 +116,7 @@ public class GitBlitExplorerPrefPage extends PreferencePage implements IWorkbenc
 		colURL.setLabelProvider(new ColumnLabelProvider() {
 			@Override
 			public String getText(Object element){
-				if(element != null && element instanceof GitBlitServer){
+				if(element instanceof GitBlitServer){
 					return ((GitBlitServer) element).url;
 				}
 				return "";
@@ -128,7 +128,7 @@ public class GitBlitExplorerPrefPage extends PreferencePage implements IWorkbenc
 		colUser.setLabelProvider(new ColumnLabelProvider() {
 			@Override
 			public String getText(Object element){
-				if(element != null && element instanceof GitBlitServer){
+				if(element instanceof GitBlitServer){
 					return ((GitBlitServer) element).user;
 				}
 				return "";
@@ -141,7 +141,7 @@ public class GitBlitExplorerPrefPage extends PreferencePage implements IWorkbenc
 		colPwd.setLabelProvider(new ColumnLabelProvider() {
 			@Override
 			public String getText(Object element){
-				if(element != null && element instanceof GitBlitServer){
+				if(element instanceof GitBlitServer){
 					String txt = ((GitBlitServer) element).password;
 					if(txt != null && txt.length() > 0){
 						return "********";

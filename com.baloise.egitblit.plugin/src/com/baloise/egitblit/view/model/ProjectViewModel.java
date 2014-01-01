@@ -62,7 +62,7 @@ public class ProjectViewModel implements GitBlitViewModel{
 		}
 		return this.entry.groupName;
 	}
-
+	
 	public boolean hasCommits(){
 		if(this.entry == null){
 			return false;
@@ -138,6 +138,13 @@ public class ProjectViewModel implements GitBlitViewModel{
 		return this.entry.size;
 	}
 
+	public long getByteSize(){
+		if(this.entry == null){
+			return -1L;
+		}
+		return this.entry.byteSize;
+	}
+
 	public void setToolTip(String msg){
 		this.toolTip = msg;
 	}
@@ -151,6 +158,12 @@ public class ProjectViewModel implements GitBlitViewModel{
 			return null;
 		}
 		return this.entry.repoRGB;
+	}
+
+	
+	@Override
+	public String toString(){
+		return "ProjectViewModel [entry=" + entry + ", parent=" + parent + "]";
 	}
 
 	@Override

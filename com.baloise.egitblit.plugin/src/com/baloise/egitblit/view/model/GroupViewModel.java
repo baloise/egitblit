@@ -58,6 +58,12 @@ public class GroupViewModel implements GitBlitViewModel{
 	public String getToolTip(){
 		return null;
 	}
+	
+
+	@Override
+	public String toString(){
+		return "GroupViewModel [groupName=" + groupName + ", parent=" + parent + ", childList=" + childList + "]";
+	}
 
 	@Override
 	public int hashCode(){
@@ -83,5 +89,4 @@ public class GroupViewModel implements GitBlitViewModel{
 			return false;
 		return true;
 	}
-
 }

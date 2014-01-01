@@ -11,6 +11,8 @@ public interface GitBlitViewModel{
 	 * @return name of the entry. To be displayed in viewer cell
 	 */
 	public String getName();
+	
+	
 	/**
 	 * @return Tooltip for the cell
 	 */

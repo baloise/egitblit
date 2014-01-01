@@ -32,7 +32,7 @@ public class GitBlitRepository{
 	public boolean isBare;
 	public String originRepository;
 	public String size;
-	
+	public long   byteSize;
 	public String repoRGB;
 
 	// ....more properties to come
@@ -67,6 +67,7 @@ public class GitBlitRepository{
 		repo.isBare = model.isBare;
 		repo.originRepository = model.originRepository;
 		repo.size = model.size;
+		repo.byteSize = makeByteValue(repo.size);
 		
 		repo.repoRGB = StringUtils.getColor(repo.projectName);
 
@@ -150,6 +151,69 @@ public class GitBlitRepository{
 			return false;
 		return true;
 	}
+	
+	/**
+	 * Gitblit repo size is a string. To make it comparable, the real numeric
+	 * bytes have to be extracted
+	 * 
+	 * @param value
+	 * @return
+	 */
+	public final static long makeByteValue(String value){
+		if(value == null || value.isEmpty()){
+			return -1L;
+		}
+		try{
+			String size = value;
+			long f = 1L;
+			// Using 1000 instead of 1024 to avoid multiplications
+			size = size.trim().toLowerCase();
+			if(size.endsWith(" b")){
+				size = size.substring(0, size.length() - 2).trim();
+				f = 1L;
+			}else if(size.endsWith(" k")){
+				size = size.substring(0, size.length() - 2).trim();
+				f = 1024L;
+			}else if(size.endsWith(" kb")){
+				size = size.substring(0, size.length() - 3).trim();
+				f = 1024L;
+			}else if(size.endsWith(" mb")){
+				size = size.substring(0, size.length() - 3).trim();
+				f = 1048576L;
+			}else if(size.endsWith(" gb")){
+				size = size.substring(0, size.length() - 3).trim();
+				f = 1073741824L;
+			}else if(size.endsWith(" tb")){
+				size = size.substring(0, size.length() - 3).trim();
+				f = 1099511627776L;
+			}else{
+				f = 1L;
+			}
+
+			// Detect decimal separator (no regex!)
+			size = size.replace("'", "");
+			size = size.replace("´", "");
+
+			int cpos = size.lastIndexOf(",");
+			int dpos = size.lastIndexOf(".");
+
+			if(cpos != -1 || dpos != -1){
+				if(cpos > dpos){
+					// Comma is separator:
+					size = size.replace(".", "").replaceAll(",", ".");
+				}else if(cpos < dpos || (cpos != -1 && dpos > -1)){
+					// Dot is separator
+					size = size.replace(",", "");
+				}
+			}
+			Double val = f * Double.parseDouble(size);
+			return val.longValue();
+		}catch(Exception e){
+			//Activator.logError("Error while sorting view", e);
+		}
+		return -1L;
+	}
+
 
 	@Override
 	public String toString(){

@@ -80,7 +80,7 @@ public abstract class ViewActionBase extends Action{
 	 */
 	protected boolean handleErrorModel(){
 		GitBlitViewModel model = getSelectedModel();
-		if(model != null && model instanceof ErrorViewModel){
+		if(model instanceof ErrorViewModel){
 			PreferenceDialog dialog = PreferencesUtil.createPreferenceDialogOn(null, GitBlitExplorerPrefPage.ID, null, null);
 		    dialog.open();
 		    return true;

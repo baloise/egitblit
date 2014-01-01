@@ -16,7 +16,8 @@ public class PreferenceModel{
 	public static enum DoubleClickBehaviour{
 			OpenGitBlit(0),
 			CopyUrl(1),
-			PasteEGit(2);
+			PasteEGit(2),
+			CloneImport(3);
 			
 			
 		public final int value;
@@ -39,6 +40,7 @@ public class PreferenceModel{
 	private List<GitBlitServer> repoList = new ArrayList<GitBlitServer>();
 	private boolean omitServerErrors = false;
 	private boolean colorColums = false;
+	private boolean showGroups = true;
 	
 	
 	public PreferenceModel(){
@@ -67,7 +69,7 @@ public class PreferenceModel{
 			return;
 		}
 		if(this.repoList.contains(repo)){
-			Activator.logError("Can´t add repository location "  + repo.url + ". A repository with this url already exists.");
+			Activator.logError("Canï¿½t add repository location "  + repo.url + ". A repository with this url already exists.");
 			return;
 		}
 		this.repoList.add(repo);
@@ -97,6 +99,13 @@ public class PreferenceModel{
 	}
 	public boolean isOmitServerErrors(){
 		return this.omitServerErrors;
+	}
+	
+	public void setShowGroups(boolean val){
+		this.showGroups = val;
+	}
+	public boolean isShowGroups(){
+		return this.showGroups;
 	}
 
 }

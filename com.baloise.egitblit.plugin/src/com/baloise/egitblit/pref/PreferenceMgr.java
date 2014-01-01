@@ -22,6 +22,7 @@ public class PreferenceMgr{
 	public final static String KEY_GITBLIT_DCLICK = "com.baloise.gitblit.dobuleclick";
 	public final static String KEY_GITBLIT_OMIT_SERVER_ERROR = "com.baloise.gitblit.general.omitServerInError";
 	public final static String KEY_GITBLIT_OMIT_COLOR_COLUMS = "com.baloise.gitblit.general.viewer.coloring";
+	public final static String KEY_GITBLIT_SHOW_GROUPS = "com.baloise.gitblit.general.viewer.showGroups";
 
 	// Node containing the list of servers
 	public final static String KEY_GITBLIT_SERVER = "com.baloise.gitblit.server";
@@ -48,7 +49,7 @@ public class PreferenceMgr{
 			ISecurePreferences pref = SecurePreferencesFactory.getDefault().node(KEY_GITBLIT_ROOT);
 
 			if(pref == null){
-				final String msg = "Can´t access preferences for Gitblit explorer. Continue with new (empty) settings.";
+				final String msg = "Canï¿½t access preferences for Gitblit explorer. Continue with new (empty) settings.";
 				Activator.logError(msg);
 				return prefModel;
 			}
@@ -62,6 +63,9 @@ public class PreferenceMgr{
 			
 			bval = pref.getBoolean(KEY_GITBLIT_OMIT_COLOR_COLUMS, false);
 			prefModel.setColorColumns(bval);
+
+			bval = pref.getBoolean(KEY_GITBLIT_SHOW_GROUPS, true);
+			prefModel.setShowGroups(bval);
 			
 			// ---- Read list of servers
 			// Root node
@@ -95,7 +99,7 @@ public class PreferenceMgr{
 		ISecurePreferences pref = SecurePreferencesFactory.getDefault().node(KEY_GITBLIT_ROOT);
 
 		if(pref == null){
-			final String msg = "Can´t access preferences for Gitblit Explorer. Confriguration will not be saved.";
+			final String msg = "Canï¿½t access preferences for Gitblit Explorer. Confriguration will not be saved.";
 			Activator.logError(msg);
 			throw new GitBlitExplorerException(msg);
 		}
@@ -105,6 +109,7 @@ public class PreferenceMgr{
 			pref.putInt(KEY_GITBLIT_DCLICK, prefModel.getDoubleClick().value, false);
 			pref.putBoolean(KEY_GITBLIT_OMIT_SERVER_ERROR, prefModel.isOmitServerErrors(),false);
 			pref.putBoolean(KEY_GITBLIT_OMIT_COLOR_COLUMS, prefModel.isColorColumns(), false);
+			pref.putBoolean(KEY_GITBLIT_SHOW_GROUPS, prefModel.isShowGroups(), false);
 			
 			ISecurePreferences serverNode = pref.node(KEY_GITBLIT_SERVER);
 			ISecurePreferences entryNode;
@@ -127,7 +132,7 @@ public class PreferenceMgr{
 			}
 			pref.flush();
 		}catch(Exception e){
-			Activator.logError("Error saving Gitblit preference settings: Can´t remove older server settings.", e);
+			Activator.logError("Error saving Gitblit preference settings: Canï¿½t remove older server settings.", e);
 		}
 	}
 

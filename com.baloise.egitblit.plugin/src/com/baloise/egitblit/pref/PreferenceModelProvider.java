@@ -20,7 +20,7 @@ public class PreferenceModelProvider implements IStructuredContentProvider{
 
 	@Override
 	public Object[] getElements(Object inputElement){
-		if(inputElement != null && inputElement instanceof PreferenceModel){
+		if(inputElement instanceof PreferenceModel){
 			return ((PreferenceModel)inputElement).getServerList().toArray();
 		}
 		return null;

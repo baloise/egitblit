@@ -3,12 +3,13 @@ package com.baloise.egitblit.view;
 
 
 public enum TimeAgo{
-	Now		(0L),
-	Mins	(60000L),
-	Hours	(60000L*60L),
-	Days	(60000L*60L*24L),
-	Months	(60000L*60L*24L*30L),
-	Years	(60000L*60L*24L*365L);
+	Now			(0L),
+	Mins		(60000L),
+	Hours		(60000L*60L),
+	Yesterday	(60000L*60L*24L),
+	Days		(60000L*60L*24L),
+	Months		(60000L*60L*24L*30L),
+	Years		(60000L*60L*24L*365L);
 	
 	private long ticks;
 	
@@ -25,6 +26,9 @@ public enum TimeAgo{
 			return Months;
 		}
 		if(Days.getValue(ticks) > 0){
+			if(Days.getValue(ticks) == 1){
+				return Yesterday;
+			}
 			return Days;
 		}
 		if(Hours.getValue(ticks) > 0){

@@ -95,12 +95,12 @@ public class StyledLabelProvider extends StyledCellLabelProvider implements Repo
 	@Override
 	public void update(ViewerCell cell){
 		// --- Get the current column and element
-		int columnIndex = cell.getColumnIndex();
+		ColumnDesc cdesc = ColumnDesc.getColumnDesc(cell.getColumnIndex());
 		Object element = cell.getElement();
 
 		if(element instanceof GitBlitViewModel == true){
 			GitBlitViewModel model = (GitBlitViewModel) element;
-			String label = getColumnText(model, columnIndex);
+			String label = getColumnText(model, cdesc);
 			Color fgCol = null;
 			Color bgCol = null;
 			Font font = null;
@@ -114,16 +114,17 @@ public class StyledLabelProvider extends StyledCellLabelProvider implements Repo
 				
 				StyledString text = new StyledString();
 				if(this.decorateLabels){
-					fgCol = getForgroundColor(model, columnIndex);
-					bgCol = getBackgroundColor(model, columnIndex);
+					fgCol = getForgroundColor(model, cdesc);
+					bgCol = getBackgroundColor(model, cdesc);
+
 					if(model instanceof ErrorViewModel){
-						if(columnIndex == 0){
+						if(cdesc == ColumnDesc.Repository){
 							image = PlatformUI.getWorkbench().getSharedImages().getImage(ISharedImages.IMG_OBJS_ERROR_TSK);
 						}
 					}
 					else if(model instanceof GroupViewModel){
-						switch(columnIndex){
-							case 0:
+						switch(cdesc){
+							case Repository:
 								image = PlatformUI.getWorkbench().getSharedImages().getImage(ISharedImages.IMG_OBJ_FOLDER);
 								break;
 							default:
@@ -132,11 +133,13 @@ public class StyledLabelProvider extends StyledCellLabelProvider implements Repo
 					}
 					else if(model instanceof ProjectViewModel){
 						// Assign font and other decorations
-						switch(columnIndex){
-							case 0:
+						switch(cdesc){
+							case Repository:
 								image = getImage(cell.getControl().getDisplay(),((ProjectViewModel) model).getColor());
 								break;
-							case 3:
+							case Description:
+								break;
+							case LastChange:
 								long diff = System.currentTimeMillis() - ((ProjectViewModel) element).getLastChange().getTime();
 								TimeAgo ago = TimeAgo.getAgo(diff);
 								long val = ago.getValue(diff);
@@ -148,6 +151,9 @@ public class StyledLabelProvider extends StyledCellLabelProvider implements Repo
 										font = boldItalicFont;
 										break;
 									case Hours:
+										font = boldItalicFont;
+										break;
+									case Yesterday:
 										font = boldItalicFont;
 										break;
 									case Days:
@@ -164,20 +170,23 @@ public class StyledLabelProvider extends StyledCellLabelProvider implements Repo
 										break;
 								}
 								break;
-							case 2:
+							case Owner:
 								font = italicFont;
 								break;
-							case 4:
+							case Size:
 								if(((ProjectViewModel)model).hasCommits() == false){
 									font = italicFont;
 								}
+								break;
+							default:
 								break;
 						}
 					}
 				}
 				text.append(label);
 				text.setStyle(lstart, lend, new BaseStyler(font, fgCol, bgCol));
-				if(model instanceof GroupViewModel && columnIndex == 0 && decorateLabels == true){
+
+				if(model instanceof GroupViewModel && cdesc == ColumnDesc.Repository  && decorateLabels == true){
 					int size = ((GroupViewModel)model).getChilds().size();
 					if(size > 0){
 						text.append(" (" + size + ")",StyledString.COUNTER_STYLER);
@@ -224,16 +233,11 @@ public class StyledLabelProvider extends StyledCellLabelProvider implements Repo
 	 * @param columnIndex
 	 * @return
 	 */
-	public String getColumnText(GitBlitViewModel element, int columnIndex){
-		switch(columnIndex){
-			case 0:
-				if(element instanceof GroupViewModel){
-					return ((GroupViewModel) element).getName();
-				}else if(element instanceof ProjectViewModel){
-					return ((ProjectViewModel) element).getName();
-				}
-				break;
-			case 1:
+	public String getColumnText(GitBlitViewModel element, ColumnDesc col){
+		switch(col){
+			case Repository:
+				return element.getName();
+			case Description:
 				if(element instanceof GroupViewModel){
 					if(GitBlitRepository.GROUP_MAIN.equals(((GroupViewModel) element).getName())){
 						return "main group of repositories";
@@ -243,17 +247,17 @@ public class StyledLabelProvider extends StyledCellLabelProvider implements Repo
 					return ((ProjectViewModel) element).getDescription();
 				}
 				break;
-			case 2:
+			case Owner:
 				if(element instanceof ProjectViewModel){
 					return ArrayUtils.toString(((ProjectViewModel) element).getOwners());
 				}
 				break;
-			case 3:
+			case LastChange:
 				if(element instanceof ProjectViewModel){
 					return makeDateAgo((ProjectViewModel) element);
 				}
 				break;
-			case 4:
+			case Size:
 				if(element instanceof ProjectViewModel){
 					if(((ProjectViewModel) element).hasCommits() == true){
 						return ((ProjectViewModel) element).getSize();
@@ -261,12 +265,19 @@ public class StyledLabelProvider extends StyledCellLabelProvider implements Repo
 					return "(empty)";
 				}
 				break;
-			case 5:
+			case Server:
 				if(element instanceof ProjectViewModel){
 					return ((ProjectViewModel) element).getServerURL();
 				}
 				break;
-
+			case Group:
+				if(element instanceof ProjectViewModel){
+					return ((ProjectViewModel) element).getGroupName();
+				}
+				if(element instanceof GroupViewModel){
+					return ((GroupViewModel) element).getName();
+				}
+				break;
 		}
 		return "";
 	}
@@ -298,6 +309,9 @@ public class StyledLabelProvider extends StyledCellLabelProvider implements Repo
 				buff.append(diff);
 				buff.append(" hours ago");
 				break;
+			case Yesterday:
+				buff.append(" yesterday");
+				break;
 			case Days:
 				buff.append(diff);
 				buff.append(" days ago");
@@ -321,7 +335,7 @@ public class StyledLabelProvider extends StyledCellLabelProvider implements Repo
 	 * @param columnIndex
 	 * @return
 	 */
-	public Color getForgroundColor(GitBlitViewModel element, int columnIndex){
+	public Color getForgroundColor(GitBlitViewModel element, ColumnDesc col){
 		if(element == null){
 			return null;
 		}
@@ -330,20 +344,22 @@ public class StyledLabelProvider extends StyledCellLabelProvider implements Repo
 			return disp.getSystemColor(SWT.COLOR_RED);
 		}
 		if(element instanceof ProjectViewModel){
-			switch(columnIndex){
-				case 3:
+			switch(col){
+				case LastChange:
 					return getTimeColor((ProjectViewModel) element);
-				case 4:
+				case Size:
 					if(((ProjectViewModel) element).hasCommits() == false){
 						return disp.getSystemColor(SWT.COLOR_DARK_GREEN);
 					}
 					return disp.getSystemColor(SWT.COLOR_BLUE);
+				default:
+					break;
 			}
 		}
 		return null;
 	}
 	
-	private Color getBackgroundColor(GitBlitViewModel element, int columnIndex){
+	private Color getBackgroundColor(GitBlitViewModel element, ColumnDesc col){
 		return null;
 	}
 
@@ -381,6 +397,8 @@ public class StyledLabelProvider extends StyledCellLabelProvider implements Repo
 				if(ago.getValue(time) < 30){
 					return disp.getSystemColor(SWT.COLOR_DARK_MAGENTA);
 				}
+			case Yesterday:
+				return disp.getSystemColor(SWT.COLOR_BLUE);
 			case Months:
 			case Years:
 		}
