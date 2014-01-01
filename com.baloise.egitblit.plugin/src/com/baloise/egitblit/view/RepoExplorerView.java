@@ -127,14 +127,18 @@ public class RepoExplorerView extends ViewPart{
 				case Group:
 					return (List)this.groupModelList;
 				case Repository:
-					return (List)getProjects();
+					return getProjects();
 			}
 			return new ArrayList<GitBlitViewModel>();
 		}
 		
-		public List<ProjectViewModel> getProjects(){
-			List<ProjectViewModel> list = new ArrayList<ProjectViewModel>();
+		public List<GitBlitViewModel> getProjects(){
+			List<GitBlitViewModel> list = new ArrayList<GitBlitViewModel>();
 			for(GitBlitViewModel item : this.groupModelList){
+				if(item instanceof ErrorViewModel){
+					list.add(item);
+					continue;
+				}
 				list.addAll((List)((GroupViewModel)item).getChilds());
 			}
 			return list;
@@ -635,15 +639,15 @@ public class RepoExplorerView extends ViewPart{
 				if(labelProvider != null){
 					labelProvider.setDecorateLabels(prefModel.isColorColumns());
 				}
-				if(viewData != null){
-					boolean mode = this.prefModel.isShowGroups();
-					if(mode == true){
-						viewData.setViewMode(ViewMode.Group);
-					}
-					else{
-						viewData.setViewMode(ViewMode.Group);
-					}
-				}
+//				if(viewData != null){
+//					boolean mode = this.prefModel.isShowGroups();
+//					if(mode == true){
+//						viewData.setViewMode(ViewMode.Group);
+//					}
+//					else{
+//						viewData.setViewMode(ViewMode.Group);
+//					}
+//				}
 			}
 			return;
 		}catch(GitBlitExplorerException e){

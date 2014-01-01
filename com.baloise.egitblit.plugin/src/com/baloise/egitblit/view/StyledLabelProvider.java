@@ -238,6 +238,9 @@ public class StyledLabelProvider extends StyledCellLabelProvider implements Repo
 			case Repository:
 				return element.getName();
 			case Description:
+				if(element instanceof ErrorViewModel){
+					return "";
+				}
 				if(element instanceof GroupViewModel){
 					if(GitBlitRepository.GROUP_MAIN.equals(((GroupViewModel) element).getName())){
 						return "main group of repositories";
@@ -271,6 +274,9 @@ public class StyledLabelProvider extends StyledCellLabelProvider implements Repo
 				}
 				break;
 			case Group:
+				if(element instanceof ErrorViewModel){
+					return "";
+				}
 				if(element instanceof ProjectViewModel){
 					return ((ProjectViewModel) element).getGroupName();
 				}

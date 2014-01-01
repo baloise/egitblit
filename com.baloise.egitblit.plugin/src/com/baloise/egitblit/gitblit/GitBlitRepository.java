@@ -34,6 +34,7 @@ public class GitBlitRepository{
 	public String size;
 	public long   byteSize;
 	public String repoRGB;
+	public String head;
 
 	// ....more properties to come
 	
@@ -68,7 +69,8 @@ public class GitBlitRepository{
 		repo.originRepository = model.originRepository;
 		repo.size = model.size;
 		repo.byteSize = makeByteValue(repo.size);
-		
+		repo.head = model.HEAD;
+
 		repo.repoRGB = StringUtils.getColor(repo.projectName);
 
 		return repo;
