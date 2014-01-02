@@ -144,15 +144,22 @@ public class RepoExplorerView extends ViewPart{
 			return list;
 		}
 		
+		/**
+		 * Prepare view depending on the current config setting
+		 * E.g. displaying and hiding columns, Setting column labels etc.
+		 */
 		public void update(){
 			if(viewer != null){
+				// Set the model to display
 				viewer.setInput(getModel());
 				viewer.refresh(true);
 				if(expandCItem != null){
+					// sync set the viewmode button
 					expandCItem.enable(viewMode == ViewMode.Group);
 				}
 				
 				if(viewMode == ViewMode.Repository){
+					// Showing repositories only (no groups)
 					if(columGroupWidth < 1){
 						columGroupWidth = 120;
 					}
@@ -162,6 +169,7 @@ public class RepoExplorerView extends ViewPart{
 					columnGroupRepo.setToolTipText("Name of the repository");
 				}
 				else{
+					// Showing groups
 					columGroupWidth = columnGroup.getWidth();
 					columnGroup.setWidth(0);
 					columnGroup.setResizable(false);
@@ -216,6 +224,11 @@ public class RepoExplorerView extends ViewPart{
 			return null;
 		}
 	};
+	/**
+	 * Action shown as menu item in form header to omit unavailable servers
+	 */
+	private OmitAction omitAction = new OmitAction();
+
 
 	/**
 	 * Internal class for showing messages at the form header
@@ -267,11 +280,6 @@ public class RepoExplorerView extends ViewPart{
 		}
 	};
 
-	/**
-	 * Action shown as menu item in form header to omit unavailable servers
-	 */
-	private OmitAction omitAction = new OmitAction();
-
 	// ------------------------------------------------------------------------
 	// Separate instance to unregiter listener at dispose cycle
 	IPropertyChangeListener propChangeListener = new IPropertyChangeListener() {
@@ -315,6 +323,9 @@ public class RepoExplorerView extends ViewPart{
 		Activator.getDefault().getPreferenceStore().addPropertyChangeListener(propChangeListener);
 		initPreferences();
 
+		// --------------------------------------------------------------------
+		// --- FormToolkit
+		// --------------------------------------------------------------------
 		final FormToolkit ftk = new FormToolkit(parent.getDisplay());
 		parent.addDisposeListener(new DisposeListener() {
 			public void widgetDisposed(DisposeEvent e){
@@ -405,8 +416,6 @@ public class RepoExplorerView extends ViewPart{
 		expandCItem = new ExpandCItem(viewer);
 		final ImageDescriptor treeMode = Activator.getImageDescriptor(SharedImages.TreeMode);
 		Action hideGroupsAllAction = new Action("Hide Groups",SWT.TOGGLE) {
-// adding column works, but is not sortable			
-//			private TreeColumn columnGroup;
 			@Override
 			public void run(){
 				viewer.getTree().setRedraw(false);
@@ -477,7 +486,7 @@ public class RepoExplorerView extends ViewPart{
 		ColumnViewerToolTipSupport.enableFor(viewer);
 		initTreeSorter();
 
-		// TODO: refactore code. Move this init code to initPreferences
+		// Preparing the model: Initializing viewData wrapper and loading repositories, sync related ui controls
 		this.viewData = new ViewerData();
 		loadRepositories(true);
 		boolean mode = this.prefModel.isShowGroups();
@@ -510,7 +519,7 @@ public class RepoExplorerView extends ViewPart{
 				RepoLabelProvider labelProvider = (RepoLabelProvider) treeViewer.getLabelProvider();
 				boolean isMatch = false;
 				for(int columnIndex = 0; columnIndex < numberOfColumns; columnIndex++){
-					String labelText = labelProvider.getColumnText((GitBlitViewModel) element, ColumnDesc.getColumnDesc(columnIndex));
+					String labelText = labelProvider.getColumnText((GitBlitViewModel) element, ColumnFactory.getColumnDesc(treeViewer,columnIndex));
 					isMatch |= wordMatches(labelText);
 				}
 				return isMatch;
@@ -539,48 +548,27 @@ public class RepoExplorerView extends ViewPart{
 
 		viewer.getTree().setHeaderVisible(true);
 		viewer.getTree().setLinesVisible(true);
-
+		
 		// IMPORTANT: See ColumnDesc Enum for column order
-		columnGroupRepo = new TreeColumn(viewer.getTree(), SWT.LEFT);
-		columnGroupRepo.setAlignment(SWT.LEFT);
-		columnGroupRepo.setText("Group / Repository");
-		columnGroupRepo.setWidth(240);
+		columnGroupRepo = ColumnFactory.addColumn(ColumnDesc.GroupRepository, viewer, "Group / Repository", SWT.LEFT, SWT.LEFT, 240);
 		columnGroupRepo.setToolTipText("Name of the group and its repositories");
 
-		TreeColumn columnDesc = new TreeColumn(viewer.getTree(), SWT.LEFT);
-		columnDesc.setAlignment(SWT.LEFT);
-		columnDesc.setText("Description");
-		columnDesc.setWidth(180);
-		columnDesc.setToolTipText("Description of the repository");
+		TreeColumn col = ColumnFactory.addColumn(ColumnDesc.Description, viewer, "Description", SWT.LEFT, SWT.LEFT, 180);
+		col.setToolTipText("Description of the repository");
 
-		TreeColumn columnOwner = new TreeColumn(viewer.getTree(), SWT.LEFT);
-		columnOwner.setAlignment(SWT.LEFT);
-		columnOwner.setText("Owner");
-		columnOwner.setWidth(120);
-		columnOwner.setToolTipText("Owner(s) of the repository");
+		col = ColumnFactory.addColumn(ColumnDesc.Description, viewer, "Owner", SWT.LEFT, SWT.LEFT, 120);
+		col.setToolTipText("Owner(s) of the repository");
 
-		TreeColumn columnLastChange = new TreeColumn(viewer.getTree(), SWT.LEFT);
-		columnLastChange.setAlignment(SWT.RIGHT);
-		columnLastChange.setText("Last Change");
-		columnLastChange.setWidth(100);
-		columnLastChange.setToolTipText("Last change of the repository");
+		col = ColumnFactory.addColumn(ColumnDesc.LastChange, viewer, "Last Change", SWT.LEFT, SWT.RIGHT, 100);
+		col.setToolTipText("Last change of the repository");
 
-		TreeColumn columnSize = new TreeColumn(viewer.getTree(), SWT.LEFT);
-		columnSize.setAlignment(SWT.RIGHT);
-		columnSize.setText("Size");
-		columnSize.setWidth(80);
-		columnSize.setToolTipText("Size of the repository");
+		col = ColumnFactory.addColumn(ColumnDesc.Size, viewer, "Size", SWT.LEFT, SWT.RIGHT, 80);
+		col.setToolTipText("Size of the repository");
 
-		TreeColumn columnServer = new TreeColumn(viewer.getTree(), SWT.LEFT);
-		columnServer.setAlignment(SWT.LEFT);
-		columnServer.setText("Gitblit Server");
-		columnServer.setWidth(180);
-		columnServer.setToolTipText("Address of the hosting Gitblit server");
+		col = ColumnFactory.addColumn(ColumnDesc.Server, viewer, "Gitblit Server", SWT.LEFT, SWT.LEFT, 180);
+		col.setToolTipText("Address of the hosting Gitblit server");
 
-		columnGroup = new TreeColumn(viewer.getTree(), SWT.LEFT);
-		columnGroup.setAlignment(SWT.LEFT);
-		columnGroup.setText("Group");
-		columnGroup.setWidth(0);	
+		columnGroup = ColumnFactory.addColumn(ColumnDesc.Group, viewer, "Group", SWT.LEFT, SWT.LEFT, 0);
 		columnGroup.setToolTipText("Group of the repository");
 
 		// --------------------------------------------------------------------
@@ -621,7 +609,7 @@ public class RepoExplorerView extends ViewPart{
 	}
 
 	private void setRepoList(final List<GroupViewModel> list){
-		if(viewData == null){
+		if(this.viewData == null){
 			this.viewData = new ViewerData();
 		}
 		this.viewData.setGroupModel(list);
@@ -639,15 +627,6 @@ public class RepoExplorerView extends ViewPart{
 				if(labelProvider != null){
 					labelProvider.setDecorateLabels(prefModel.isColorColumns());
 				}
-//				if(viewData != null){
-//					boolean mode = this.prefModel.isShowGroups();
-//					if(mode == true){
-//						viewData.setViewMode(ViewMode.Group);
-//					}
-//					else{
-//						viewData.setViewMode(ViewMode.Group);
-//					}
-//				}
 			}
 			return;
 		}catch(GitBlitExplorerException e){

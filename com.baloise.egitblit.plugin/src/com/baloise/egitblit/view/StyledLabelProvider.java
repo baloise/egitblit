@@ -19,6 +19,8 @@ import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.graphics.RGB;
 import org.eclipse.swt.graphics.TextStyle;
 import org.eclipse.swt.widgets.Display;
+import org.eclipse.swt.widgets.Tree;
+import org.eclipse.swt.widgets.TreeColumn;
 import org.eclipse.ui.ISharedImages;
 import org.eclipse.ui.PlatformUI;
 
@@ -95,9 +97,14 @@ public class StyledLabelProvider extends StyledCellLabelProvider implements Repo
 	@Override
 	public void update(ViewerCell cell){
 		// --- Get the current column and element
-		ColumnDesc cdesc = ColumnDesc.getColumnDesc(cell.getColumnIndex());
 		Object element = cell.getElement();
-
+		TreeColumn tcol = ((Tree)cell.getControl()).getColumn(cell.getColumnIndex());
+		ColumnDesc cdesc = ColumnFactory.getColumnDesc(tcol);
+		if(cdesc == null){
+			Activator.logError("Error determinating column ID. TreeColumn data missing. Can't compute cell label.");
+			return;
+		}
+		
 		if(element instanceof GitBlitViewModel == true){
 			GitBlitViewModel model = (GitBlitViewModel) element;
 			String label = getColumnText(model, cdesc);
@@ -118,13 +125,13 @@ public class StyledLabelProvider extends StyledCellLabelProvider implements Repo
 					bgCol = getBackgroundColor(model, cdesc);
 
 					if(model instanceof ErrorViewModel){
-						if(cdesc == ColumnDesc.Repository){
+						if(cdesc == ColumnDesc.GroupRepository){
 							image = PlatformUI.getWorkbench().getSharedImages().getImage(ISharedImages.IMG_OBJS_ERROR_TSK);
 						}
 					}
 					else if(model instanceof GroupViewModel){
 						switch(cdesc){
-							case Repository:
+							case GroupRepository:
 								image = PlatformUI.getWorkbench().getSharedImages().getImage(ISharedImages.IMG_OBJ_FOLDER);
 								break;
 							default:
@@ -134,7 +141,7 @@ public class StyledLabelProvider extends StyledCellLabelProvider implements Repo
 					else if(model instanceof ProjectViewModel){
 						// Assign font and other decorations
 						switch(cdesc){
-							case Repository:
+							case GroupRepository:
 								image = getImage(cell.getControl().getDisplay(),((ProjectViewModel) model).getColor());
 								break;
 							case Description:
@@ -186,7 +193,7 @@ public class StyledLabelProvider extends StyledCellLabelProvider implements Repo
 				text.append(label);
 				text.setStyle(lstart, lend, new BaseStyler(font, fgCol, bgCol));
 
-				if(model instanceof GroupViewModel && cdesc == ColumnDesc.Repository  && decorateLabels == true){
+				if(model instanceof GroupViewModel && cdesc == ColumnDesc.GroupRepository  && decorateLabels == true){
 					int size = ((GroupViewModel)model).getChilds().size();
 					if(size > 0){
 						text.append(" (" + size + ")",StyledString.COUNTER_STYLER);
@@ -235,7 +242,7 @@ public class StyledLabelProvider extends StyledCellLabelProvider implements Repo
 	 */
 	public String getColumnText(GitBlitViewModel element, ColumnDesc col){
 		switch(col){
-			case Repository:
+			case GroupRepository:
 				return element.getName();
 			case Description:
 				if(element instanceof ErrorViewModel){

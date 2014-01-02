@@ -63,7 +63,7 @@ public class RepoViewSorter extends TreePathViewerSorter{
 		TreeViewer tviewer = (TreeViewer) viewer;
 
 		int dir = SWT.UP;
-		ColumnDesc column = null;
+		ColumnDesc columnDesc = null;
 		String v1 = "";
 		String v2 = "";
 
@@ -90,34 +90,28 @@ public class RepoViewSorter extends TreePathViewerSorter{
 		// Init
 		dir = tviewer.getTree().getSortDirection();
 		TreeColumn col = tviewer.getTree().getSortColumn();
-		column = ColumnDesc.getColumnDesc(tviewer.getTree().indexOf(col));
+		columnDesc = ColumnFactory.getColumnDesc(col);
 		RepoLabelProvider lprov = (RepoLabelProvider) prov;
 
-		v1 = lprov.getColumnText((GitBlitViewModel) e1, column);
-		v2 = lprov.getColumnText((GitBlitViewModel) e2, column);
+		v1 = lprov.getColumnText((GitBlitViewModel) e1, columnDesc);
+		v2 = lprov.getColumnText((GitBlitViewModel) e2, columnDesc);
 
 		v1 = v1 == null ? "" : v1;
 		v2 = v2 == null ? "" : v2;
 		v1 = v1.trim();
 		v2 = v2.trim();
 
-		if(column != ColumnDesc.Repository){
+		if(columnDesc != ColumnDesc.GroupRepository){
 			// For repository column, use label
 			if(e1 instanceof GroupViewModel){
 				// Get the values for the columns, if the model is a group
 				// Because a group entry does not contain values for all columns
-				v1 = getGroupSortValue(tviewer, (GroupViewModel) e1, column, dir);
-				v2 = getGroupSortValue(tviewer, (GroupViewModel) e2, column, dir);
-//				if(v1.compareTo(v2) == 0){
-//					// Based on sort direction, entries are equal, so maybe the invers 	comparison
-//					// brings a unique result (compare highest vs. compare lowest entries of a group)
-//					v1 = getGroupSortValue(tviewer, (GroupViewModel) e1, column, (dir == SWT.DOWN ? SWT.UP : SWT.DOWN));
-//					v2 = getGroupSortValue(tviewer, (GroupViewModel) e2, column, (dir == SWT.DOWN ? SWT.UP : SWT.DOWN));
-//				}
+				v1 = getGroupSortValue(tviewer, (GroupViewModel) e1, columnDesc, dir);
+				v2 = getGroupSortValue(tviewer, (GroupViewModel) e2, columnDesc, dir);
 			}else if(e1 instanceof ProjectViewModel){
 				// Only for numeric values required (because of alphanumeric(!)
 				// string compare)
-				switch(column){
+				switch(columnDesc){
 					case LastChange:
 						v1 = makeSortValue(((ProjectViewModel) e1).getLastChange());
 						v2 = makeSortValue(((ProjectViewModel) e2).getLastChange());
@@ -183,7 +177,7 @@ public class RepoViewSorter extends TreePathViewerSorter{
 		for(GitBlitViewModel item : list){
 			if(item instanceof ProjectViewModel){
 				switch(col){
-					case Repository:
+					case GroupRepository:
 						break;
 					case Description:
 						sl.add(((ProjectViewModel) item).getDescription());
