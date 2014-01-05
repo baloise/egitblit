@@ -6,7 +6,10 @@ public enum SharedImages{
 	ExpandAll			("ExpandAll",			"Expand all",	  "expandall.gif"),
 	GitIconBlack		("GitIconBlack",		"Git",			  "git-black-16x16.png"),
 	Refresh				("Refresh",				"Refresh",		  "refresh_tab.gif"),
-	TreeMode			("TreeMode",			"Tree mode",	  "tree_mode.gif");
+	ConfigureTable		("Configure Table",		"Configure Table","refresh_tab.gif"),
+	TreeMode			("TreeMode",			"Tree mode",	  "tree_mode.gif"),
+	Down				("Down",				"Down",	  		  "next.gif"),
+	Up					("Up",					"Up",	  		  "previous.gif");
 
 	
 	public String ID;

@@ -28,6 +28,7 @@ import org.eclipse.jface.viewers.IDoubleClickListener;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.TreeViewer;
 import org.eclipse.jface.viewers.Viewer;
+import org.eclipse.jface.window.Window;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.dnd.DND;
 import org.eclipse.swt.dnd.TextTransfer;
@@ -40,7 +41,11 @@ import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
+import org.eclipse.swt.widgets.Event;
+import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.TreeColumn;
+import org.eclipse.ui.IMemento;
+import org.eclipse.ui.ISharedImages;
 import org.eclipse.ui.dialogs.FilteredTree;
 import org.eclipse.ui.dialogs.PatternFilter;
 import org.eclipse.ui.forms.IMessage;
@@ -76,46 +81,46 @@ import com.baloise.egitblit.view.model.ProjectViewModel;
 public class RepoExplorerView extends ViewPart{
 
 	private TreeViewer viewer;
-
+	private ColumnFactory colFactory;
 	/**
 	 * Enum containing the display modes (Grouped or only the repos)
+	 * 
 	 * @author MicBag
-	 *
+	 * 
 	 */
 	private enum ViewMode{
-		Group,
-		Repository
+		Group, Repository
 	};
 
 	/**
 	 * Wrapper which prepares the viewer model depending on the ViewMode
+	 * 
 	 * @author MicBag
-	 *
+	 * 
 	 */
 	private class ViewerData{
 		private List<GroupViewModel> groupModelList = new ArrayList<GroupViewModel>();
 		private ViewMode viewMode = ViewMode.Group;
-		private int columGroupWidth = 120;
+
 		public ViewerData(){
 		}
-		
+
 		public void setGroupModel(List<GroupViewModel> list){
 			this.groupModelList.clear();
 			this.groupModelList.addAll(list);
 			update();
 		}
-		
+
 		public void setViewMode(ViewMode mode){
 			this.viewMode = mode;
 			update();
 		}
-		
+
 		public ViewMode switchMode(){
 			ViewMode mode;
 			if(this.viewMode == ViewMode.Group){
 				mode = ViewMode.Repository;
-			}
-			else{
+			}else{
 				mode = ViewMode.Group;
 			}
 			setViewMode(mode);
@@ -125,13 +130,13 @@ public class RepoExplorerView extends ViewPart{
 		public List<GitBlitViewModel> getModel(){
 			switch(viewMode){
 				case Group:
-					return (List)this.groupModelList;
+					return (List) this.groupModelList;
 				case Repository:
 					return getProjects();
 			}
 			return new ArrayList<GitBlitViewModel>();
 		}
-		
+
 		public List<GitBlitViewModel> getProjects(){
 			List<GitBlitViewModel> list = new ArrayList<GitBlitViewModel>();
 			for(GitBlitViewModel item : this.groupModelList){
@@ -139,14 +144,14 @@ public class RepoExplorerView extends ViewPart{
 					list.add(item);
 					continue;
 				}
-				list.addAll((List)((GroupViewModel)item).getChilds());
+				list.addAll((List) ((GroupViewModel) item).getChilds());
 			}
 			return list;
 		}
-		
+
 		/**
-		 * Prepare view depending on the current config setting
-		 * E.g. displaying and hiding columns, Setting column labels etc.
+		 * Prepare view depending on the current config setting E.g. displaying
+		 * and hiding columns, Setting column labels etc.
 		 */
 		public void update(){
 			if(viewer != null){
@@ -157,47 +162,39 @@ public class RepoExplorerView extends ViewPart{
 					// sync set the viewmode button
 					expandCItem.enable(viewMode == ViewMode.Group);
 				}
-				
+
 				if(viewMode == ViewMode.Repository){
 					// Showing repositories only (no groups)
-					if(columGroupWidth < 1){
-						columGroupWidth = 120;
-					}
-					columnGroup.setWidth(columGroupWidth);
-					columnGroup.setResizable(true);
 					columnGroupRepo.setText("Repository");
 					columnGroupRepo.setToolTipText("Name of the repository");
-				}
-				else{
+				}else{
 					// Showing groups
-					columGroupWidth = columnGroup.getWidth();
-					columnGroup.setWidth(0);
-					columnGroup.setResizable(false);
 					columnGroupRepo.setText("Group / Repository");
 					columnGroupRepo.setToolTipText("Name of the group and its repositories");
 				}
 			}
 		}
-		
+
 	};
-	
+
 	// ------------------------------------------------------------------------
 	// --- Variables
 	// ------------------------------------------------------------------------
-	private ViewerData viewData;	// Model Wrapper
+	private ViewerData viewData; // Model Wrapper
 	private RepoViewSorter repoViewSorter;
-	private TreeColumn columnGroupRepo; // Needed to change column text and tooltip
+	private TreeColumn columnGroupRepo; // Needed to change column text and
+										// tooltip
 	private TreeColumn columnGroup;
-	private StyledLabelProvider labelProvider; 
+	private StyledLabelProvider labelProvider;
 	private DoubleClickBehaviour dbclick = DoubleClickBehaviour.OpenGitBlit;
-	private PreferenceModel prefModel = null;
+	private PreferenceModel prefModel = new PreferenceModel();
 	private List<GitBlitServer> serverList = null;
 	private Action refreshAction;
 	private ExpandCItem expandCItem;
 
 	private Form form;
 	private boolean omitServerErrors = false;
-
+	
 	// ------------------------------------------------------------------------
 	// --- Local actions
 	// ------------------------------------------------------------------------
@@ -208,7 +205,6 @@ public class RepoExplorerView extends ViewPart{
 			setChecked(omitServerErrors);
 			try{
 				prefModel.setOmitServerErrors(omitServerErrors);
-				PreferenceMgr.saveConfig(prefModel);
 			}catch(Exception e){
 				Activator.logError("Error saving preference settings.", e);
 			}
@@ -224,11 +220,11 @@ public class RepoExplorerView extends ViewPart{
 			return null;
 		}
 	};
+
 	/**
 	 * Action shown as menu item in form header to omit unavailable servers
 	 */
 	private OmitAction omitAction = new OmitAction();
-
 
 	/**
 	 * Internal class for showing messages at the form header
@@ -281,7 +277,7 @@ public class RepoExplorerView extends ViewPart{
 	};
 
 	// ------------------------------------------------------------------------
-	// Separate instance to unregiter listener at dispose cycle
+	// Subscribe on preference changes
 	IPropertyChangeListener propChangeListener = new IPropertyChangeListener() {
 		@Override
 		public void propertyChange(PropertyChangeEvent event){
@@ -293,18 +289,36 @@ public class RepoExplorerView extends ViewPart{
 	};
 
 	/**
-	 * ...guess 
+	 * ...guess
 	 */
 	public RepoExplorerView(){
 	}
 
-	/* (non-Javadoc)
+	/*
+	 * (non-Javadoc)
+	 * 
 	 * @see org.eclipse.ui.part.WorkbenchPart#dispose()
 	 */
 	@Override
 	public void dispose(){
 		Activator.getDefault().getPreferenceStore().removePropertyChangeListener(propChangeListener);
+		colFactory.clear();
 		super.dispose();
+	}
+	
+
+	/* (non-Javadoc)
+	 * @see org.eclipse.ui.part.ViewPart#saveState(org.eclipse.ui.IMemento)
+	 */
+	@Override
+	public void saveState(IMemento memento){
+		super.saveState(memento);
+		try{
+			colFactory.updatePreferences(this.prefModel,true);
+			PreferenceMgr.saveConfig(this.prefModel);
+		}catch(GitBlitExplorerException e){
+			Activator.logError("Error saveing preferences.",e);
+		}
 	}
 
 	/*
@@ -316,7 +330,6 @@ public class RepoExplorerView extends ViewPart{
 	 */
 	@Override
 	public void createPartControl(Composite parent){
-
 		// --------------------------------------------------------------------
 		// Sync preferences
 		// --------------------------------------------------------------------
@@ -334,7 +347,8 @@ public class RepoExplorerView extends ViewPart{
 		});
 
 		// --------------------------------------------------------------------
-		// --- sync with EGit: Remote repository related action will force a reload
+		// --- sync with EGit: Remote repository related action will force a
+		// reload
 		// --------------------------------------------------------------------
 		IJobManager jobMan = Job.getJobManager();
 		jobMan.addJobChangeListener(new IJobChangeListener() {
@@ -366,7 +380,6 @@ public class RepoExplorerView extends ViewPart{
 			public void aboutToRun(IJobChangeEvent event){
 			}
 		});
-
 
 		// --------------------------------------------------------------------
 		// --- Use Formtoolkit, because of header preparing
@@ -412,20 +425,15 @@ public class RepoExplorerView extends ViewPart{
 				return refreskImgDesc;
 			}
 		};
-		
+
 		expandCItem = new ExpandCItem(viewer);
 		final ImageDescriptor treeMode = Activator.getImageDescriptor(SharedImages.TreeMode);
-		Action hideGroupsAllAction = new Action("Hide Groups",SWT.TOGGLE) {
+		Action hideGroupsAllAction = new Action("Hide Groups", SWT.TOGGLE) {
 			@Override
 			public void run(){
 				viewer.getTree().setRedraw(false);
 				ViewMode mode = viewData.switchMode();
 				prefModel.setShowGroups(ViewMode.Group == mode);
-				try{
-					PreferenceMgr.saveConfig(prefModel);
-				}catch(Exception e){
-					Activator.logError("Error saving preference settings.", e);
-				}
 				viewer.refresh(true);
 				viewer.getTree().setRedraw(true);
 			}
@@ -435,7 +443,7 @@ public class RepoExplorerView extends ViewPart{
 				return treeMode;
 			}
 		};
-		
+
 		hideGroupsAllAction.setChecked(true);
 		this.form.getToolBarManager().add(expandCItem);
 		this.form.getToolBarManager().add(hideGroupsAllAction);
@@ -445,6 +453,33 @@ public class RepoExplorerView extends ViewPart{
 		IMenuManager hmgr = form.getMenuManager();
 		hmgr.add(omitAction);
 		omitAction.setChecked(this.prefModel.isOmitServerErrors());
+
+		hmgr.add(new Separator());
+		final ImageDescriptor desc = Activator.getSharedImageDescriptor(ISharedImages.IMG_DEF_VIEW); 
+		hmgr.add(new Action("Configure table columns",desc){			
+			@Override
+			public void runWithEvent(Event event){
+				colFactory.updatePreferences(prefModel, true);
+				Shell shell = new Shell(event.widget.getDisplay());
+				shell.setImage(desc.createImage());
+				shell.setText(getText());
+				ColumnConfigDialog dialog = new ColumnConfigDialog(shell,prefModel);
+				dialog.create();
+				Window.setDefaultImage(Activator.getSharedImage(ISharedImages.IMG_DEF_VIEW));
+				if (dialog.open() == Window.OK) {
+					prefModel.setColumnData(dialog.getColumns());
+					colFactory.updatePreferences(prefModel, false);
+				} 
+			}
+		});
+
+		hmgr.add(new Action("Reset table columns",refreskImgDesc){			
+			@Override
+			public void runWithEvent(Event event){
+				colFactory.reset();
+			}
+		});
+		
 		hmgr.update(true);
 
 		// --------------------------------------------------------------------
@@ -486,7 +521,8 @@ public class RepoExplorerView extends ViewPart{
 		ColumnViewerToolTipSupport.enableFor(viewer);
 		initTreeSorter();
 
-		// Preparing the model: Initializing viewData wrapper and loading repositories, sync related ui controls
+		// Preparing the model: Initializing viewData wrapper and loading
+		// repositories, sync related ui controls
 		this.viewData = new ViewerData();
 		loadRepositories(true);
 		boolean mode = this.prefModel.isShowGroups();
@@ -494,16 +530,16 @@ public class RepoExplorerView extends ViewPart{
 		if(mode == true){
 			viewData.setViewMode(ViewMode.Group);
 			columnGroup.setWidth(0);
-		}
-		else{
+		}else{
 			viewData.setViewMode(ViewMode.Repository);
 			columnGroup.setWidth(120);
 		}
 
 	}
-	
+
 	/**
 	 * Initializes the viewer
+	 * 
 	 * @param parent
 	 */
 	private void initViewer(Composite parent){
@@ -519,60 +555,48 @@ public class RepoExplorerView extends ViewPart{
 				RepoLabelProvider labelProvider = (RepoLabelProvider) treeViewer.getLabelProvider();
 				boolean isMatch = false;
 				for(int columnIndex = 0; columnIndex < numberOfColumns; columnIndex++){
-					String labelText = labelProvider.getColumnText((GitBlitViewModel) element, ColumnFactory.getColumnDesc(treeViewer,columnIndex));
+					String labelText = labelProvider.getColumnText((GitBlitViewModel) element, colFactory.getColumnDesc(columnIndex));
 					isMatch |= wordMatches(labelText);
 				}
 				return isMatch;
 			}
 		};
+		
 		// --------------------------------------------------------------------
+		// Create Viewer
 		FilteredTree filteredTree = new FilteredTree(parent, SWT.FULL_SELECTION | SWT.BORDER | SWT.H_SCROLL | SWT.V_SCROLL, filter, true);
 		viewer = filteredTree.getViewer();
-
+		colFactory = new ColumnFactory(this.viewer);
+		
+		
 		// viewer = new TreeViewer(parent, SWT.H_SCROLL | SWT.V_SCROLL);
 		viewer.setContentProvider(new RepoContentProvider());
 		this.labelProvider = new StyledLabelProvider(viewer);
 		viewer.setLabelProvider(this.labelProvider);
 
 		// --------------------------------------------------------------------
-		// --- table columns
+		// --- Viewer layout
 		// --------------------------------------------------------------------
-		//GridLayout l = GridLayoutFactory.swtDefaults().create();
-		
 		GridData gd = GridDataFactory.swtDefaults().create();
 		gd.grabExcessHorizontalSpace = true;
 		gd.grabExcessVerticalSpace = true;
 		gd.horizontalAlignment = SWT.FILL;
 		gd.verticalAlignment = SWT.FILL;
-		viewer.getControl().setLayoutData(gd);
 
+		viewer.getControl().setLayoutData(gd);
 		viewer.getTree().setHeaderVisible(true);
 		viewer.getTree().setLinesVisible(true);
-		
-		// IMPORTANT: See ColumnDesc Enum for column order
-		columnGroupRepo = ColumnFactory.addColumn(ColumnDesc.GroupRepository, viewer, "Group / Repository", SWT.LEFT, SWT.LEFT, 240);
-		columnGroupRepo.setToolTipText("Name of the group and its repositories");
-
-		TreeColumn col = ColumnFactory.addColumn(ColumnDesc.Description, viewer, "Description", SWT.LEFT, SWT.LEFT, 180);
-		col.setToolTipText("Description of the repository");
-
-		col = ColumnFactory.addColumn(ColumnDesc.Description, viewer, "Owner", SWT.LEFT, SWT.LEFT, 120);
-		col.setToolTipText("Owner(s) of the repository");
-
-		col = ColumnFactory.addColumn(ColumnDesc.LastChange, viewer, "Last Change", SWT.LEFT, SWT.RIGHT, 100);
-		col.setToolTipText("Last change of the repository");
-
-		col = ColumnFactory.addColumn(ColumnDesc.Size, viewer, "Size", SWT.LEFT, SWT.RIGHT, 80);
-		col.setToolTipText("Size of the repository");
-
-		col = ColumnFactory.addColumn(ColumnDesc.Server, viewer, "Gitblit Server", SWT.LEFT, SWT.LEFT, 180);
-		col.setToolTipText("Address of the hosting Gitblit server");
-
-		columnGroup = ColumnFactory.addColumn(ColumnDesc.Group, viewer, "Group", SWT.LEFT, SWT.LEFT, 0);
-		columnGroup.setToolTipText("Group of the repository");
 
 		// --------------------------------------------------------------------
-		// Adding viewer interaction
+		// Create columns
+		// --------------------------------------------------------------------
+		colFactory.createColumns();
+		// Get some columns we need to configure later / depending on view state
+		columnGroupRepo = colFactory.getColumn(ColumnDesc.GroupRepository);
+		columnGroup = colFactory.getColumn(ColumnDesc.Group);
+
+		// --------------------------------------------------------------------
+		// Drag support
 		// --------------------------------------------------------------------
 		int operations = DND.DROP_COPY | DND.DROP_MOVE;
 		Transfer[] transferTypes = new Transfer[] { TextTransfer.getInstance() };
@@ -583,15 +607,24 @@ public class RepoExplorerView extends ViewPart{
 				getDoubleClickAction().run();
 			}
 		});
+
+		colFactory.updatePreferences(this.prefModel,false);
 	}
 
+	/**
+	 * Update column preferences with current settings
+	 */
+
+	/**
+	 * Restore columns widths from preferences
+	 */
 	private void initTreeSorter(){
 		repoViewSorter = new RepoViewSorter();
 		viewer.setSorter(repoViewSorter);
 		viewer.getTree().setSortColumn(viewer.getTree().getColumn(0));
 		viewer.getTree().setSortDirection(SWT.UP);
 		viewer.refresh();
-		
+
 		TreeColumn[] cols = viewer.getTree().getColumns();
 		for(final TreeColumn item : cols){
 			item.addSelectionListener(new SelectionAdapter() {
@@ -676,7 +709,7 @@ public class RepoExplorerView extends ViewPart{
 	 */
 	private void loadRepositories(boolean reload){
 		initServerList(reload);
-		
+
 		Job job = new Job("Gitblit Repository Explorer") {
 			@Override
 			protected IStatus run(IProgressMonitor monitor){

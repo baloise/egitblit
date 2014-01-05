@@ -10,6 +10,7 @@ import org.eclipse.core.runtime.Status;
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.jface.resource.ImageRegistry;
 import org.eclipse.swt.graphics.Image;
+import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.plugin.AbstractUIPlugin;
 import org.eclipse.ui.statushandlers.StatusManager;
 import org.osgi.framework.Bundle;
@@ -78,6 +79,14 @@ public class Activator extends AbstractUIPlugin{
 	public static ImageDescriptor getImageDescriptor(String path){
 		return imageDescriptorFromPlugin(PLUGIN_ID, path);
 	}
+	
+	public static ImageDescriptor getSharedImageDescriptor(String symbolicName){
+		return PlatformUI.getWorkbench().getSharedImages().getImageDescriptor(symbolicName);
+	}
+
+	public static Image getSharedImage(String symbolicName){
+		return PlatformUI.getWorkbench().getSharedImages().getImage(symbolicName);
+	}
 
 	@Override
 	protected void initializeImageRegistry(ImageRegistry registry){
@@ -138,6 +147,23 @@ public class Activator extends AbstractUIPlugin{
 	public final static void logError(String msg, Throwable e){
 		logMessage(IStatus.ERROR, msg, e);
 	}
+	
+	public static void logWarn(String msg){
+		logMessage(IStatus.WARNING, msg, null);
+	}
+
+	public static void logInfo(String msg){
+		logMessage(IStatus.INFO, msg, null);
+	}
+
+	public static void logOk(String msg){
+		logMessage(IStatus.OK, msg, null);
+	}
+
+	public static void logCANCEL(String msg){
+		logMessage(IStatus.CANCEL, msg, null);
+	}
+
 
 	// ------------------------------------------------------------------------
 	// --- Message showing
@@ -161,7 +187,7 @@ public class Activator extends AbstractUIPlugin{
 	public final static void showWarning(String msg, Throwable e){
 		showMessage(IStatus.WARNING, msg, e);
 	}
-
+	
 	// ------------------------------------------------------------------------
 	// --- Combinations of logging an showing a message
 	// ------------------------------------------------------------------------
@@ -176,5 +202,4 @@ public class Activator extends AbstractUIPlugin{
 	public final static void showAndLogError(Throwable e){
 		handleMessage(IStatus.ERROR, StatusManager.SHOW | StatusManager.LOG, "", e);
 	}
-
 }

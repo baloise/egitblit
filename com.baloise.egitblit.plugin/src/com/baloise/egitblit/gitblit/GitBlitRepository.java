@@ -25,16 +25,21 @@ public class GitBlitRepository{
 	public String description;
 	
 	public List<String> owners = new ArrayList<String>();
+	public List<String> availRefs = new ArrayList<String>();
 	public Date lastChange;
 	public boolean isFrozen;
 	public boolean isFederated;
 	public String frequency;
 	public boolean isBare;
+	public String origin;
 	public String originRepository;
 	public String size;
 	public long   byteSize;
+	public String lastChangeAuthor;
 	public String repoRGB;
 	public String head;
+	public boolean allowAuthenticated;
+	public boolean allowForks;
 
 	// ....more properties to come
 	
@@ -67,9 +72,15 @@ public class GitBlitRepository{
 		repo.frequency = model.frequency;
 		repo.isBare = model.isBare;
 		repo.originRepository = model.originRepository;
+		repo.origin = model.origin;
 		repo.size = model.size;
 		repo.byteSize = makeByteValue(repo.size);
 		repo.head = model.HEAD;
+		repo.availRefs.addAll(model.availableRefs);
+		repo.lastChangeAuthor = model.lastChangeAuthor;
+		
+		repo.allowAuthenticated = model.allowAuthenticated;
+		repo.allowForks = model.allowForks;
 
 		repo.repoRGB = StringUtils.getColor(repo.projectName);
 
@@ -229,14 +240,11 @@ public class GitBlitRepository{
 //public boolean useDocs;
 //public AccessRestrictionType accessRestriction;
 //public AuthorizationControl authorizationControl;
-//public boolean allowAuthenticated;
 //public boolean showReadme;
 //public FederationStrategy federationStrategy;
 //public List<String> federationSets;
 //public boolean skipSizeCalculation;
 //public boolean skipSummaryMetrics;
-//public String origin;
-//public String HEAD;
 //public List<String> availableRefs;
 //public List<String> indexedBranches;
 //public List<String> preReceiveScripts;

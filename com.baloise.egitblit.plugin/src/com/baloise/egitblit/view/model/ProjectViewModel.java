@@ -138,13 +138,55 @@ public class ProjectViewModel implements GitBlitViewModel{
 		return this.entry.size;
 	}
 
+	public List<String> getAvailRefs(){
+		if(this.entry == null){
+			return null;
+		}
+		return this.entry.availRefs;
+	}
+	
+	public String getLastChangeAuthor(){
+		if(this.entry == null){
+			return null;
+		}
+		return this.entry.lastChangeAuthor;
+	}
+	
 	public long getByteSize(){
 		if(this.entry == null){
 			return -1L;
 		}
 		return this.entry.byteSize;
 	}
+	
+	public String getHead(){
+		if(this.entry == null){
+			return null;
+		}
+		return this.entry.head;
+	}
+	
+	public String getOrigin(){
+		if(this.entry == null){
+			return null;
+		}
+		return this.entry.origin;
+	}	
+	
+	public boolean getAllowAuthenticated(){
+		if(this.entry == null){
+			return false;
+		}
+		return this.entry.allowAuthenticated;
+	}	
 
+	public boolean getAllowForks(){
+		if(this.entry == null){
+			return false;
+		}
+		return this.entry.allowForks;
+	}	
+	
 	public void setToolTip(String msg){
 		this.toolTip = msg;
 	}

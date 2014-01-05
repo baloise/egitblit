@@ -1,11 +1,14 @@
 package com.baloise.egitblit.pref;
 
+import java.util.List;
+
 import org.eclipse.equinox.security.storage.ISecurePreferences;
 import org.eclipse.equinox.security.storage.SecurePreferencesFactory;
 
 import com.baloise.egitblit.common.GitBlitExplorerException;
 import com.baloise.egitblit.gitblit.GitBlitServer;
 import com.baloise.egitblit.main.Activator;
+import com.baloise.egitblit.pref.PreferenceModel.ColumnData;
 
 /**
  * Handling preference settings
@@ -23,9 +26,15 @@ public class PreferenceMgr{
 	public final static String KEY_GITBLIT_OMIT_SERVER_ERROR = "com.baloise.gitblit.general.omitServerInError";
 	public final static String KEY_GITBLIT_OMIT_COLOR_COLUMS = "com.baloise.gitblit.general.viewer.coloring";
 	public final static String KEY_GITBLIT_SHOW_GROUPS = "com.baloise.gitblit.general.viewer.showGroups";
+	
+	public final static String KEY_GITBLIT_COLUMN_DESC_NODE = "com.baloise.gitblit.general.viewer.column.desc";
+	public final static String KEY_GITBLIT_COLUMN_DESC_ID = "com.baloise.gitblit.general.viewer.column.desc.id";
+	public final static String KEY_GITBLIT_COLUMN_DESC_POS = "com.baloise.gitblit.general.viewer.column.desc.pos";
+	public final static String KEY_GITBLIT_COLUMN_DESC_WIDTH = "com.baloise.gitblit.general.viewer.column.desc.width";
+	
 
 	// Node containing the list of servers
-	public final static String KEY_GITBLIT_SERVER = "com.baloise.gitblit.server";
+	public final static String KEY_GITBLIT_SERVER_NODE = "com.baloise.gitblit.server";
 	// --- Server entry
 	public final static String KEY_GITBLIT_SERVER_URL = "com.baloise.gitblit.server.url";
 	public final static String KEY_GITBLIT_SERVER_ACTIVE = "com.baloise.gitblit.server.active";
@@ -67,22 +76,47 @@ public class PreferenceMgr{
 			bval = pref.getBoolean(KEY_GITBLIT_SHOW_GROUPS, true);
 			prefModel.setShowGroups(bval);
 			
+			// -- Column settings
+			ISecurePreferences entryNode;
+			ISecurePreferences serverNode = pref.node(KEY_GITBLIT_COLUMN_DESC_NODE);
+			String[] cols = serverNode.childrenNames();
+			String id;
+			int pos,width;
+			for(String col : cols){
+				entryNode = serverNode.node(col);
+				id = entryNode.get(KEY_GITBLIT_COLUMN_DESC_ID, null);
+				if(id == null){
+					// Node does not exist. Should not happen
+					continue;
+				}
+				pos   = entryNode.getInt(KEY_GITBLIT_COLUMN_DESC_POS, -1);
+				width = entryNode.getInt(KEY_GITBLIT_COLUMN_DESC_WIDTH, -1);
+				if(pos == -1 || width == -1){
+					continue;
+				}
+				prefModel.putColumnData(id, pos, width);
+			}
+			
 			// ---- Read list of servers
 			// Root node
-			ISecurePreferences serverNode = pref.node(KEY_GITBLIT_SERVER);
-			// An entry
-			ISecurePreferences entryNode;
-			String url, user, pwd;
-			boolean active;
-
-			String[] names = serverNode.childrenNames();
-			for(String item : names){
-				entryNode = serverNode.node(item);
-				url = entryNode.get(KEY_GITBLIT_SERVER_URL, null);
-				active = entryNode.getBoolean(KEY_GITBLIT_SERVER_ACTIVE, true);
-				user = entryNode.get(KEY_GITBLIT_SERVER_USER, null);
-				pwd = entryNode.get(KEY_GITBLIT_SERVER_PASSWORD, null);
-				prefModel.addRepository(url, active, user, pwd);
+			serverNode = pref.node(KEY_GITBLIT_SERVER_NODE);
+			if(serverNode != null){
+				// An entry
+				String url, user, pwd;
+				boolean active;
+	
+				String[] names = serverNode.childrenNames();
+				for(String item : names){
+					entryNode = serverNode.node(item);
+					url = entryNode.get(KEY_GITBLIT_SERVER_URL, null);
+					active = entryNode.getBoolean(KEY_GITBLIT_SERVER_ACTIVE, true);
+					user = entryNode.get(KEY_GITBLIT_SERVER_USER, null);
+					pwd = entryNode.get(KEY_GITBLIT_SERVER_PASSWORD, null);
+					prefModel.addRepository(url, active, user, pwd);
+				}
+			}
+			else{
+				Activator.logError("Error reading preferences. Missing configuration node of servers");	
 			}
 		}catch(Exception e){
 			Activator.logError("Error reading preferences. Continue with configuration settings which have been read so far.", e);
@@ -110,18 +144,29 @@ public class PreferenceMgr{
 			pref.putBoolean(KEY_GITBLIT_OMIT_SERVER_ERROR, prefModel.isOmitServerErrors(),false);
 			pref.putBoolean(KEY_GITBLIT_OMIT_COLOR_COLUMS, prefModel.isColorColumns(), false);
 			pref.putBoolean(KEY_GITBLIT_SHOW_GROUPS, prefModel.isShowGroups(), false);
-			
-			ISecurePreferences serverNode = pref.node(KEY_GITBLIT_SERVER);
+
 			ISecurePreferences entryNode;
 
-			// --- Saving server settings
-			// First, erase old settings
+			ISecurePreferences serverNode = pref.node(KEY_GITBLIT_COLUMN_DESC_NODE);
 			serverNode.removeNode();
 			pref.flush();
+			serverNode = pref.node(KEY_GITBLIT_COLUMN_DESC_NODE);
 
+			List<ColumnData> descs = prefModel.getColumnData();
+			for(ColumnData desc : descs){
+				entryNode = serverNode.node(desc.id);
+				entryNode.put(KEY_GITBLIT_COLUMN_DESC_ID, desc.id, false);
+				entryNode.putInt(KEY_GITBLIT_COLUMN_DESC_POS, desc.pos, false);
+				entryNode.putInt(KEY_GITBLIT_COLUMN_DESC_WIDTH, desc.width, false);
+			}
+			pref.flush();
+			
 			// --- Write new settings
 			int count = 0;
-			serverNode = pref.node(KEY_GITBLIT_SERVER);
+			serverNode = pref.node(KEY_GITBLIT_SERVER_NODE);
+			serverNode.removeNode();
+			pref.flush();
+			serverNode = pref.node(KEY_GITBLIT_SERVER_NODE);
 			
 			for(GitBlitServer item : prefModel.getServerList()){
 				entryNode = serverNode.node(KEY_GITBLIT_SERVER_URL + "_" + count++);

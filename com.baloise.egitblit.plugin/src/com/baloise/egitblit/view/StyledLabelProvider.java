@@ -241,6 +241,7 @@ public class StyledLabelProvider extends StyledCellLabelProvider implements Repo
 	 * @return
 	 */
 	public String getColumnText(GitBlitViewModel element, ColumnDesc col){
+
 		switch(col){
 			case GroupRepository:
 				return element.getName();
@@ -267,6 +268,11 @@ public class StyledLabelProvider extends StyledCellLabelProvider implements Repo
 					return makeDateAgo((ProjectViewModel) element);
 				}
 				break;
+			case LastChangeAuthor:
+				if(element instanceof ProjectViewModel){
+					return ((ProjectViewModel) element).getLastChangeAuthor();
+				}
+				break;
 			case Size:
 				if(element instanceof ProjectViewModel){
 					if(((ProjectViewModel) element).hasCommits() == true){
@@ -291,10 +297,58 @@ public class StyledLabelProvider extends StyledCellLabelProvider implements Repo
 					return ((GroupViewModel) element).getName();
 				}
 				break;
+			case IsFrozen:
+				if(element instanceof ProjectViewModel){
+					return getBoolean(((ProjectViewModel) element).isFrozen());					
+				}
+				break;
+			case IsFederated:
+				if(element instanceof ProjectViewModel){
+					return getBoolean(((ProjectViewModel) element).isFederated());
+				}
+				break;
+			case IsBare:
+				if(element instanceof ProjectViewModel){
+					return getBoolean(((ProjectViewModel) element).isFrozen());
+				}
+				break;
+			case Frequency:
+				if(element instanceof ProjectViewModel){
+					return ((ProjectViewModel) element).getFrequency();
+				}
+				break;
+			case OriginRepository:
+				if(element instanceof ProjectViewModel){
+					return ((ProjectViewModel) element).getOriginRepository();
+				}
+				break;
+			case Origin:
+				if(element instanceof ProjectViewModel){
+					return ((ProjectViewModel) element).getOrigin();
+				}
+				break;
+			case Head:
+				if(element instanceof ProjectViewModel){
+					return ((ProjectViewModel) element).getHead();
+				}
+				break;
+			case AllowAuthenticated:
+				if(element instanceof ProjectViewModel){
+					getBoolean(((ProjectViewModel) element).getAllowAuthenticated());
+				}
+				break;
+			case AllowForks:
+				if(element instanceof ProjectViewModel){
+					return getBoolean(((ProjectViewModel) element).getAllowForks());
+				}
 		}
 		return "";
 	}
 
+	public final static String getBoolean(boolean value){
+		return value == true ? "Yes" : "No";
+	}
+	
 	/**
 	 * Calculate time ago as string
 	 * 
