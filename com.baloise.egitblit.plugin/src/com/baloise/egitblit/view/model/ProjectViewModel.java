@@ -187,6 +187,13 @@ public class ProjectViewModel implements GitBlitViewModel{
 		return this.entry.allowForks;
 	}	
 	
+	public String getProjectPath(){
+		if(this.entry == null){
+			return null;
+		}
+		return this.entry.projectPath;
+	}	
+
 	public void setToolTip(String msg){
 		this.toolTip = msg;
 	}

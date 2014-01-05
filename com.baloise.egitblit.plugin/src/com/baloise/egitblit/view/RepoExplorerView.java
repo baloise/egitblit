@@ -459,10 +459,10 @@ public class RepoExplorerView extends ViewPart{
 		hmgr.add(new Action("Configure table columns",desc){			
 			@Override
 			public void runWithEvent(Event event){
-				colFactory.updatePreferences(prefModel, true);
 				Shell shell = new Shell(event.widget.getDisplay());
 				shell.setImage(desc.createImage());
 				shell.setText(getText());
+				colFactory.updatePreferences(prefModel, true);
 				ColumnConfigDialog dialog = new ColumnConfigDialog(shell,prefModel);
 				dialog.create();
 				Window.setDefaultImage(Activator.getSharedImage(ISharedImages.IMG_DEF_VIEW));

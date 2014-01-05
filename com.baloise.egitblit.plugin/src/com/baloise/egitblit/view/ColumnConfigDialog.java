@@ -42,8 +42,9 @@ import com.baloise.egitblit.pref.PreferenceModel.ColumnData;
 
 /**
  * Dialog to configure the group / repo view (display columns, order of columns)
+ * 
  * @author MicBag
- *
+ * 
  */
 public class ColumnConfigDialog extends TitleAreaDialog{
 
@@ -101,22 +102,24 @@ public class ColumnConfigDialog extends TitleAreaDialog{
 		});
 
 		viewer.getControl().addKeyListener(new KeyListener() {
-			
+
 			@Override
 			public void keyReleased(KeyEvent e){
 			}
-			
+
 			@Override
 			public void keyPressed(KeyEvent e){
 				if(e.keyCode == SWT.KEYPAD_ADD || e.keyCode == SWT.KEYPAD_SUBTRACT){
-					IStructuredSelection sel = (IStructuredSelection)viewer.getSelection();
+					IStructuredSelection sel = (IStructuredSelection) viewer.getSelection();
 					if(sel.isEmpty()){
 						return;
 					}
 					List<Object> list = sel.toList();
 					for(Object item : list){
-						// ...needed as method here in in SWT.CHECK, because SWT.CHECK will not be fired when manually calling item.setChecked() :-(
-						setChecked((ColumnData) item,e.keyCode == SWT.KEYPAD_ADD);
+						// ...needed as method here in in SWT.CHECK, because
+						// SWT.CHECK will not be fired when manually calling
+						// item.setChecked() :-(
+						setChecked((ColumnData) item, e.keyCode == SWT.KEYPAD_ADD);
 					}
 					viewer.setSelection(new StructuredSelection(list));
 					viewer.refresh();
@@ -124,7 +127,7 @@ public class ColumnConfigDialog extends TitleAreaDialog{
 				}
 			}
 		});
-		
+
 		final Table table = viewer.getTable();
 
 		final TableViewerColumn vcol = new TableViewerColumn(viewer, SWT.LEFT);
@@ -144,7 +147,7 @@ public class ColumnConfigDialog extends TitleAreaDialog{
 			}
 		});
 
-		vcol.getColumn().addControlListener(new ControlListener() {
+		table.addControlListener(new ControlListener() {
 			@Override
 			public void controlResized(ControlEvent e){
 				vcol.getColumn().setWidth(table.getClientArea().width);
@@ -161,7 +164,7 @@ public class ColumnConfigDialog extends TitleAreaDialog{
 				if((e.detail == SWT.CHECK)){
 					TableItem item = (TableItem) e.item;
 					if(item != null){
-						setChecked((ColumnData) item.getData(),item.getChecked());
+						setChecked((ColumnData) item.getData(), item.getChecked());
 					}
 					viewer.refresh();
 				}
@@ -234,7 +237,8 @@ public class ColumnConfigDialog extends TitleAreaDialog{
 					StructuredSelection sel = (StructuredSelection) isel;
 					List<Object> list = sel.toList();
 					if(list != null && list.isEmpty() == false){
-						Collections.reverse(list); // start with the last element
+						Collections.reverse(list); // start with the last
+													// element
 						for(Object item : list){
 							ColumnData data = ((ColumnData) item);
 							if(data.pos == 0){
@@ -266,7 +270,8 @@ public class ColumnConfigDialog extends TitleAreaDialog{
 	}
 
 	/**
-	 * Ordering columns: Selected are first, deselected last in (viewer) list when dialog starts
+	 * Ordering columns: Selected are first, deselected last in (viewer) list
+	 * when dialog starts
 	 */
 	private void orderColumns(){
 		ColumnData act;
@@ -287,14 +292,17 @@ public class ColumnConfigDialog extends TitleAreaDialog{
 			orderColumns();
 		}
 	}
-	
-	
+
 	/**
-	 * Selects a column and sets the column width.
-	 * Needed, because a manually setChecked does not fire a SWT.CHECK event (why?.... I'm confused)
-	 * So, logic has to be placed in a separad method, because this routine is needed for SPACE and +/- for setting the checkbox
-	 * @param data ColumnData to ajust 
-	 * @param checked true = checked, false = deselect
+	 * Selects a column and sets the column width. Needed, because a manually
+	 * setChecked does not fire a SWT.CHECK event (why?.... I'm confused) So,
+	 * logic has to be placed in a separad method, because this routine is
+	 * needed for SPACE and +/- for setting the checkbox
+	 * 
+	 * @param data
+	 *            ColumnData to ajust
+	 * @param checked
+	 *            true = checked, false = deselect
 	 */
 	private void setChecked(ColumnData data, boolean checked){
 		if(data == null){
@@ -313,10 +321,11 @@ public class ColumnConfigDialog extends TitleAreaDialog{
 		data.width = checked == true ? getDefaultWidth(data) : 0;
 		item.setChecked(checked);
 	}
-	
+
 	/**
-	 * Checkboxes in tables behave are a little bit strange, because the check mark can get lost (somehow....RFM :-))
-	 * However, he have to take care about the item state by ourself. 
+	 * Checkboxes in tables behave are a little bit strange, because the check
+	 * mark can get lost (somehow....RFM :-)) However, he have to take care
+	 * about the item state by ourself.
 	 */
 	private void syncCheck(){
 		for(ColumnData item : this.colData){
@@ -329,6 +338,7 @@ public class ColumnConfigDialog extends TitleAreaDialog{
 
 	/**
 	 * Default width of a column
+	 * 
 	 * @param data
 	 * @return
 	 */
@@ -345,8 +355,11 @@ public class ColumnConfigDialog extends TitleAreaDialog{
 
 	/**
 	 * Swaps the position values of two ColumnData entries
-	 * @param cd1 First ColumnData 
-	 * @param cd2 Second ColumnData
+	 * 
+	 * @param cd1
+	 *            First ColumnData
+	 * @param cd2
+	 *            Second ColumnData
 	 */
 	private void swapPos(ColumnData cd1, ColumnData cd2){
 		if(cd1 == null || cd2 == null){
@@ -358,7 +371,8 @@ public class ColumnConfigDialog extends TitleAreaDialog{
 	}
 
 	/**
-	 * Return the TableItem which belongs to the passed ColumnData 
+	 * Return the TableItem which belongs to the passed ColumnData
+	 * 
 	 * @param data
 	 * @return
 	 */
@@ -377,6 +391,7 @@ public class ColumnConfigDialog extends TitleAreaDialog{
 
 	/**
 	 * Get the columndata by its position
+	 * 
 	 * @param pos
 	 * @return
 	 */
@@ -391,11 +406,17 @@ public class ColumnConfigDialog extends TitleAreaDialog{
 
 	/**
 	 * For the caller: Deliver the result of this dialog
+	 * 
 	 * @return list of ColumnData
 	 */
 	public List<ColumnData> getColumns(){
 		orderColumns();
 		return this.colData;
+	}
+	
+	@Override
+	protected boolean isResizable() {
+	    return true;
 	}
 
 }

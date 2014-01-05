@@ -214,30 +214,35 @@ public class ColumnFactory{
 	private List<PreferenceModel.ColumnData> getColumnData(){
 		enableControlListeners(false);
 
-		List<PreferenceModel.ColumnData> colData = new ArrayList<PreferenceModel.ColumnData>();
+		List<PreferenceModel.ColumnData> colDataList = new ArrayList<PreferenceModel.ColumnData>();
 
 		Tree tree = viewer.getTree();
 		viewer.refresh(true);
 
-		// Save all columns
-		TreeColumn[] cols = tree.getColumns();
-		String id;
-		int pos, width;
 		ColumnDesc colDesc;
-		for(TreeColumn item : cols){
-			colDesc = getColumnDesc(item);
-			if(colDesc == null){
-				Activator.logError("Error while saving prefernces. Viewer / column definition are out of sync. Missing column description.");
+		TreeColumn titem;
+		int width;
+		String id;
+		int order[] = tree.getColumnOrder();
+		int size = order.length;
+		TreeColumn[] gaga = viewer.getTree().getColumns();
+		for(int pos = 0 ; pos < size; pos++){
+			titem = viewer.getTree().getColumn(order[pos]);
+			colDesc = getColumnDesc(titem);
+			if(colDesc == null || titem == null){
+				Activator.logError("Error while computing column data . Viewer / column definition are out of sync. Missing column description.");
 				return colInit;
 			}
 			id = colDesc.name();
-			pos = viewer.getTree().indexOf(getColumn(colDesc));
-			width = item.getWidth();
-			colData.add(new PreferenceModel.ColumnData(id, pos, width));
+			width = titem.getWidth();
+			colDataList.add(new PreferenceModel.ColumnData(id, pos, width));
 		}
 		
 		enableControlListeners(true);
-		return colData;
+		if(colDataList.size() != order.length){
+			Activator.logError("Error while computing column data . Viewer / column definition are out of sync. Viewer has more / less columns than expected.");
+		}
+		return colDataList;
 	}
 
 	/**

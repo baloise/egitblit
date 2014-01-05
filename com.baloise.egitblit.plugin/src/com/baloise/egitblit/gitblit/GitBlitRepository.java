@@ -81,7 +81,6 @@ public class GitBlitRepository{
 		
 		repo.allowAuthenticated = model.allowAuthenticated;
 		repo.allowForks = model.allowForks;
-
 		repo.repoRGB = StringUtils.getColor(repo.projectName);
 
 		return repo;

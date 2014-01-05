@@ -19,10 +19,13 @@ public enum ColumnDesc{
 	IsFrozen			("Is Frozen", "Is frozen", false, 60, SWT.RIGHT | SWT.Move),
 	IsFederated			("Is Federated", "Is federated", false, 80, SWT.RIGHT | SWT.Move),
 	IsBare				("Is Bare", "Is bare", false, 60, SWT.RIGHT | SWT.Move),
+	HasCommits			("Has Commits", "Has commits", false, 60, SWT.RIGHT | SWT.Move),
 	Frequency			("Frequency", "Frequency", false, 80, SWT.LEFT | SWT.Move),
 	OriginRepository	("Origin Repository", "Origin repository", false, 120, SWT.LEFT | SWT.Move),
 	Origin				("Origin","Origin", false, 120, SWT.LEFT | SWT.Move),
 	Head				("Head", "Head", false, 120, SWT.LEFT | SWT.Move),
+	ProjectPath			("Project Path", "Project path", false, 180, SWT.LEFT | SWT.Move),
+	GitUrl				("Git Url", "Git Url", false, 320, SWT.LEFT | SWT.Move),
 	AllowAuthenticated  ("Allow Authenticated", "Allow authenticated", false, 120, SWT.RIGHT | SWT.Move),
 	AllowForks 			("Allow Forks", "Allow forks", false, 80, SWT.RIGHT | SWT.Move);
 
@@ -44,7 +47,4 @@ public enum ColumnDesc{
 	public boolean isMovable(){
 		return(SWT.Move == (this.style & SWT.Move));
 	}
-	
-	
-
 }

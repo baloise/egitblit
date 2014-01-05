@@ -121,6 +121,9 @@ public class StyledLabelProvider extends StyledCellLabelProvider implements Repo
 				
 				StyledString text = new StyledString();
 				if(this.decorateLabels){
+					// ----------------------------------------------------
+					// Assign font and other decorations
+					// ----------------------------------------------------
 					fgCol = getForgroundColor(model, cdesc);
 					bgCol = getBackgroundColor(model, cdesc);
 
@@ -139,10 +142,12 @@ public class StyledLabelProvider extends StyledCellLabelProvider implements Repo
 						}
 					}
 					else if(model instanceof ProjectViewModel){
-						// Assign font and other decorations
 						switch(cdesc){
 							case GroupRepository:
 								image = getImage(cell.getControl().getDisplay(),((ProjectViewModel) model).getColor());
+								break;
+							case Group:
+//								fgCol = getRepoColor(((ProjectViewModel) model).getColor());
 								break;
 							case Description:
 								break;
@@ -178,6 +183,9 @@ public class StyledLabelProvider extends StyledCellLabelProvider implements Repo
 								}
 								break;
 							case Owner:
+								font = italicFont;
+								break;
+							case LastChangeAuthor:
 								font = italicFont;
 								break;
 							case Size:
@@ -341,6 +349,19 @@ public class StyledLabelProvider extends StyledCellLabelProvider implements Repo
 				if(element instanceof ProjectViewModel){
 					return getBoolean(((ProjectViewModel) element).getAllowForks());
 				}
+			case ProjectPath:
+				if(element instanceof ProjectViewModel){
+					return ((ProjectViewModel) element).getProjectPath();
+				}
+			case HasCommits:
+				if(element instanceof ProjectViewModel){
+					return getBoolean(((ProjectViewModel) element).hasCommits());
+				}
+			case GitUrl:
+				if(element instanceof ProjectViewModel){
+					return ((ProjectViewModel) element).getGitURL();
+				}
+				
 		}
 		return "";
 	}
