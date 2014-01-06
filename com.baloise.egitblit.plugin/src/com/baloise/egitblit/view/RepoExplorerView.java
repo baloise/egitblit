@@ -62,6 +62,7 @@ import com.baloise.egitblit.main.Activator;
 import com.baloise.egitblit.main.SharedImages;
 import com.baloise.egitblit.pref.PreferenceMgr;
 import com.baloise.egitblit.pref.PreferenceModel;
+import com.baloise.egitblit.pref.PreferenceModel.ColumnData;
 import com.baloise.egitblit.pref.PreferenceModel.DoubleClickBehaviour;
 import com.baloise.egitblit.view.action.BrowseAction;
 import com.baloise.egitblit.view.action.CloneAction;
@@ -555,19 +556,22 @@ public class RepoExplorerView extends ViewPart{
 				RepoLabelProvider labelProvider = (RepoLabelProvider) treeViewer.getLabelProvider();
 				boolean isMatch = false;
 				for(int columnIndex = 0; columnIndex < numberOfColumns; columnIndex++){
+				  TreeColumn item = treeViewer.getTree().getColumn(columnIndex);
+				  if(item != null && item.getWidth() == 0){
+				    // column is invisible: Ignore 
+				    continue;
+				  }
 					String labelText = labelProvider.getColumnText((GitBlitViewModel) element, colFactory.getColumnDesc(columnIndex));
 					isMatch |= wordMatches(labelText);
 				}
 				return isMatch;
 			}
 		};
-		
 		// --------------------------------------------------------------------
 		// Create Viewer
 		FilteredTree filteredTree = new FilteredTree(parent, SWT.FULL_SELECTION | SWT.BORDER | SWT.H_SCROLL | SWT.V_SCROLL, filter, true);
 		viewer = filteredTree.getViewer();
 		colFactory = new ColumnFactory(this.viewer);
-		
 		
 		// viewer = new TreeViewer(parent, SWT.H_SCROLL | SWT.V_SCROLL);
 		viewer.setContentProvider(new RepoContentProvider());
