@@ -1,5 +1,6 @@
 package com.baloise.egitblit.pref;
 
+import org.eclipse.jface.action.Action;
 import org.eclipse.jface.layout.GridDataFactory;
 import org.eclipse.jface.layout.GridLayoutFactory;
 import org.eclipse.jface.preference.PreferencePage;
@@ -34,6 +35,9 @@ import com.baloise.egitblit.common.GitBlitExplorerException;
 import com.baloise.egitblit.gitblit.GitBlitServer;
 import com.baloise.egitblit.main.Activator;
 import com.baloise.egitblit.pref.PreferenceModel.DoubleClickBehaviour;
+import com.baloise.egitblit.view.action.BrowseAction;
+import com.baloise.egitblit.view.action.CloneAction;
+import com.baloise.egitblit.view.action.CopyAction;
 
 /**
  * Preference Page Page showing the configuration settings of git blit explorer
@@ -247,14 +251,12 @@ public class GitBlitExplorerPrefPage extends PreferencePage implements IWorkbenc
 		g.setLayoutData(gd);
 		g.setText("Double click on repository entry");
 
-		btEGitPaste = new Button(g, SWT.RADIO);
-		btEGitPaste.setText("Paste repsitory Url in EGit");
+		btEGitPaste = createRadiobutton(new CloneAction(null),g);
+ 				
 
-		btOpenGitBlit = new Button(g, SWT.RADIO);
-		btOpenGitBlit.setText("Open Gitblit summary page in a browser");
+		btOpenGitBlit = createRadiobutton(new BrowseAction(null), g);
 
-		btCopyUrl = new Button(g, SWT.RADIO);
-		btCopyUrl.setText("Copy repository Url to clipboard");
+		btCopyUrl =  createRadiobutton(new CopyAction(null), g);
 
 		// --- Open edit dialog when a given row is double clicked 
 		viewer.setContentProvider(new PreferenceModelProvider());
@@ -312,6 +314,13 @@ public class GitBlitExplorerPrefPage extends PreferencePage implements IWorkbenc
 		return root;
 	}
 	
+	private Button createRadiobutton(Action action, Group g) {
+		Button ret = new Button(g, SWT.RADIO);
+		ret.setText(action.getText());
+		ret.setImage(action.getImageDescriptor().createImage());
+		return ret;
+	}
+
 	/**
 	 * Apply all field settings of preferences to preference model.
 	 */
