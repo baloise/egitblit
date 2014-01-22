@@ -1,8 +1,8 @@
 package com.baloise.egitblit.pref;
 
-import java.net.MalformedURLException;
 import java.net.URL;
 
+import org.eclipse.jface.action.Action;
 import org.eclipse.jface.layout.GridDataFactory;
 import org.eclipse.jface.layout.GridLayoutFactory;
 import org.eclipse.jface.preference.PreferencePage;
@@ -35,13 +35,15 @@ import org.eclipse.swt.widgets.TableColumn;
 import org.eclipse.swt.widgets.TableItem;
 import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.IWorkbenchPreferencePage;
-import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.PlatformUI;
 
 import com.baloise.egitblit.common.GitBlitExplorerException;
 import com.baloise.egitblit.gitblit.GitBlitServer;
 import com.baloise.egitblit.main.Activator;
 import com.baloise.egitblit.pref.PreferenceModel.DoubleClickBehaviour;
+import com.baloise.egitblit.view.action.BrowseAction;
+import com.baloise.egitblit.view.action.CloneAction;
+import com.baloise.egitblit.view.action.CopyAction;
 
 /**
  * Preference Page Page showing the configuration settings of git blit explorer
@@ -53,7 +55,7 @@ public class GitBlitExplorerPrefPage extends PreferencePage implements IWorkbenc
 
 	public final static String ID = "com.baloise.egitblit.pref";
 	public final static String URL_GITHUB_ISSUE = "https://github.com/baloise/egitblit/issues";
-	
+
 	private PreferenceModel prefModel;
 	private TableViewer viewer;
 	private Button btOpenGitBlit;
@@ -256,14 +258,9 @@ public class GitBlitExplorerPrefPage extends PreferencePage implements IWorkbenc
 		g.setLayoutData(gd);
 		g.setText("Double click on repository entry");
 
-		btEGitPaste = new Button(g, SWT.RADIO);
-		btEGitPaste.setText("Paste repsitory Url in EGit");
-
-		btOpenGitBlit = new Button(g, SWT.RADIO);
-		btOpenGitBlit.setText("Open Gitblit summary page in a browser");
-
-		btCopyUrl = new Button(g, SWT.RADIO);
-		btCopyUrl.setText("Copy repository Url to clipboard");
+		btEGitPaste = createRadiobutton(new CloneAction(null),g);
+		btOpenGitBlit = createRadiobutton(new BrowseAction(null), g);
+		btCopyUrl =  createRadiobutton(new CopyAction(null), g);
 
 		// --- Open edit dialog when a given row is double clicked 
 		viewer.setContentProvider(new PreferenceModelProvider());
@@ -300,15 +297,13 @@ public class GitBlitExplorerPrefPage extends PreferencePage implements IWorkbenc
 		
 		// --- Viewer configuration
 		g = new Group(root, SWT.SHADOW_IN);
-		
+		g.setText("Appearance");
+		g.setLayout(l);
 		gd = GridDataFactory.swtDefaults().create();
 		gd.horizontalAlignment = SWT.FILL;
 		gd.verticalAlignment = SWT.TOP;
 		gd.grabExcessHorizontalSpace = false;
 		gd.grabExcessVerticalSpace = false;
-		
-		g.setText("Appearance");
-		g.setLayout(l);
 		g.setLayoutData(gd);
 
 		btColViewer = new Button(g, SWT.CHECK);
@@ -337,10 +332,18 @@ public class GitBlitExplorerPrefPage extends PreferencePage implements IWorkbenc
 				}
 			}
 		});
+
 		initData();
 		return root;
 	}
 	
+	private Button createRadiobutton(Action action, Group g) {
+		Button ret = new Button(g, SWT.RADIO);
+		ret.setText(action.getText());
+		ret.setImage(action.getImageDescriptor().createImage());
+		return ret;
+	}
+
 	/**
 	 * Apply all field settings of preferences to preference model.
 	 */
