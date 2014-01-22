@@ -1,5 +1,8 @@
 package com.baloise.egitblit.pref;
 
+import java.net.MalformedURLException;
+import java.net.URL;
+
 import org.eclipse.jface.layout.GridDataFactory;
 import org.eclipse.jface.layout.GridLayoutFactory;
 import org.eclipse.jface.preference.PreferencePage;
@@ -22,13 +25,18 @@ import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
+import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Label;
+import org.eclipse.swt.widgets.Link;
+import org.eclipse.swt.widgets.Listener;
 import org.eclipse.swt.widgets.Table;
 import org.eclipse.swt.widgets.TableColumn;
 import org.eclipse.swt.widgets.TableItem;
 import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.IWorkbenchPreferencePage;
+import org.eclipse.ui.PartInitException;
+import org.eclipse.ui.PlatformUI;
 
 import com.baloise.egitblit.common.GitBlitExplorerException;
 import com.baloise.egitblit.gitblit.GitBlitServer;
@@ -44,7 +52,8 @@ import com.baloise.egitblit.pref.PreferenceModel.DoubleClickBehaviour;
 public class GitBlitExplorerPrefPage extends PreferencePage implements IWorkbenchPreferencePage{
 
 	public final static String ID = "com.baloise.egitblit.pref";
-
+	public final static String URL_GITHUB_ISSUE = "https://github.com/baloise/egitblit/issues";
+	
 	private PreferenceModel prefModel;
 	private TableViewer viewer;
 	private Button btOpenGitBlit;
@@ -237,8 +246,8 @@ public class GitBlitExplorerPrefPage extends PreferencePage implements IWorkbenc
 		l.numColumns = 1;
 
 		gd = GridDataFactory.swtDefaults().create();
-		gd.verticalAlignment = SWT.TOP;
 		gd.horizontalAlignment = SWT.FILL;
+		gd.verticalAlignment = SWT.TOP;
 		gd.grabExcessHorizontalSpace = true;
 		gd.grabExcessVerticalSpace = false;
 
@@ -291,6 +300,13 @@ public class GitBlitExplorerPrefPage extends PreferencePage implements IWorkbenc
 		
 		// --- Viewer configuration
 		g = new Group(root, SWT.SHADOW_IN);
+		
+		gd = GridDataFactory.swtDefaults().create();
+		gd.horizontalAlignment = SWT.FILL;
+		gd.verticalAlignment = SWT.TOP;
+		gd.grabExcessHorizontalSpace = false;
+		gd.grabExcessVerticalSpace = false;
+		
 		g.setText("Appearance");
 		g.setLayout(l);
 		g.setLayoutData(gd);
@@ -308,6 +324,19 @@ public class GitBlitExplorerPrefPage extends PreferencePage implements IWorkbenc
 			}
 		});
 		
+		new Label(root,SWT.NONE); // filler
+		Link link = new Link(root, SWT.NONE);
+		link.setText("<a>Report issue / Feeedback</a>");
+		link.addListener (SWT.Selection, new Listener () {
+			@Override
+			public void handleEvent(Event event) {
+				try{
+					PlatformUI.getWorkbench().getBrowserSupport().createBrowser("eGitBlit issue page").openURL(new URL(URL_GITHUB_ISSUE));
+				}catch(Exception e){
+					Activator.showAndLogError("Can't open eGitBlit issue page",e);
+				}
+			}
+		});
 		initData();
 		return root;
 	}
