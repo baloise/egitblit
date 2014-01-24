@@ -47,7 +47,7 @@ import com.baloise.egitblit.view.model.ProjectViewModel;
  * 
  */
 public class CloneOneClickAction extends CloneAction{
-	public final static String ID = "com.baloise.egitblit.plugin.cmd.import";
+	public final static String ID = "com.baloise.egitblit.cmd.import";
 
 	public CloneOneClickAction(Viewer viewer){
 		super(viewer);

@@ -80,6 +80,8 @@ import com.baloise.egitblit.view.model.ProjectViewModel;
  */
 public class RepoExplorerView extends ViewPart{
 
+	public final static String CONTEXT_ID = "com.baloise.egitblit.context";
+	
 	private TreeViewer		viewer;
 	private ColumnFactory	colFactory;
 	private ActionFactory   actionFactory;
@@ -332,8 +334,9 @@ public class RepoExplorerView extends ViewPart{
 	@Override
 	public void createPartControl(Composite parent){
 		
+		// --- Register context to separate keybindings form standard eclipse (see plugin.xml)
 		IContextService contextService = (IContextService)getSite().getService(IContextService.class);
-		contextService.activateContext("com.baloise.egitblit.plugin.context");
+		contextService.activateContext(CONTEXT_ID);
 		
 		// --------------------------------------------------------------------
 		// Sync preferences

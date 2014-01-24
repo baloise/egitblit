@@ -20,7 +20,7 @@ import com.baloise.egitblit.view.model.ProjectViewModel;
 public class CloneAction extends ViewActionBase{
 
 	public final static String CMD_EGIT = "org.eclipse.egit.ui.RepositoriesViewPaste";
-	public final static String ID = "com.baloise.egitblit.plugin.cmd.clone";
+	public final static String ID = "com.baloise.egitblit.cmd.clone";
 
 	public CloneAction(Viewer viewer){
 		super(ID,viewer, "Clone");

@@ -20,7 +20,7 @@ import com.baloise.egitblit.view.model.ProjectViewModel;
  *
  */
 public class CopyAction extends ViewActionBase{
-	public final static String ID = "com.baloise.egitblit.plugin.cmd.copy";
+	public final static String ID = "com.baloise.egitblit.cmd.copy";
 
 	public CopyAction(Viewer viewer){
 		super(ID,viewer, "Copy");

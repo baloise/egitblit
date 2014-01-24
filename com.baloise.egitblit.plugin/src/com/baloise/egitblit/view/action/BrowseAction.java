@@ -25,7 +25,7 @@ public class BrowseAction extends ViewActionBase{
 
 	public final static String GITBLIT_SUMMARY_PATH = "summary/?r=";
 	public final static String GIT_URL_POSTFIX = ".git";
-	public final static String ID = "com.baloise.egitblit.plugin.cmd.browse";
+	public final static String ID = "com.baloise.egitblit.cmd.browse";
 	
 	public BrowseAction(Viewer viewer){
 		super(ID,viewer, "Browse");
