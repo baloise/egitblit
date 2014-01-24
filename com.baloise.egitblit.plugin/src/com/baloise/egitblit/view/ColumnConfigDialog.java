@@ -25,6 +25,7 @@ import org.eclipse.swt.events.KeyEvent;
 import org.eclipse.swt.events.KeyListener;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.events.SelectionListener;
+import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
@@ -61,6 +62,14 @@ public class ColumnConfigDialog extends TitleAreaDialog{
 		super.create();
 		setTitle("Configure group/repository table columns");
 		setMessage("Select and order the repository properties you want to see on the \ngroup / repository table", IMessageProvider.NONE);
+		setHelpAvailable(false);
+	}
+	
+	@Override
+	protected Point getInitialSize(){
+		Point p = getShell().computeSize(SWT.DEFAULT, 480, true);
+		p.x *= 1.5;
+		return p;
 	}
 
 	@Override
@@ -82,8 +91,10 @@ public class ColumnConfigDialog extends TitleAreaDialog{
 		gd.grabExcessVerticalSpace = true;
 		gd.horizontalAlignment = SWT.FILL;
 		gd.verticalAlignment = SWT.FILL;
+		gd.heightHint = 640;
 		comp.setLayout(l);
 		comp.setLayoutData(gd);
+		gd.heightHint = -1;
 
 		viewer = new TableViewer(comp, SWT.MULTI | SWT.H_SCROLL | SWT.V_SCROLL | SWT.FULL_SELECTION | SWT.BORDER | SWT.CHECK);
 		viewer.getTable().setLayout(l);
@@ -95,7 +106,7 @@ public class ColumnConfigDialog extends TitleAreaDialog{
 				if(e1 instanceof ColumnData && e2 instanceof ColumnData){
 					ColumnData c1 = ((ColumnData) e1);
 					ColumnData c2 = ((ColumnData) e2);
-					return new Integer(c1.pos).compareTo(new Integer(c2.pos));
+					return new Integer(c1.pos).compareTo(c2.pos);
 				}
 				return super.compare(viewer, e1, e2);
 			}
@@ -131,8 +142,8 @@ public class ColumnConfigDialog extends TitleAreaDialog{
 		final Table table = viewer.getTable();
 
 		final TableViewerColumn vcol = new TableViewerColumn(viewer, SWT.LEFT);
-		vcol.getColumn().setText("Column Name / Column Order");
-		// TODO: Autosize column when opening dialog
+		vcol.getColumn().setText("Column Name & Order");
+
 		vcol.getColumn().pack();
 		vcol.setLabelProvider(new ColumnLabelProvider() {
 			@Override
@@ -191,7 +202,7 @@ public class ColumnConfigDialog extends TitleAreaDialog{
 		btComp.setLayoutData(gd);
 
 		Button btUp = new Button(btComp, SWT.PUSH);
-		btUp.setToolTipText("Moving selected element up");
+		btUp.setToolTipText("Moving selected column up");
 
 		btUp.addSelectionListener(new SelectionListener() {
 			@Override
@@ -207,13 +218,14 @@ public class ColumnConfigDialog extends TitleAreaDialog{
 						for(Object item : list){
 							ColumnData data = ((ColumnData) item);
 							ColumnData prev = getColumnData(data.pos - 1);
-							if(data.pos <= 1){
+							if(prev == null || prev.pos == 0){
 								continue;
 							}
 							swapPos(data, prev);
 						}
 						viewer.refresh();
 						syncCheck();
+						viewer.getTable().showSelection();
 					}
 				}
 			}
@@ -225,7 +237,7 @@ public class ColumnConfigDialog extends TitleAreaDialog{
 		btUp.setImage(Activator.getImage(SharedImages.Up));
 
 		Button btDown = new Button(btComp, SWT.PUSH);
-		btDown.setToolTipText("Moving selected element down");
+		btDown.setToolTipText("Moving selected column down");
 		btDown.addSelectionListener(new SelectionListener() {
 			@Override
 			public void widgetSelected(SelectionEvent e){
@@ -236,15 +248,14 @@ public class ColumnConfigDialog extends TitleAreaDialog{
 				if(isel instanceof StructuredSelection){
 					StructuredSelection sel = (StructuredSelection) isel;
 					List<Object> list = sel.toList();
-					if(list != null && list.isEmpty() == false){
-						Collections.reverse(list); // start with the last
-													// element
+					if(list != null && !list.isEmpty()){
+						Collections.reverse(list); // start with the last element
 						for(Object item : list){
 							ColumnData data = ((ColumnData) item);
+							ColumnData next = getColumnData(data.pos+1);
 							if(data.pos == 0){
 								continue;
 							}
-							ColumnData next = getColumnData(data.pos + 1);
 							if(next == null){
 								continue;
 							}
@@ -252,6 +263,7 @@ public class ColumnConfigDialog extends TitleAreaDialog{
 						}
 						viewer.refresh();
 						syncCheck();
+						viewer.getTable().showSelection();
 					}
 				}
 			}
@@ -260,36 +272,49 @@ public class ColumnConfigDialog extends TitleAreaDialog{
 			public void widgetDefaultSelected(SelectionEvent e){
 			}
 		});
+		
 		btDown.setImage(Activator.getImage(SharedImages.Down));
 
-		viewer.setInput(colData.toArray(new ColumnData[colData.size()]));
-		orderColumns();
-		viewer.refresh();
+// Does not work correctly so far: Sorting is not correct (grrr)		
+//		final ImageDescriptor refreskImgDesc = Activator.getImageDescriptor(SharedImages.Refresh);
+//		Button btReset = new Button(btComp, SWT.PUSH);
+//		btReset.setToolTipText("Reset displayed columns and their order");
+//		btReset.setImage(refreskImgDesc.createImage());
+//		btReset.addSelectionListener(new SelectionListener() {
+//			@Override
+//			public void widgetSelected(SelectionEvent e){
+//				colData.clear();
+//				colData.addAll(PreferenceMgr.initColumnData());
+//				sortColData();
+//
+//				viewer.setInput(colData.toArray(new ColumnData[colData.size()]));
+//				viewer.refresh();
+//				syncCheck();
+//			}
+//
+//			@Override
+//			public void widgetDefaultSelected(SelectionEvent e){
+//			}
+//		});
+		
+		sortColData();
+		this.viewer.setInput(this.colData.toArray(new ColumnData[this.colData.size()]));
+		this.viewer.refresh();
 		syncCheck();
 		return area;
 	}
-
-	/**
-	 * Ordering columns: Selected are first, deselected last in (viewer) list
-	 * when dialog starts
-	 */
-	private void orderColumns(){
-		ColumnData act;
-		ColumnData next;
-		boolean again = false;
-		int size = this.colData.size() - 1;
-		for(int i = 0; i < size; i++){
+	
+	private void sortColData(){
+		ColumnData act,next;
+		
+		int size = this.colData.size()-1;
+		for(int i=0;i<size;i++){
 			act = this.colData.get(i);
-			if(act != null && act.width == 0){
-				next = getColumnData(act.pos + 1);
-				if(next != null && next.width > 0){
-					swapPos(act, next);
-					again = true;
-				}
+			next = this.colData.get(i+1);
+			if(act.visible == false && next.visible == true && act.pos < next.pos){
+				swapPos(act,next);
+				i=0;
 			}
-		}
-		if(again == true){
-			orderColumns();
 		}
 	}
 
@@ -314,11 +339,11 @@ public class ColumnConfigDialog extends TitleAreaDialog{
 		}
 		if(data.pos == 0){
 			// First column can't be removed (group / repo column)
-			data.width = getDefaultWidth(data);
+			data.visible = true;
 			item.setChecked(true);
 			return;
 		}
-		data.width = checked == true ? getDefaultWidth(data) : 0;
+		data.visible = checked;
 		item.setChecked(checked);
 	}
 
@@ -331,26 +356,9 @@ public class ColumnConfigDialog extends TitleAreaDialog{
 		for(ColumnData item : this.colData){
 			TableItem titem = getTableItem(item);
 			if(titem != null){
-				titem.setChecked(item.width > 0);
+				titem.setChecked(item.visible);
 			}
 		}
-	}
-
-	/**
-	 * Default width of a column
-	 * 
-	 * @param data
-	 * @return
-	 */
-	private int getDefaultWidth(ColumnData data){
-		if(data == null){
-			return 0;
-		}
-		ColumnDesc desc = ColumnDesc.valueOf(data.id);
-		if(desc == null){
-			return 0;
-		}
-		return desc.width;
 	}
 
 	/**
@@ -410,7 +418,6 @@ public class ColumnConfigDialog extends TitleAreaDialog{
 	 * @return list of ColumnData
 	 */
 	public List<ColumnData> getColumns(){
-		orderColumns();
 		return this.colData;
 	}
 	

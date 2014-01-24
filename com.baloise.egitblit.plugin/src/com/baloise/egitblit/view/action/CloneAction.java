@@ -20,9 +20,10 @@ import com.baloise.egitblit.view.model.ProjectViewModel;
 public class CloneAction extends ViewActionBase{
 
 	public final static String CMD_EGIT = "org.eclipse.egit.ui.RepositoriesViewPaste";
+	public final static String ID = "com.baloise.egitblit.plugin.cmd.clone";
 
 	public CloneAction(Viewer viewer){
-		super(viewer, "Clone");
+		super(ID,viewer, "Clone");
 		setImageDescriptorFromURL("platform:/plugin/org.eclipse.egit.ui/icons/obj16/cloneGit.gif");
 	}
 

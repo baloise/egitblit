@@ -1,8 +1,6 @@
 package com.baloise.egitblit.pref;
 
 import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
 import java.util.List;
 
 import com.baloise.egitblit.gitblit.GitBlitServer;
@@ -47,20 +45,23 @@ public class PreferenceModel{
 		public String id;
 		public int pos;
 		public int width;
+		public boolean visible;
 		
 		public ColumnData(){
 		}
 		
-		public ColumnData(String id, int pos, int width){
+		public ColumnData(String id, int pos, boolean visible, int width){
 			this.id = id;
 			this.pos = pos;
+			this.visible = visible;
 			this.width = width;
 		}
-		
+
 		@Override
 		public String toString(){
-			return "ColDesc [id=" + id + ", pos=" + pos + ", width=" + width + "]";
+			return "ColumnData [id=" + id + ", pos=" + pos + ", width=" + width + ", visible=" + visible + "]";
 		}
+		
 	}
 
 	// ------------------------------------------------------------------------
@@ -163,7 +164,7 @@ public class PreferenceModel{
 		return this.showGroups;
 	}
 
-	public ColumnData putColumnData(String id, int pos, int width){
+	public ColumnData putColumnData(String id, int pos, boolean visible, int width){
 		ColumnData desc = getColumnData(id);
 		if(desc == null){
 			desc = new ColumnData();
@@ -172,6 +173,7 @@ public class PreferenceModel{
 		desc.id = id;
 		desc.pos = pos;
 		desc.width = width;
+		desc.visible = visible;
 		return desc;
 	}
 	
@@ -217,22 +219,6 @@ public class PreferenceModel{
 		this.colData.addAll(list);
 	}
 
-	/**
-	 * ...Just for debugging purpose
-	 * @param ColumnDat list list to be sorted by position
-	 */
-	public final static void sortByOrder(List<ColumnData> list){
-		if(list == null){
-			return;
-		}
-		Collections.sort(list,new Comparator<ColumnData>() {
-			@Override
-			public int compare(ColumnData o1, ColumnData o2){
-				return new Integer(o1.pos).compareTo(o2.pos);
-			}
-		});
-	}
-	
 	@Override
 	public String toString(){
 		return "PreferenceModel [dbClick=" + dbClick + ", repoList=" + repoList + ", omitServerErrors=" + omitServerErrors + ", colorColums=" + colorColums + ", showGroups=" + showGroups + ", colDesc=" + colData + "]";

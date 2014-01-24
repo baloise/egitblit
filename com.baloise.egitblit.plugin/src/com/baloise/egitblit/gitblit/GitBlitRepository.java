@@ -2,94 +2,178 @@ package com.baloise.egitblit.gitblit;
 
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.Hashtable;
 import java.util.List;
+import java.util.Map;
 
 import com.gitblit.models.RepositoryModel;
 import com.gitblit.utils.StringUtils;
 
 /**
- * Represents a GitBlit Repository 
- * This class contains the gitblit repository properties as copy.
+ * Represents a GitBlit Repository This class contains the gitblit repository
+ * properties as copy.
+ * 
  * @author MicBag
  * 
  */
 public class GitBlitRepository{
+	public static final String	GROUP_MAIN				= "main";
 
-	public static final String GROUP_MAIN = "main";
-	public String serverUrl;
-	public String gitUrl;
-	public String groupName;
-	public String projectName;
-	public String projectPath;
-	public boolean hasCommits;
-	public String description;
-	
-	public List<String> owners = new ArrayList<String>();
-	public List<String> availRefs = new ArrayList<String>();
-	public Date lastChange;
-	public boolean isFrozen;
-	public boolean isFederated;
-	public String frequency;
-	public boolean isBare;
-	public String origin;
-	public String originRepository;
-	public String size;
-	public long   byteSize;
-	public String lastChangeAuthor;
-	public String repoRGB;
-	public String head;
-	public boolean allowAuthenticated;
-	public boolean allowForks;
+	// --- Gitblit repository attriburtes
+	public String				name;
+	public String				description;
+	public List<String>			owners					= new ArrayList<String>();
+	public Date					lastChange;
+	public String				lastChangeAuthor;
+	public boolean				hasCommits;
+	public boolean				showRemoteBranches;
+	public boolean				useIncrementalPushTags;
+	public String				incrementalPushTagPrefix;
+	public String				accessRestriction;
+	public String				authorizationControl;
+	public boolean				allowAuthenticated;
+	public boolean				isFrozen;
+	public String				federationStrategy;
+	public List<String>			federationSets			= new ArrayList<String>();
+	public boolean				isFederated;
+	public boolean				skipSizeCalculation;
+	public boolean				skipSummaryMetrics;
+	public String				frequency;
+	public boolean				isBare;
+	public boolean				isMirror;
+	public String				origin;
+	public String				HEAD;
+	public List<String>			availableRefs			= new ArrayList<String>();
+	public List<String>			indexedBranches			= new ArrayList<String>();
+	public String				size;
+	public List<String>			preReceiveScripts		= new ArrayList<String>();
+	public List<String>			postReceiveScripts		= new ArrayList<String>();
+	public List<String>			mailingLists			= new ArrayList<String>();
+	public Map<String, String>	customFields			= new Hashtable<String, String>();
+	public String				projectPath;
+	public boolean				allowForks;
+	public List<String>			forks					= new ArrayList<String>();
+	public String				originRepository;
+	public boolean				verifyCommitter;
+	public String				gcThreshold;
+	public int					gcPeriod;
+	public int					maxActivityCommits;
+	public List<String>			metricAuthorExclusions	= new ArrayList<String>();
+	// public CommitMessageRenderer commitMessageRenderer;
 
-	// ....more properties to come
-	
+	public transient boolean	isCollectingGarbage;
+	public Date					lastGC;
+	public String				sparkleshareId;
+
+	// --- Prepared or passed attribues
+	public String				gitUrl;
+	public String				groupName;
+	public String				projectName;
+	public String				serverUrl;
+	public long					byteSize;
+	public String				repoRGB;
+
 	public GitBlitRepository(){
 	}
 
 	/**
 	 * Factory method for createing an GitBlitProject Model
-	 * @param gitUUrl Git Url of reposiotry
-	 * @param model GitBlit RepositoryModel object
+	 * 
+	 * @param gitUUrl
+	 *            Git Url of reposiotry
+	 * @param model
+	 *            GitBlit RepositoryModel object
 	 * @return created GitBlitProject
 	 */
 	public static GitBlitRepository create(String serverUrl, String gitUrl, RepositoryModel model){
-		GitBlitRepository repo = new GitBlitRepository();
+		GitBlitRepository  repo = new GitBlitRepository();
 
+	    repo.name = model.name;
+	    repo.description= model.description;
+	    if(model.owners != null){
+	    	repo.owners.addAll(model.owners);
+	    }
+	    repo.lastChange= model.lastChange;
+	    repo.lastChangeAuthor= model.lastChangeAuthor;
+	    repo.hasCommits= model.hasCommits;
+	    repo.showRemoteBranches= model.showRemoteBranches;
+	    repo.useIncrementalPushTags= model.useIncrementalPushTags;
+	    repo.incrementalPushTagPrefix= model.incrementalPushTagPrefix;
+	    
+	    repo.accessRestriction=model.accessRestriction.name();
+	    repo.authorizationControl= model.authorizationControl.name();
+	    
+	    repo.allowAuthenticated= model.allowAuthenticated;
+	    repo.isFrozen= model.isFrozen;
+	    repo.federationStrategy= model.federationStrategy.name();
+	    if(model.federationSets != null){
+	    	repo.federationSets.addAll(model.federationSets);
+	    }
+	    repo.isFederated= model.isFederated;
+	    repo.skipSizeCalculation= model.skipSizeCalculation;
+	    repo.skipSummaryMetrics= model.skipSummaryMetrics;
+	    repo.frequency= model.frequency;
+	    repo.isBare= model.isBare;
+	    //repo.isMirror = model.is;
+	    repo.origin= model.origin;
+	    repo.HEAD= model.HEAD;
+	    if(model.availableRefs != null){
+	    	repo.availableRefs.addAll(model.availableRefs);
+	    }
+	    if(model.indexedBranches != null){
+	    	repo.indexedBranches.addAll(model.indexedBranches);
+	    }
+	    repo.size= model.size;
+	    if(model.preReceiveScripts != null){
+	    	repo.preReceiveScripts.addAll(model.preReceiveScripts);
+	    }
+	    if(model.postReceiveScripts != null){
+	    	repo.postReceiveScripts.addAll(model.postReceiveScripts);
+	    }
+	    if(model.mailingLists != null){
+	    	repo.mailingLists.addAll(model.mailingLists);
+	    }
+	    if(model.customFields != null){
+	    	repo.customFields.putAll(model.customFields);
+	    }
+	    repo.projectPath = model.projectPath;
+
+	    repo.allowForks= model.allowForks;
+	    if(model.forks != null){
+	    	repo.forks.addAll(model.forks);
+	    }
+	    repo.originRepository= model.originRepository;
+	    repo.verifyCommitter= model.verifyCommitter;
+	    repo.gcThreshold= model.gcThreshold;
+	    repo.gcPeriod= model.gcPeriod;
+	    repo.maxActivityCommits= model.maxActivityCommits;
+	    if(model.metricAuthorExclusions != null){
+	    	repo.metricAuthorExclusions.addAll(model.metricAuthorExclusions);
+	    }
+//	    CommitMessageRenderer commitMessageRenderer= model.
+
+	    repo.isCollectingGarbage= model.isCollectingGarbage;
+	    repo.lastGC= model.lastGC;
+	    repo.sparkleshareId= model.sparkleshareId;
+
+
+	    // --- Passed or prepared attributes
 		repo.gitUrl = gitUrl;
 		repo.groupName = getGroupName(model);
 
 		repo.projectName = getProjectName(model);
-		repo.projectPath = model.projectPath;
-		repo.hasCommits = model.hasCommits;
-		repo.description = model.description;
 		repo.serverUrl = serverUrl;
-		
-		repo.owners.addAll(model.owners);
-		repo.lastChange = model.lastChange;
-		
-		repo.isFrozen = model.isFrozen;
-		repo.isFederated = model.isFederated;
-		repo.frequency = model.frequency;
-		repo.isBare = model.isBare;
-		repo.originRepository = model.originRepository;
-		repo.origin = model.origin;
-		repo.size = model.size;
 		repo.byteSize = makeByteValue(repo.size);
-		repo.head = model.HEAD;
-		repo.availRefs.addAll(model.availableRefs);
-		repo.lastChangeAuthor = model.lastChangeAuthor;
-		
-		repo.allowAuthenticated = model.allowAuthenticated;
-		repo.allowForks = model.allowForks;
 		repo.repoRGB = StringUtils.getColor(repo.projectName);
-
 		return repo;
 	}
 
 	/**
 	 * Extracts the group name
-	 * @param model repository which group name should be extracted
-	 * @return the group name 
+	 * 
+	 * @param model
+	 *            repository which group name should be extracted
+	 * @return the group name
 	 */
 	private final static String getGroupName(RepositoryModel model){
 		if(model == null){
@@ -108,7 +192,9 @@ public class GitBlitRepository{
 
 	/**
 	 * Extracts the project/repository name from the passed repository model
-	 * @param model repository which name should be extracted
+	 * 
+	 * @param model
+	 *            repository which name should be extracted
 	 * @return name of the repository / project name
 	 */
 	private final static String getProjectName(RepositoryModel model){
@@ -127,9 +213,11 @@ public class GitBlitRepository{
 	}
 
 	/**
-	 * ...copied from gitblit api source code
-	 *  Extract trailing ".git" from passed string
-	 * @param value url
+	 * ...copied from gitblit api source code Extract trailing ".git" from
+	 * passed string
+	 * 
+	 * @param value
+	 *            url
 	 * @return url without ".git"
 	 */
 	private static String stripDotGit(String value){
@@ -163,7 +251,7 @@ public class GitBlitRepository{
 			return false;
 		return true;
 	}
-	
+
 	/**
 	 * Gitblit repo size is a string. To make it comparable, the real numeric
 	 * bytes have to be extracted
@@ -221,11 +309,10 @@ public class GitBlitRepository{
 			Double val = f * Double.parseDouble(size);
 			return val.longValue();
 		}catch(Exception e){
-			//Activator.logError("Error while sorting view", e);
+			// Activator.logError("Error while sorting view", e);
 		}
 		return -1L;
 	}
-
 
 	@Override
 	public String toString(){
@@ -233,33 +320,49 @@ public class GitBlitRepository{
 	}
 }
 
-//*** fields from com.gitblit.models.RepositoryModel
-//public boolean showRemoteBranches;
-//public boolean useTickets;
-//public boolean useDocs;
-//public AccessRestrictionType accessRestriction;
-//public AuthorizationControl authorizationControl;
-//public boolean showReadme;
-//public FederationStrategy federationStrategy;
-//public List<String> federationSets;
-//public boolean skipSizeCalculation;
-//public boolean skipSummaryMetrics;
-//public List<String> availableRefs;
-//public List<String> indexedBranches;
-//public List<String> preReceiveScripts;
-//public List<String> postReceiveScripts;
-//public List<String> mailingLists;
-//public Map<String, String> customFields;
-//public String projectPath;
-//private String displayName;
-//public boolean allowForks;
-//public Set<String> forks;
-//public boolean verifyCommitter;
-//public String gcThreshold;
-//public int gcPeriod;
-//public int maxActivityCommits;
+// *** fields from com.gitblit.models.RepositoryModel
+// public String name;
+// public String description;
+// public List<String> owners;
+// public Date lastChange;
+// public String lastChangeAuthor;
+// public boolean hasCommits;
+// public boolean showRemoteBranches;
+// public boolean useIncrementalPushTags;
+// public String incrementalPushTagPrefix;
+// public AccessRestrictionType accessRestriction;
+// public AuthorizationControl authorizationControl;
+// public boolean allowAuthenticated;
+// public boolean isFrozen;
+// public FederationStrategy federationStrategy;
+// public List<String> federationSets;
+// public boolean isFederated;
+// public boolean skipSizeCalculation;
+// public boolean skipSummaryMetrics;
+// public String frequency;
+// public boolean isBare;
+// public boolean isMirror;
+// public String origin;
+// public String HEAD;
+// public List<String> availableRefs;
+// public List<String> indexedBranches;
+// public String size;
+// public List<String> preReceiveScripts;
+// public List<String> postReceiveScripts;
+// public List<String> mailingLists;
+// public Map<String, String> customFields;
+// public String projectPath;
+// private String displayName;
+// public boolean allowForks;
+// public Set<String> forks;
+// public String originRepository;
+// public boolean verifyCommitter;
+// public String gcThreshold;
+// public int gcPeriod;
+// public int maxActivityCommits;
+// public List<String> metricAuthorExclusions;
+// public CommitMessageRenderer commitMessageRenderer;
 //
-//public transient boolean isCollectingGarbage;
-//public Date lastGC;
-//public String sparkleshareId;
-
+// public transient boolean isCollectingGarbage;
+// public Date lastGC;
+// public String sparkleshareId;

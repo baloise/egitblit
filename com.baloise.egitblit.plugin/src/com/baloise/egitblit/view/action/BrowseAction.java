@@ -25,9 +25,10 @@ public class BrowseAction extends ViewActionBase{
 
 	public final static String GITBLIT_SUMMARY_PATH = "summary/?r=";
 	public final static String GIT_URL_POSTFIX = ".git";
-
+	public final static String ID = "com.baloise.egitblit.plugin.cmd.browse";
+	
 	public BrowseAction(Viewer viewer){
-		super(viewer, "Browse");
+		super(ID,viewer, "Browse");
 		boolean useInternalBrowser = 0 == getPreferencesService().getInt("org.eclipse.ui.browser", "browser-choice", 1, null);
 		if(useInternalBrowser){
 			setImageDescriptorFromURL("platform:/plugin/org.eclipse.ui.browser/icons/obj16/internal_browser.gif");
@@ -45,12 +46,12 @@ public class BrowseAction extends ViewActionBase{
 	 * @throws MalformedURLException
 	 */
 	private final static URL makeGitBlitSummaryUrl(ProjectViewModel model) throws MalformedURLException{
-		if(model == null || model.getServerURL() == null){
+		if(model == null || model.getServerUrl() == null){
 			return null;
 		}
 
 		// --- Get Server url an prepare it
-		String url = model.getServerURL();
+		String url = model.getServerUrl();
 		if(url != null && url.endsWith("/") == false){
 			url += "/";
 		}
@@ -80,5 +81,14 @@ public class BrowseAction extends ViewActionBase{
 				Activator.logError("Error while performing open Gitblit action", e);
 			}
 		}
+	}
+	
+	public boolean isEnabled(){
+		GitBlitViewModel model = getSelectedModel();
+		if(model instanceof ProjectViewModel){
+			ProjectViewModel pm = (ProjectViewModel) model;
+			return pm.hasCommits();
+		}
+		return false;
 	}
 }

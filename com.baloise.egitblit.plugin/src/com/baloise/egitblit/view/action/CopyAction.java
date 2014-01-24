@@ -20,9 +20,10 @@ import com.baloise.egitblit.view.model.ProjectViewModel;
  *
  */
 public class CopyAction extends ViewActionBase{
+	public final static String ID = "com.baloise.egitblit.plugin.cmd.copy";
 
 	public CopyAction(Viewer viewer){
-		super(viewer, "Copy");
+		super(ID,viewer, "Copy");
 		ImageDescriptor img = getWorkbench().getSharedImages().getImageDescriptor(ISharedImages.IMG_TOOL_COPY);
 		setImageDescriptor(img);
 		ImageDescriptor imgDisabled = getWorkbench().getSharedImages().getImageDescriptor(ISharedImages.IMG_TOOL_COPY_DISABLED);
@@ -38,7 +39,7 @@ public class CopyAction extends ViewActionBase{
 		if(model != null){
 			if(model instanceof ProjectViewModel){
 				Clipboard clipboard = new Clipboard(getDisplay());
-				clipboard.setContents(new Object[] { ((ProjectViewModel)model).getGitURL() }, new Transfer[] { TextTransfer.getInstance() });
+				clipboard.setContents(new Object[] { ((ProjectViewModel)model).getGitUrl() }, new Transfer[] { TextTransfer.getInstance() });
 			}
 		}
 	}

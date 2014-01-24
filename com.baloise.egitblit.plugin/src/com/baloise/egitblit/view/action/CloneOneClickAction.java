@@ -47,10 +47,12 @@ import com.baloise.egitblit.view.model.ProjectViewModel;
  * 
  */
 public class CloneOneClickAction extends CloneAction{
+	public final static String ID = "com.baloise.egitblit.plugin.cmd.import";
 
 	public CloneOneClickAction(Viewer viewer){
 		super(viewer);
 		setText("Clone && Import Project");
+		setActionDefinitionId(ID);
 		setImageDescriptorFromURL("platform:/plugin/" + Activator.PLUGIN_ID + "/icons/cloneGitOneClick.gif");
 	}
 
@@ -68,7 +70,7 @@ public class CloneOneClickAction extends CloneAction{
 	}
 
 	protected void performClone(final ProjectViewModel project) throws URISyntaxException, GitBlitExplorerException{
-		URIish uri = new URIish(project.getGitURL());
+		URIish uri = new URIish(project.getGitUrl());
 		final Collection<Ref> selectedBranches;
 		selectedBranches = Collections.emptyList();
 		final File workdir = getWorkdir(project);
@@ -77,7 +79,7 @@ public class CloneOneClickAction extends CloneAction{
 		int remote_connection_timeout = Platform.getPreferencesService().getInt("org.eclipse.egit.ui", "remote_connection_timeout", 30, null);
 
 		final CloneOperation op = new CloneOperation(uri, true, selectedBranches, workdir, "refs/heads/master", remoteName, remote_connection_timeout);
-		UsernamePasswordCredentialsProvider credentialsProvider = getUsernamePasswordCredentialsProvider(project.getServerURL());
+		UsernamePasswordCredentialsProvider credentialsProvider = getUsernamePasswordCredentialsProvider(project.getServerUrl());
 		op.setCredentialsProvider(credentialsProvider);
 
 		op.addPostCloneTask(new PostCloneTask() {

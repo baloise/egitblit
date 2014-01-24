@@ -84,6 +84,9 @@ public class GitBlitBD{
 	 *             in case of an network or authorization error
 	 */
 	public List<GitBlitRepository> readRepositories(ProgressToken token, boolean activeOnly, boolean omitHasError) throws GitBlitExplorerException{
+//		if(true){
+//			return TestDataFactory.createRepoList(10, 50);
+//		}
 		List<GitBlitRepository> bres = new ArrayList<GitBlitRepository>();
 
 		List<String> serverErrorList = new ArrayList<String>();

@@ -19,6 +19,7 @@ import com.baloise.egitblit.view.model.GitBlitViewModel;
 
 /**
  * Base class for handling viewer actions (get selection etc.)
+ * The actionDefinitionId must match to a command id in plugin.xml (if you want to define a keybinding)
  * @see Action 
  * @author MicBag
  *
@@ -27,9 +28,15 @@ public abstract class ViewActionBase extends Action{
 
 	private Viewer viewer;
 
-	public ViewActionBase(Viewer viewer, String label){
+	/**
+	 * @param id Id corresponding to a command id in plugin.xml if you want to define a key binding
+	 * @param viewer viewer
+	 * @param label label to be displayed
+	 */
+	public ViewActionBase(String id, Viewer viewer, String label){
 		super(label);
 		this.viewer = viewer;
+		setActionDefinitionId(id);
 	}
 	
 	

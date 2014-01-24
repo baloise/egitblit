@@ -90,6 +90,9 @@ public class RepoViewSorter extends TreePathViewerSorter{
 		// Init
 		dir = tviewer.getTree().getSortDirection();
 		TreeColumn col = tviewer.getTree().getSortColumn();
+		if(col == null){
+			return 0; // No sort column
+		}
 		columnDesc = ColumnFactory.getColumnDesc(col);
 		RepoLabelProvider lprov = (RepoLabelProvider) prov;
 
@@ -159,7 +162,7 @@ public class RepoViewSorter extends TreePathViewerSorter{
 	 * @return
 	 */
 	private String getGroupSortValue(TreeViewer viewer, GroupViewModel gmodel, ColumnDesc col, int dir){
-		if(gmodel instanceof GroupViewModel == false){
+		if(col == null || gmodel instanceof GroupViewModel == false){
 			return "";
 		}
 
@@ -192,7 +195,7 @@ public class RepoViewSorter extends TreePathViewerSorter{
 						sl.add(makeSortValue(((ProjectViewModel) item).getByteSize()));
 						break;
 					case Server:
-						sl.add(((ProjectViewModel) item).getServerURL());
+						sl.add(((ProjectViewModel) item).getServerUrl());
 						break;
 					default:
 						sl.add(((ProjectViewModel) item).getName());

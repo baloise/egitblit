@@ -39,7 +39,7 @@ public class RepoDragListener implements DragSourceListener {
 		String gitURL=null;
 		if(model instanceof ProjectViewModel){
 			ProjectViewModel pm = (ProjectViewModel)model;
-			gitURL = pm.getGitURL();
+			gitURL = pm.getGitUrl();
 		}
 		if(gitURL == null){
 			return;

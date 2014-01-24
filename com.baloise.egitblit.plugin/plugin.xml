@@ -20,6 +20,7 @@
    <extension
          point="org.eclipse.ui.preferencePages">
       <page
+            category="com.baloise.egitblit.pref"
             class="com.baloise.egitblit.pref.GitBlitExplorerPrefPage"
             id="com.baloise.egitblit.pref"
             name="GitBlit Repository Explorer">
@@ -30,6 +31,68 @@
       <initializer
             class="com.baloise.egitblit.pref.Initializer">
       </initializer>
+   </extension>
+   <extension
+         point="org.eclipse.ui.bindings">
+      <key
+            commandId="com.baloise.egitblit.plugin.cmd.browse"
+            contextId="com.baloise.egitblit.plugin.context"
+            schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"
+            sequence="M1+B">
+      </key>
+      <key
+            commandId="com.baloise.egitblit.plugin.cmd.copy"
+            contextId="com.baloise.egitblit.plugin.context"
+            schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"
+            sequence="M1+C">
+      </key>
+      <key
+            commandId="com.baloise.egitblit.plugin.cmd.clone"
+            contextId="com.baloise.egitblit.plugin.context"
+            schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"
+            sequence="M1+V">
+      </key>
+      <key
+            commandId="com.baloise.egitblit.plugin.cmd.import"
+            contextId="com.baloise.egitblit.plugin.context"
+            schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"
+            sequence="M1+I">
+      </key>
+   </extension>
+   <extension
+         point="org.eclipse.ui.commands">
+      <category
+            id="com.baloise.egitblit.plugin.commands"
+            name="Gitblit Repository Explorer Commands">
+      </category>
+      <command
+            categoryId="com.baloise.egitblit.plugin.commands"
+            id="com.baloise.egitblit.plugin.cmd.copy"
+            name="Copy Gitblit URL to Clipboard">
+      </command>
+      <command
+            categoryId="com.baloise.egitblit.plugin.commands"
+            id="com.baloise.egitblit.plugin.cmd.clone"
+            name="Clone Repository">
+      </command>
+      <command
+            categoryId="com.baloise.egitblit.plugin.commands"
+            id="com.baloise.egitblit.plugin.cmd.import"
+            name="Clone &amp; Import Project">
+      </command>
+      <command
+            categoryId="com.baloise.egitblit.plugin.commands"
+            id="com.baloise.egitblit.plugin.cmd.browse"
+            name="Open Gitblit summary page">
+      </command>
+   </extension>
+   <extension
+         point="org.eclipse.ui.contexts">
+      <context
+            id="com.baloise.egitblit.plugin.context"
+            name="Gitblit Repository Explorer"
+            parentId="org.eclipse.ui.contexts.window">
+      </context>
    </extension>
 
 </plugin>

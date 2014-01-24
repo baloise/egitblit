@@ -1,19 +1,18 @@
 package com.baloise.egitblit.view;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 import org.eclipse.jface.viewers.TreeViewer;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.ControlEvent;
 import org.eclipse.swt.events.ControlListener;
-import org.eclipse.swt.events.DisposeEvent;
-import org.eclipse.swt.events.DisposeListener;
-import org.eclipse.swt.widgets.Tree;
+import org.eclipse.swt.events.SelectionAdapter;
+import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.widgets.TreeColumn;
 
 import com.baloise.egitblit.main.Activator;
+import com.baloise.egitblit.pref.PreferenceMgr;
 import com.baloise.egitblit.pref.PreferenceModel;
 import com.baloise.egitblit.pref.PreferenceModel.ColumnData;
 
@@ -23,46 +22,42 @@ import com.baloise.egitblit.pref.PreferenceModel.ColumnData;
  * @author MicBag
  */
 public class ColumnFactory{
+	public final static String	KEY_COLDESC		= "ColumnDesc";
+	private TreeViewer			viewer;
 
-	public final static String KEY_COLDESC = "ColumnDesc";
-
-	private TreeViewer viewer;
-
-	private List<TreeColumn> ctrlMoveList = new ArrayList<TreeColumn>();
-	private List<TreeColumn> ctrlMoveStack = new ArrayList<TreeColumn>();
-	private List<PreferenceModel.ColumnData> colInit = new ArrayList<PreferenceModel.ColumnData>();
-
-	// ------------------------------------------------------------------------
-	// Standard listeners
-	// ------------------------------------------------------------------------
-	DisposeListener diposeMoveListener = new DisposeListener() {
-		@Override
-		public void widgetDisposed(DisposeEvent e){
-			if(e.widget instanceof TreeColumn){
-				unregisterColumn((TreeColumn) e.widget);
-			}
-		}
-	};
-
-	ControlListener moveListener = new ControlListener() {
+	/**
+	 * Move listener
+	 */
+	ControlListener	moveListener = new ControlListener() {
 		@Override
 		public void controlResized(ControlEvent e){
 		}
-
+		
 		@Override
 		public void controlMoved(ControlEvent e){
 			int[] order = viewer.getTree().getColumnOrder();
 			int[] newOrder = new int[order.length];
 			int i = 0;
-			// First column can't be moved and no other column can be placed at
-			// pos 0
-			newOrder[i++] = 0;
-			for(int col : order){
-				if(col != 0){
-					newOrder[i++] = col;
+			// First column can't be moved and no other column can be placed at pos 0
+				newOrder[i++] = 0;
+				for(int col : order){
+					if(col != 0){
+						newOrder[i++] = col;
+					}
 				}
+				viewer.getTree().setColumnOrder(newOrder);
 			}
-			viewer.getTree().setColumnOrder(newOrder);
+		};
+
+	SelectionAdapter selListener= new SelectionAdapter() {
+		public void widgetSelected(SelectionEvent e){
+			TreeColumn col = viewer.getTree().getSortColumn();
+			viewer.getTree().setSortColumn((TreeColumn) e.widget);
+			if(((TreeColumn) e.widget).equals(col)){
+				int dir = viewer.getTree().getSortDirection() == SWT.UP ? SWT.DOWN : SWT.UP;
+				viewer.getTree().setSortDirection(dir);
+			}
+			viewer.refresh();
 		}
 	};
 
@@ -76,30 +71,36 @@ public class ColumnFactory{
 		this.viewer = viewer;
 	}
 
-	/**
-	 * Creates an table column for repo viewer
-	 * 
-	 * @param id
-	 *            enum / id of the column
-	 * @param label
-	 *            column label
-	 * @param style
-	 *            style of the control (mostly SWT.LEFT or SWT.RIGHT)
-	 * @param alignment
-	 *            alignment of the column data (mostly SWT.LEFT or SWT.RIGHT)
-	 * @param width
-	 *            initial width of the column
-	 * @return created column
-	 */
-	public TreeColumn addColumn(ColumnDesc id, String label, int style, int alignment, int width){
-		TreeColumn col = new TreeColumn(viewer.getTree(), style);
-		col.setAlignment(alignment);
-		col.setText(label);
-		col.setToolTipText(label);
+	public TreeColumn addColumn(ColumnDesc desc, int pos, int width){
+		if(desc == null){
+			return null;
+		}
+		int max = viewer.getTree().getColumnCount();
+		pos = (pos > max || pos < 0) ? max : pos;
+		TreeColumn col = new TreeColumn(viewer.getTree(), desc.style, pos);
+
+		col.setAlignment(desc.style);
+		col.setText(desc.label);
+		col.setToolTipText(desc.label);
 		col.setWidth(width);
-		col.setToolTipText(label);
-		col.setData(KEY_COLDESC, id);
+		col.setData(KEY_COLDESC, desc);
+
+		if(desc.isMovable()){
+			enableMoveable(col);
+		}
 		return col;
+	}
+
+	public TreeColumn addColumn(ColumnDesc desc){
+		return addColumn(desc, desc.getIndex(),desc.width);
+	}
+
+	public void removeColumn(ColumnDesc desc){
+		TreeColumn col = getColumn(desc);
+		if(col != null){
+			disableMovable(col);
+			col.dispose();
+		}
 	}
 
 	public final static ColumnDesc getColumnDesc(TreeColumn item){
@@ -111,7 +112,6 @@ public class ColumnFactory{
 
 	public final ColumnDesc getColumnDesc(int index){
 		return getColumnDesc(viewer.getTree().getColumn(index));
-
 	}
 
 	public final TreeColumn getColumn(ColumnDesc desc){
@@ -128,17 +128,38 @@ public class ColumnFactory{
 		return null;
 	}
 
+	public final int getColumnIndex(ColumnDesc desc){
+		if(desc == null){
+			return -1;
+		}
+		
+		int pos = 0;
+
+		// Initial position
+		TreeColumn[] items = viewer.getTree().getColumns();
+		// actual order (index is order, value is init position)
+		int[] actOrder = viewer.getTree().getColumnOrder();
+		for(TreeColumn item : items){
+			if(desc == (ColumnDesc) item.getData(KEY_COLDESC)){
+				for(int i=0;i<actOrder.length;i++){
+					if(actOrder[i] == pos){
+						return i;
+					}
+				}
+			}
+			pos++;
+		}
+		return -1;
+	}
+
 	public final void enableMoveable(final TreeColumn... cols){
 		if(cols == null || cols.length == 0){
 			return;
 		}
-		ctrlMoveList.addAll(Arrays.asList(cols));
-		ctrlMoveStack.removeAll(Arrays.asList(cols));
 
 		for(TreeColumn col : cols){
 			col.setMoveable(true);
 			col.addControlListener(moveListener);
-			col.addDisposeListener(diposeMoveListener);
 		}
 	}
 
@@ -147,34 +168,68 @@ public class ColumnFactory{
 			return;
 		}
 
-		ctrlMoveStack.addAll(Arrays.asList(cols));
-		ctrlMoveList.removeAll(Arrays.asList(cols));
 		for(TreeColumn col : cols){
 			col.setMoveable(false);
 			col.removeControlListener(moveListener);
-			col.removeDisposeListener(diposeMoveListener);
 		}
 	}
 
-	/**
-	 * Enables or disables control listners
-	 * 
-	 * @param enable
-	 *            true = enabled / false = disabled
-	 * @return previous state
-	 */
-	public boolean enableControlListeners(boolean enable){
-		if((ctrlMoveList.isEmpty() && enable == false) || (ctrlMoveStack.isEmpty() && enable == true)){
-			// trying to enable or disable with no columns or invalid state
-			return !ctrlMoveList.isEmpty();
+	public final void createColumns(PreferenceModel model){
+
+		viewer.getTree().setRedraw(false);
+
+		// --- Remove all columns
+		TreeColumn[] treeCols = viewer.getTree().getColumns();
+		disableMovable(treeCols);
+		for(TreeColumn item : treeCols){
+			// Next line: Useless, because item will be disposed and eventtable
+			// will be set to null
+			// item.removeSelectionListener(selListener);
+			item.dispose();
 		}
 
-		if(enable == true){
-			enableMoveable(ctrlMoveStack.toArray(new TreeColumn[ctrlMoveStack.size()]));
-		}else{
-			disableMovable(ctrlMoveList.toArray(new TreeColumn[ctrlMoveList.size()]));
+		List<ColumnData> colList = null;
+		if(model != null && model.getColumnData().size() > 0){
+			// --- Create columns from prefs
+			colList = model.getColumnData();
 		}
-		return !ctrlMoveList.isEmpty();
+		if(colList == null || colList.isEmpty()){
+			// --- no columns in preferences saved
+			colList = PreferenceMgr.initColumnData();
+		}
+
+		PreferenceMgr.sortByIndex(colList);
+		colList = PreferenceMgr.filterVisible(colList);
+		ColumnDesc desc;
+		for(ColumnData item : colList){
+			desc = ColumnDesc.valueOf(item.id);
+			if(item.visible){
+				addColumn(desc,item.pos,item.width);
+			}
+		}
+
+		treeCols = viewer.getTree().getColumns();
+		enableMoveable(treeCols);
+		initTreeSorter();
+		viewer.refresh(true);
+		viewer.getTree().setRedraw(true);
+	}
+
+	private void initTreeSorter(){
+		if(this.viewer.getTree().getColumnCount() == 0){
+			Activator.logError("Can't init TreeSorter. Tree has no columns.");
+			return;
+		}
+		RepoViewSorter repoViewSorter = new RepoViewSorter();
+		viewer.setSorter(repoViewSorter);
+		viewer.getTree().setSortColumn(viewer.getTree().getColumn(0));
+		viewer.getTree().setSortDirection(SWT.UP);
+		viewer.refresh();
+
+		TreeColumn[] cols = viewer.getTree().getColumns();
+		for(final TreeColumn item : cols){
+			item.addSelectionListener(this.selListener);
+		}
 	}
 
 	/**
@@ -182,132 +237,157 @@ public class ColumnFactory{
 	 *            true = set current column data in Preference model, false =
 	 *            init columns with pref settings
 	 */
-	public void updatePreferences(PreferenceModel model, boolean toPrefFromPref){
-		captureColumnData(false);
+	public void update(PreferenceModel model, boolean toPrefFromPref){
 		if(toPrefFromPref){
 			model.setColumnData(getColumnData());
 		}else{
-			updateColumnsFromPref(model.getColumnData());
+			createColumns(model);
 		}
 	}
-
-	public void captureColumnData(boolean force){
-		if(force == false){
-			if(colInit.isEmpty() == false){
-				return;
-			}
-		}
-		colInit.clear();
-		colInit.addAll(getColumnData());
-	}
-
-	public void reset(){
-		if(colInit.isEmpty()){
-			return;
-		}
-		updateColumnsFromPref(colInit);
-	}
-
-	/**
-	 * @return Actual column data
-	 */
-	private List<PreferenceModel.ColumnData> getColumnData(){
-		enableControlListeners(false);
-
-		List<PreferenceModel.ColumnData> colDataList = new ArrayList<PreferenceModel.ColumnData>();
-
-		Tree tree = viewer.getTree();
-		viewer.refresh(true);
-
-		ColumnDesc colDesc;
-		TreeColumn titem;
-		int width;
-		String id;
-		int order[] = tree.getColumnOrder();
-		int size = order.length;
-		TreeColumn[] gaga = viewer.getTree().getColumns();
-		for(int pos = 0 ; pos < size; pos++){
-			titem = viewer.getTree().getColumn(order[pos]);
-			colDesc = getColumnDesc(titem);
-			if(colDesc == null || titem == null){
-				Activator.logError("Error while computing column data . Viewer / column definition are out of sync. Missing column description.");
-				return colInit;
-			}
-			id = colDesc.name();
-			width = titem.getWidth();
-			colDataList.add(new PreferenceModel.ColumnData(id, pos, width));
-		}
-		
-		enableControlListeners(true);
-		if(colDataList.size() != order.length){
-			Activator.logError("Error while computing column data . Viewer / column definition are out of sync. Viewer has more / less columns than expected.");
-		}
-		return colDataList;
-	}
-
-	/**
-	 * Initializes viewer columns from preferences
-	 * 
-	 * @param prefModel
-	 */
-	private void updateColumnsFromPref(List<PreferenceModel.ColumnData> colDataList){
-		enableControlListeners(false);
-
-		TreeColumn[] treeCols = viewer.getTree().getColumns(); // original order when building table
-
-		int colSize = treeCols.length;
-		int[] order = new int[colSize];
-		for(int i = 0; i < colSize; i++){
-			order[i] = -1;
-		}
-		
-		TreeColumn item;
-		ColumnDesc colDesc;
-		ColumnData colData;
-		for(int i = 0; i< colSize; i++){
-			item = viewer.getTree().getColumn(i);
-			colDesc = getColumnDesc(item); // Description of the item
-			colData = PreferenceModel.getColumnData(colDataList, colDesc.name()); // Data with the new position
-			if(colData == null || colData.pos > colSize){
-				Activator.logWarn("Column index from preferences does not match with no. of columns. Continue anyway.");
-				continue;
-			}
-			order[colData.pos] = i; // At new position pos, column i will be placed
-			item.setWidth(colData.width);
-		}
-
-		for(int i = 0; i < colSize; i++){
-			if(order[i] == -1){
-				enableControlListeners(true);
-				Activator.logError("Column index from preferences does not match with table. Missing column in preferences");
-				return;
-			}
-		}
-		viewer.getTree().setColumnOrder(order);
-		enableControlListeners(true);
-	}
-
-	public void unregisterColumn(TreeColumn col){
-		ctrlMoveList.remove(col);
-		ctrlMoveStack.remove(col);
-	}
-
-	public void clear(){
-		ctrlMoveList.clear();
-		ctrlMoveStack.clear();
-	}
-
-	public void createColumns(){
+	
+	public List<ColumnData> getColumnData(){
 		TreeColumn col;
-		int width;
+		int pos, width;
+		boolean visible;
+		
+		List<ColumnData> list = new ArrayList<PreferenceModel.ColumnData>();
 		ColumnDesc[] items = ColumnDesc.values();
 		for(ColumnDesc item : items){
-			width = item.visible == true ? item.width : 0;
-			col = addColumn(item, item.label, SWT.LEFT,item.style,width);
-			if(item.isMovable()){
-				enableMoveable(col);
+			col = getColumn(item);
+			if(col == null){
+				visible = false;
+				width = item.width;
+				pos = -1;
+			}
+			else{
+				visible = true;
+				width = col.getWidth();
+				pos = getColumnIndex(item);
+			}
+			list.add(new ColumnData(item.name(), pos, visible, width));
+		}
+		
+		// --- create default position for invisible columns
+		
+		// --- Get max position of visible columns
+		pos = -1;
+		for(ColumnData item : list){
+			if(pos < item.pos && item.visible){
+				pos = item.pos;
 			}
 		}
-		captureColumnData(true);
+		// --- override position for invisible columns with next free index
+		for(ColumnData item : list){
+			if(item.pos == -1){
+				item.pos = ++pos;
+			}
+		}
+		return list;
 	}
+	
+	
+	//
+	// /**
+	// * @return Actual column data
+	// */
+	// private List<PreferenceModel.ColumnData> getColumnData(){
+	// List<PreferenceModel.ColumnData> colDataList = new
+	// ArrayList<PreferenceModel.ColumnData>();
+	// viewer.refresh(true);
+	//
+	// int width;
+	// int pos;
+	// int max;
+	// String id;
+	// boolean visible;
+	// TreeColumn col;
+	//
+	// ColumnDesc[] cdesc = ColumnDesc.values();
+	// max = cdesc.length-1;
+	// for(ColumnDesc item : cdesc){
+	// col = getColumn(item);
+	// if(col == null){
+	// width = item.width;
+	// visible = false;
+	// }
+	// else{
+	// width = col.getWidth();
+	// visible = width > 0 ? true : false;
+	// }
+	// id = item.name();
+	// pos = visible == true ? getColumnIndex(item) : max--;
+	//
+	// colDataList.add(new PreferenceModel.ColumnData(id, pos, visible,width));
+	// }
+	// return colDataList;
+	// }
+	//
+	// /**
+	// * Initializes viewer columns from preferences
+	// *
+	// * @param prefModel
+	// */
+	// private void updateColumnsFromPref(List<PreferenceModel.ColumnData>
+	// colDataList){
+	// resetColumns();
+	// for(ColumnData item : colDataList){
+	// if(item.visible){
+	// addColumn(ColumnDesc.valueOf(item.id),item.pos);
+	// }
+	// }
+	// }
+	//
+	// public TreeColumn addColumn(ColumnDesc desc){
+	// return addColumn(desc,desc.getIndex());
+	// }
+	//
+	// public TreeColumn addColumn(ColumnDesc desc, int index){
+	// if(desc == null){
+	// return null;
+	// }
+	// TreeColumn col = addColumn(desc, desc.label, SWT.LEFT,desc.style,index,
+	// desc.width);
+	// if(desc.isMovable()){
+	// enableMoveable(col);
+	// }
+	// return col;
+	// }
+	//
+	// /**
+	// * Create columns from preferences or form default settings (values of
+	// enum ColumnDesc)
+	// * @param model PreferenceModel containing the actual column settings
+	// */
+	// public void createColumns(PreferenceModel model){
+	// if(model != null && model.getColumnData().size() > 0){
+	// // --- Create from preferences
+	// update(model,false);
+	// return;
+	// }
+	//
+	// // Create from default definitions
+	// ColumnDesc[] items = ColumnDesc.values();
+	// for(ColumnDesc item : items){
+	// if(item.visible == true){
+	// addColumn(item);
+	// }
+	// }
+	// if(model != null){
+	// // Set actual column data to preferences
+	// model.setColumnData(getColumnData());
+	// }
+	// }
+	//
+	// public void resetColumns(){
+	// resetColumns(null);
+	// }
+	//
+	// public void resetColumns(PreferenceModel model){
+	// TreeColumn[] treeCols = viewer.getTree().getColumns();
+	// disableMovable(treeCols);
+	// for(TreeColumn item : treeCols){
+	// item.dispose();
+	// }
+	// createColumns(model);
+	// }
 }

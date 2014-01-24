@@ -1,5 +1,8 @@
 package com.baloise.egitblit.pref;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 
 import org.eclipse.equinox.security.storage.ISecurePreferences;
@@ -9,6 +12,7 @@ import com.baloise.egitblit.common.GitBlitExplorerException;
 import com.baloise.egitblit.gitblit.GitBlitServer;
 import com.baloise.egitblit.main.Activator;
 import com.baloise.egitblit.pref.PreferenceModel.ColumnData;
+import com.baloise.egitblit.view.ColumnDesc;
 
 /**
  * Handling preference settings
@@ -31,6 +35,7 @@ public class PreferenceMgr{
 	public final static String KEY_GITBLIT_COLUMN_DESC_ID = "com.baloise.gitblit.general.viewer.column.desc.id";
 	public final static String KEY_GITBLIT_COLUMN_DESC_POS = "com.baloise.gitblit.general.viewer.column.desc.pos";
 	public final static String KEY_GITBLIT_COLUMN_DESC_WIDTH = "com.baloise.gitblit.general.viewer.column.desc.width";
+	public final static String KEY_GITBLIT_COLUMN_DESC_VISIBLE = "com.baloise.gitblit.general.viewer.column.desc.visible";
 	
 
 	// Node containing the list of servers
@@ -76,12 +81,13 @@ public class PreferenceMgr{
 			bval = pref.getBoolean(KEY_GITBLIT_SHOW_GROUPS, true);
 			prefModel.setShowGroups(bval);
 			
-			// -- Column settings
+			// --- Column settings
 			ISecurePreferences entryNode;
 			ISecurePreferences serverNode = pref.node(KEY_GITBLIT_COLUMN_DESC_NODE);
 			String[] cols = serverNode.childrenNames();
 			String id;
 			int pos,width;
+			boolean visible;
 			for(String col : cols){
 				entryNode = serverNode.node(col);
 				id = entryNode.get(KEY_GITBLIT_COLUMN_DESC_ID, null);
@@ -90,11 +96,12 @@ public class PreferenceMgr{
 					continue;
 				}
 				pos   = entryNode.getInt(KEY_GITBLIT_COLUMN_DESC_POS, -1);
-				width = entryNode.getInt(KEY_GITBLIT_COLUMN_DESC_WIDTH, -1);
-				if(pos == -1 || width == -1){
-					continue;
+				width = entryNode.getInt(KEY_GITBLIT_COLUMN_DESC_WIDTH, 0);
+				visible = entryNode.getBoolean(KEY_GITBLIT_COLUMN_DESC_VISIBLE, true);
+				if(width == 0 && visible == true){
+					visible = false; 
 				}
-				prefModel.putColumnData(id, pos, width);
+				prefModel.putColumnData(id, pos, visible,width);
 			}
 			
 			// ---- Read list of servers
@@ -158,6 +165,7 @@ public class PreferenceMgr{
 				entryNode.put(KEY_GITBLIT_COLUMN_DESC_ID, desc.id, false);
 				entryNode.putInt(KEY_GITBLIT_COLUMN_DESC_POS, desc.pos, false);
 				entryNode.putInt(KEY_GITBLIT_COLUMN_DESC_WIDTH, desc.width, false);
+				entryNode.putBoolean(KEY_GITBLIT_COLUMN_DESC_VISIBLE, desc.visible, false);
 			}
 			pref.flush();
 			
@@ -187,6 +195,44 @@ public class PreferenceMgr{
 		}
 		return value.trim();
 	}
+	
+	
+	/**
+	 * @param ColumnDat list list to be sorted by position
+	 */
+	public final static List<ColumnData> sortByIndex(List<ColumnData> list){
+		if(list == null){
+			return new ArrayList<PreferenceModel.ColumnData>();
+		}
+		Collections.sort(list,new Comparator<ColumnData>() {
+			@Override
+			public int compare(ColumnData o1, ColumnData o2){
+				return new Integer(o1.pos).compareTo(o2.pos);
+			}
+		});
+		return list;
+	}
+	
+	public final static List<ColumnData> filterVisible(List<ColumnData> list){
+		List<ColumnData> res = new ArrayList<PreferenceModel.ColumnData>();
+		for(ColumnData item : list){
+			if(item.visible == true){
+				res.add(item);
+			}
+		}
+		return res;
+	}
+	
+	public final static List<ColumnData> initColumnData(){
+		List<ColumnData> res = new ArrayList<PreferenceModel.ColumnData>();
+		ColumnDesc[] items = ColumnDesc.values();
+		for(ColumnDesc item : items){
+			res.add(new ColumnData(item.name(), item.getIndex(), item.visible, item.width));
+		}
+		return res;
+	}
+	
+	
 
 	public final static boolean isValidConfig(){
 		return true;
