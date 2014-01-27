@@ -19,6 +19,7 @@ import org.eclipse.jface.action.Separator;
 import org.eclipse.jface.dialogs.IMessageProvider;
 import org.eclipse.jface.layout.GridDataFactory;
 import org.eclipse.jface.layout.GridLayoutFactory;
+import org.eclipse.jface.preference.PreferenceDialog;
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.jface.util.IPropertyChangeListener;
 import org.eclipse.jface.util.PropertyChangeEvent;
@@ -40,6 +41,7 @@ import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Event;
+import org.eclipse.swt.widgets.MenuItem;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.TreeColumn;
 import org.eclipse.ui.IMemento;
@@ -47,6 +49,7 @@ import org.eclipse.ui.ISharedImages;
 import org.eclipse.ui.contexts.IContextService;
 import org.eclipse.ui.dialogs.FilteredTree;
 import org.eclipse.ui.dialogs.PatternFilter;
+import org.eclipse.ui.dialogs.PreferencesUtil;
 import org.eclipse.ui.forms.IMessage;
 import org.eclipse.ui.forms.widgets.Form;
 import org.eclipse.ui.forms.widgets.FormToolkit;
@@ -59,6 +62,7 @@ import com.baloise.egitblit.gitblit.GitBlitServer;
 import com.baloise.egitblit.gitblit.ProgressToken;
 import com.baloise.egitblit.main.Activator;
 import com.baloise.egitblit.main.SharedImages;
+import com.baloise.egitblit.pref.GitBlitExplorerPrefPage;
 import com.baloise.egitblit.pref.PreferenceMgr;
 import com.baloise.egitblit.pref.PreferenceModel;
 import com.baloise.egitblit.pref.PreferenceModel.DoubleClickBehaviour;
@@ -196,14 +200,18 @@ public class RepoExplorerView extends ViewPart{
 	private ExpandCItem				expandCItem;
 
 	private Form					form;
-	private boolean					omitServerErrors	= false;
+	private Boolean					omitServerErrors	= null;
 
 	// ------------------------------------------------------------------------
 	// --- Local actions
 	// ------------------------------------------------------------------------
 	private class OmitAction extends Action{
+		
 		@Override
-		public void run(){
+		public void runWithEvent(Event event){
+			if(omitServerErrors == null){
+				omitServerErrors = true;
+			}
 			omitServerErrors = !omitServerErrors;
 			setChecked(omitServerErrors);
 			try{
@@ -461,6 +469,14 @@ public class RepoExplorerView extends ViewPart{
 		IMenuManager hmgr = this.form.getMenuManager();
 		hmgr.add(this.omitAction);
 		this.omitAction.setChecked(this.prefModel.isOmitServerErrors());
+		final Action prefAction = new Action("Open preferences"){
+			@Override
+			public void runWithEvent(Event event){
+				PreferenceDialog dialog = PreferencesUtil.createPreferenceDialogOn(null, GitBlitExplorerPrefPage.ID, null, null);
+			    dialog.open();
+			}
+		};
+		hmgr.add(prefAction);
 
 		hmgr.add(new Separator());
 		final ImageDescriptor desc = Activator.getSharedImageDescriptor(ISharedImages.IMG_DEF_VIEW);
@@ -628,7 +644,9 @@ public class RepoExplorerView extends ViewPart{
 			this.prefModel = PreferenceMgr.readConfig();
 			if(prefModel != null){
 				dbclick = prefModel.getDoubleClick();
-				omitServerErrors = prefModel.isOmitServerErrors();
+				if(omitServerErrors == null){
+					omitServerErrors = prefModel.isOmitServerErrors();
+				}
 				if(labelProvider != null){
 					labelProvider.setDecorateLabels(prefModel.isColorColumns());
 				}
