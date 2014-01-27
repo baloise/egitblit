@@ -290,7 +290,7 @@ public class StyledLabelProvider extends StyledCellLabelProvider implements Repo
 			case Size:
 				if(element instanceof ProjectViewModel){
 					if(((ProjectViewModel) element).hasCommits() == true){
-						return ((ProjectViewModel) element).getSize();
+						return toString(((ProjectViewModel) element).getSize());
 					}
 					return "(empty)";
 				}
@@ -491,6 +491,14 @@ public class StyledLabelProvider extends StyledCellLabelProvider implements Repo
 		return "";
 	}
 
+	
+	public final static String toString(String value){
+		if(value == null){
+			return "";
+		}
+		return value;
+	}
+	
 	public final static String toString(boolean value){
 		return value == true ? "Yes" : "No";
 	}
@@ -598,7 +606,7 @@ public class StyledLabelProvider extends StyledCellLabelProvider implements Repo
 				case LastChange:
 					return getTimeColor((ProjectViewModel) element);
 				case Size:
-					if(((ProjectViewModel) element).hasCommits() == false){
+					if(((ProjectViewModel) element).hasCommits() == false || ((ProjectViewModel) element).getSize() == null){
 						return disp.getSystemColor(SWT.COLOR_DARK_GREEN);
 					}
 					return disp.getSystemColor(SWT.COLOR_BLUE);

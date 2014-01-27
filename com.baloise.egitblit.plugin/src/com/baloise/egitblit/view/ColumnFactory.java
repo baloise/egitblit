@@ -82,9 +82,14 @@ public class ColumnFactory{
 		if(desc == null){
 			return null;
 		}
+		TreeColumn col = getColumn(desc);
+		// Prevent double entry
+		if(col != null && col.isDisposed() == false){
+			return col;
+		}
 		int max = viewer.getTree().getColumnCount();
 		pos = (pos > max || pos < 0) ? max : pos;
-		TreeColumn col = new TreeColumn(viewer.getTree(), desc.style, pos);
+		col = new TreeColumn(viewer.getTree(), desc.style, pos);
 
 		col.setAlignment(desc.style);
 		col.setText(desc.label);
@@ -201,6 +206,10 @@ public class ColumnFactory{
 		}
 
 		for(TreeColumn col : cols){
+			if(col.isDisposed()){
+				Activator.logError("Error setting column to movable. Column is disposed.");
+				continue;
+			}
 			col.setMoveable(true);
 			col.addControlListener(moveListener);
 		}
@@ -258,7 +267,7 @@ public class ColumnFactory{
 				addColumn(desc,item.pos,item.width);
 			}
 		}
-
+		
 		treeCols = viewer.getTree().getColumns();
 		enableMoveable(treeCols);
 		initTreeSorter();

@@ -29,7 +29,7 @@ import com.gitblit.utils.ArrayUtils;
 public class RepoViewSorter extends TreePathViewerSorter{
 
 	// private final static DecimalFormat dform = new
-	private final static DecimalFormat dform = new DecimalFormat("0000000000000000000.00");
+	private final static DecimalFormat decform = new DecimalFormat("+0000000000000000000.00;-#");
 
 	public RepoViewSorter(){
 	}
@@ -136,12 +136,19 @@ public class RepoViewSorter extends TreePathViewerSorter{
 		return v1.compareTo(v2);
 	}
 
+	protected final static String makeSortValue(Long value){
+		if(value == null){
+			value = new Long(0L);
+		}
+		return decform.format(value);
+	}
+
 	protected final static String makeSortValue(long value){
-		return dform.format(value);
+		return decform.format(value);
 	}
 
 	protected final static String makeSortValue(double value){
-		return dform.format(value);
+		return decform.format(value);
 	}
 
 	protected final static String makeSortValue(Date date){

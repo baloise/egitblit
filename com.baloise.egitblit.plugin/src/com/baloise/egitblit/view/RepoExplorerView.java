@@ -542,10 +542,8 @@ public class RepoExplorerView extends ViewPart{
 		hideGroupsAllAction.setChecked(mode);
 		if(mode == true){
 			viewData.setViewMode(ViewMode.Group);
-			colFactory.removeColumn(ColumnDesc.Group);
 		}else{
 			viewData.setViewMode(ViewMode.Repository);
-			colFactory.addColumn(ColumnDesc.Group);
 		}
 	}
 

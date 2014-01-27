@@ -86,7 +86,7 @@ public class TestDataFactory{
 
 		repo.projectName = "projectName " + id;
 		repo.serverUrl = "serverUrl";
-		repo.byteSize = id * 1024;
+		repo.byteSize = new Long(id * 1024);
 		repo.repoRGB = StringUtils.getColor(repo.projectName);
 
 		return repo;

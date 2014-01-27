@@ -219,7 +219,7 @@ public class ProjectViewModel implements GitBlitViewModel{
 		return repo.serverUrl;
 	}
 
-	public long getByteSize(){
+	public Long getByteSize(){
 		return repo.byteSize;
 	}
 

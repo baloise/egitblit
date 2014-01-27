@@ -70,7 +70,7 @@ public class GitBlitRepository{
 	public String				groupName;
 	public String				projectName;
 	public String				serverUrl;
-	public long					byteSize;
+	public Long					byteSize;
 	public String				repoRGB;
 
 	public GitBlitRepository(){
@@ -259,9 +259,9 @@ public class GitBlitRepository{
 	 * @param value
 	 * @return
 	 */
-	public final static long makeByteValue(String value){
+	public final static Long makeByteValue(String value){
 		if(value == null || value.isEmpty()){
-			return -1L;
+			return null;
 		}
 		try{
 			String size = value;
@@ -311,7 +311,7 @@ public class GitBlitRepository{
 		}catch(Exception e){
 			// Activator.logError("Error while sorting view", e);
 		}
-		return -1L;
+		return null;
 	}
 
 	@Override
