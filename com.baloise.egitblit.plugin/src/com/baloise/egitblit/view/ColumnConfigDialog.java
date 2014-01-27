@@ -61,7 +61,7 @@ public class ColumnConfigDialog extends TitleAreaDialog{
 	public void create(){
 		super.create();
 		setTitle("Configure group/repository table columns");
-		setMessage("Select and order the repository properties you want to see on the \ngroup / repository table", IMessageProvider.NONE);
+		setMessage("Please select and order the repository properties you want to see on the group/repository table", IMessageProvider.NONE);
 		setHelpAvailable(false);
 	}
 	
@@ -142,7 +142,7 @@ public class ColumnConfigDialog extends TitleAreaDialog{
 		final Table table = viewer.getTable();
 
 		final TableViewerColumn vcol = new TableViewerColumn(viewer, SWT.LEFT);
-		vcol.getColumn().setText("Column Name & Order");
+		vcol.getColumn().setText("Column Name && Order");
 
 		vcol.getColumn().pack();
 		vcol.setLabelProvider(new ColumnLabelProvider() {
