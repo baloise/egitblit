@@ -174,7 +174,7 @@ public class CloneOneClickAction extends CloneAction{
 		if(!GitBlitRepository.GROUP_MAIN.equals(project.getGroupName())){
 			ret = new File(ret, project.getGroupName());
 		}
-		return new File(ret, project.getName());
+		return new File(ret, project.getProjectName());
 	}
 
 	@Override
