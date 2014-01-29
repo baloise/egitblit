@@ -1,11 +1,7 @@
 package com.baloise.egitblit.pref;
 
 import java.util.ArrayList;
-import java.util.Hashtable;
 import java.util.List;
-import java.util.Map;
-
-import org.eclipse.ui.IMemento;
 
 import com.baloise.egitblit.gitblit.GitBlitServer;
 import com.baloise.egitblit.main.Activator;
@@ -46,10 +42,6 @@ public class PreferenceModel{
 	 *
 	 */
 	public static class ColumnData{
-		public final static String KEY_GITBLIT_COLUMN_DESC_POS = "column.desc.pos";
-		public final static String KEY_GITBLIT_COLUMN_DESC_WIDTH = "column.desc.width";
-		public final static String KEY_GITBLIT_COLUMN_DESC_VISIBLE = "column.desc.visible";
-
 		public String id;
 		public int pos;
 		public int width;
@@ -63,36 +55,6 @@ public class PreferenceModel{
 			this.pos = pos;
 			this.visible = visible;
 			this.width = width;
-		}
-		
-		public void saveState(IMemento memento){
-			if(memento == null){
-				Activator.logError("Error saving column state. Missing call parameter.");
-				return;
-			}
-			
-			memento.putInteger(makeKey(KEY_GITBLIT_COLUMN_DESC_POS), this.pos);
-			memento.putInteger(makeKey(KEY_GITBLIT_COLUMN_DESC_WIDTH), this.width);
-			memento.putBoolean(makeKey(KEY_GITBLIT_COLUMN_DESC_VISIBLE), this.visible);
-		}
-		
-		public void loadState(IMemento memento){
-			if(memento == null){
-				Activator.logError("Error saving column state. Missing call parameter.");
-				return;
-			}
-			Integer val;
-			Boolean b;
-			val = memento.getInteger(makeKey(KEY_GITBLIT_COLUMN_DESC_POS));
-			this.pos = val != null ? val :  -1;
-			val = memento.getInteger(makeKey(KEY_GITBLIT_COLUMN_DESC_WIDTH));
-			this.width = val != null ? val : 0;
-			b = memento.getBoolean(makeKey(KEY_GITBLIT_COLUMN_DESC_VISIBLE));
-			this.visible = b != null && this.width > 0 ? b : false;
-		}
-		
-		private String makeKey(String propId) {
-			return this.id + "." + propId;
 		}
 
 		@Override
@@ -117,12 +79,12 @@ public class PreferenceModel{
 	}
 	
 	public void reset(){
-		this.dbClick = DoubleClickBehaviour.PasteEGit;
-		this.repoList = new ArrayList<GitBlitServer>();
-		this.omitServerErrors = false;
-		this.colorColums = false;
-		this.showGroups = true;
-		this.colData = new ArrayList<ColumnData>();
+		dbClick = DoubleClickBehaviour.PasteEGit;
+		repoList = new ArrayList<GitBlitServer>();
+		omitServerErrors = false;
+		colorColums = false;
+		showGroups = true;
+		colData = new ArrayList<ColumnData>();
 	}
 	
 	public void init(PreferenceModel model){
