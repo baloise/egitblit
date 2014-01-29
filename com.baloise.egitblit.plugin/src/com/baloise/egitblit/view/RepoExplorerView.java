@@ -45,6 +45,8 @@ import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.TreeColumn;
 import org.eclipse.ui.IMemento;
 import org.eclipse.ui.ISharedImages;
+import org.eclipse.ui.IViewSite;
+import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.contexts.IContextService;
 import org.eclipse.ui.dialogs.FilteredTree;
 import org.eclipse.ui.dialogs.PatternFilter;
@@ -64,6 +66,7 @@ import com.baloise.egitblit.main.SharedImages;
 import com.baloise.egitblit.pref.GitBlitExplorerPrefPage;
 import com.baloise.egitblit.pref.PreferenceMgr;
 import com.baloise.egitblit.pref.PreferenceModel;
+import com.baloise.egitblit.pref.PreferenceModel.ColumnData;
 import com.baloise.egitblit.pref.PreferenceModel.DoubleClickBehaviour;
 import com.baloise.egitblit.view.action.ActionFactory;
 import com.baloise.egitblit.view.action.BrowseAction;
@@ -85,7 +88,11 @@ public class RepoExplorerView extends ViewPart{
 
 	public final static String CONTEXT_ID = "com.baloise.egitblit.context";
 	
+	public final static String KEY_GITBLIT_OMIT_SERVER_ERROR = "com.baloise.gitblit.view.omitServerInError";
+	public final static String KEY_GITBLIT_SHOW_GROUPS = "com.baloise.gitblit.view.showGroups";
+
 	private TreeViewer		viewer;
+	private IMemento 		memento;
 	private ColumnFactory	colFactory;
 	private ActionFactory   actionFactory;
 	/**
@@ -193,7 +200,7 @@ public class RepoExplorerView extends ViewPart{
 																							// Wrapper
 	private StyledLabelProvider		labelProvider;
 	private DoubleClickBehaviour	dbclick				= DoubleClickBehaviour.OpenGitBlit;
-	private PreferenceModel			prefModel			= new PreferenceModel();
+	private PreferenceModel			prefModel			= null;
 	private List<GitBlitServer>		serverList			= null;
 	private Action					refreshAction;
 	private ExpandCItem				expandCItem;
@@ -323,12 +330,23 @@ public class RepoExplorerView extends ViewPart{
 	@Override
 	public void saveState(IMemento memento){
 		super.saveState(memento);
-		try{
-			colFactory.update(this.prefModel, true);
-			PreferenceMgr.saveConfig(this.prefModel);
-		}catch(GitBlitExplorerException e){
-			Activator.logError("Error saveing preferences.", e);
+		if(memento == null && this.colFactory == null && this.prefModel == null){
+			return;
 		}
+		this.colFactory.update(this.prefModel, true);
+		List<ColumnData> list = this.prefModel.getColumnData();
+		for(ColumnData item : list){
+			item.saveState(memento);
+		}
+		memento.putBoolean(KEY_GITBLIT_OMIT_SERVER_ERROR, this.prefModel.isOmitServerErrors());
+		memento.putBoolean(KEY_GITBLIT_SHOW_GROUPS, this.prefModel.isShowGroups());
+	}
+	
+
+	@Override
+	public void init(IViewSite site, IMemento memento) throws PartInitException {
+		super.init(site, memento);
+		this.memento = memento;
 	}
 
 	/*
@@ -585,10 +603,22 @@ public class RepoExplorerView extends ViewPart{
 		// --------------------------------------------------------------------
 		// Create columns from preferences
 		// --------------------------------------------------------------------
+		List<ColumnData> list = PreferenceMgr.initColumnData();
+		this.prefModel.setColumnData(list);
+		for(ColumnData item : list){
+			item.loadState(this.memento);
+		}
 		colFactory.createColumns(prefModel);
+		
+		if(this.memento != null){
+			// Init from preferences
+			Boolean b = memento.getBoolean(KEY_GITBLIT_OMIT_SERVER_ERROR);
+			this.prefModel.setOmitServerErrors(b != null ? b.booleanValue() : true);
+			
+			b = memento.getBoolean(KEY_GITBLIT_SHOW_GROUPS);
+			this.prefModel.setShowGroups(b != null ? b.booleanValue() : true);
+		}
 
-		TreeColumn[] a = viewer.getTree().getColumns();
-		// viewer = new TreeViewer(parent, SWT.H_SCROLL | SWT.V_SCROLL);
 		viewer.setContentProvider(new RepoContentProvider());
 		this.labelProvider = new StyledLabelProvider(viewer);
 		viewer.setLabelProvider(this.labelProvider);
