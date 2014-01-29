@@ -1,6 +1,8 @@
 package com.baloise.egitblit.view;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 
 import org.eclipse.jface.viewers.TreeViewer;
@@ -255,11 +257,11 @@ public class ColumnFactory{
 		}
 		if(colList == null || colList.isEmpty()){
 			// --- no columns in preferences saved
-			colList = PreferenceMgr.initColumnData();
+			colList = initColumnData();
 		}
 
-		PreferenceMgr.sortByIndex(colList);
-		colList = PreferenceMgr.filterVisible(colList);
+		sortByIndex(colList);
+		colList = filterVisible(colList);
 		ColumnDesc desc;
 		for(ColumnData item : colList){
 			desc = ColumnDesc.valueOf(item.id);
@@ -351,4 +353,39 @@ public class ColumnFactory{
 		}
 		return list;
 	}
+	
+	/**
+	 * @param ColumnDat list list to be sorted by position
+	 */
+	public final static List<ColumnData> sortByIndex(List<ColumnData> list){
+		if(list == null){
+			return new ArrayList<PreferenceModel.ColumnData>();
+		}
+		Collections.sort(list,new Comparator<ColumnData>() {
+			@Override
+			public int compare(ColumnData o1, ColumnData o2){
+				return new Integer(o1.pos).compareTo(o2.pos);
+			}
+		});
+		return list;
+	}
+	
+	public final static List<ColumnData> filterVisible(List<ColumnData> list){
+		List<ColumnData> res = new ArrayList<PreferenceModel.ColumnData>();
+		for(ColumnData item : list){
+			if(item.visible == true){
+				res.add(item);
+			}
+		}
+		return res;
+	}
+	
+	public final static List<ColumnData> initColumnData(){
+		List<ColumnData> res = new ArrayList<PreferenceModel.ColumnData>();
+		ColumnDesc[] items = ColumnDesc.values();
+		for(ColumnDesc item : items){
+			res.add(new ColumnData(item.name(), item.getIndex(), item.visible, item.width));
+		}
+		return res;
+	}	
 }

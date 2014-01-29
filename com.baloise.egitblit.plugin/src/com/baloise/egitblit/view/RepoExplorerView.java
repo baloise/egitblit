@@ -44,6 +44,8 @@ import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.TreeColumn;
 import org.eclipse.ui.IMemento;
 import org.eclipse.ui.ISharedImages;
+import org.eclipse.ui.IViewSite;
+import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.contexts.IContextService;
 import org.eclipse.ui.dialogs.FilteredTree;
 import org.eclipse.ui.dialogs.PatternFilter;
@@ -83,9 +85,6 @@ public class RepoExplorerView extends ViewPart{
 
 	public final static String CONTEXT_ID = "com.baloise.egitblit.context";
 	
-	private TreeViewer		viewer;
-	private ColumnFactory	colFactory;
-	private ActionFactory   actionFactory;
 	/**
 	 * Enum containing the display modes (Grouped or only the repos)
 	 * 
@@ -187,8 +186,11 @@ public class RepoExplorerView extends ViewPart{
 	// ------------------------------------------------------------------------
 	// --- Variables
 	// ------------------------------------------------------------------------
-	private ViewerData				viewData;												// Model
-																							// Wrapper
+	private TreeViewer				viewer;
+	private ColumnFactory			colFactory;
+	private ActionFactory   		actionFactory;
+	private IMemento				memento = null;
+	private ViewerData				viewData;		
 	private StyledLabelProvider		labelProvider;
 	private DoubleClickBehaviour	dbclick				= DoubleClickBehaviour.OpenGitBlit;
 	private PreferenceModel			prefModel			= new PreferenceModel();
@@ -203,7 +205,6 @@ public class RepoExplorerView extends ViewPart{
 	// --- Local actions
 	// ------------------------------------------------------------------------
 	private class OmitAction extends Action{
-		
 		@Override
 		public void runWithEvent(Event event){
 			if(omitServerErrors == null){
@@ -240,7 +241,6 @@ public class RepoExplorerView extends ViewPart{
 	 * @author MicBag
 	 */
 	private class ServerMsg implements IMessage{
-
 		private String	msg;
 		private int		type	= IMessageProvider.NONE;
 
@@ -321,12 +321,16 @@ public class RepoExplorerView extends ViewPart{
 	@Override
 	public void saveState(IMemento memento){
 		super.saveState(memento);
-		try{
-			colFactory.update(this.prefModel, true);
-			PreferenceMgr.saveConfig(this.prefModel);
-		}catch(GitBlitExplorerException e){
-			Activator.logError("Error saveing preferences.", e);
-		}
+		saveViewState(memento);
+	}
+	
+	/* (non-Javadoc)
+	 * @see org.eclipse.ui.part.ViewPart#init(org.eclipse.ui.IViewSite, org.eclipse.ui.IMemento)
+	 */
+	@Override
+	public void init(IViewSite site, IMemento memento) throws PartInitException{
+		super.init(site, memento);
+		this.memento = memento;
 	}
 
 	/*
@@ -651,7 +655,7 @@ public class RepoExplorerView extends ViewPart{
 		}
 	}
 
-	private List<String> getOmittedServerUrls(){
+	private List<String> getOmittedServerErrorUrls(){
 		List<String> res = new ArrayList<String>();
 		for(GitBlitServer item : this.serverList){
 			if(item.serverError == true && res.contains(item.url) == false){
@@ -839,7 +843,7 @@ public class RepoExplorerView extends ViewPart{
 			public void run(){
 				omitAction.refreshLabel();
 				setRepoList(list);
-				setHeaderMessage(getOmittedServerUrls());
+				setHeaderMessage(getOmittedServerErrorUrls());
 			}
 		});
 	}
@@ -865,9 +869,19 @@ public class RepoExplorerView extends ViewPart{
 				status = IMessageProvider.WARNING;
 			}
 			if(msgs.size() == 1){
-				this.form.setMessage("There is one omitted Gitblit server", status, msgList.toArray(new ServerMsg[msgs.size()]));
+				if(this.omitServerErrors == false){
+					this.form.setMessage("There is one unavailable Gitblit server", status, msgList.toArray(new ServerMsg[msgs.size()]));
+				}
+				else{
+					this.form.setMessage("There is one omitted Gitblit server", status, msgList.toArray(new ServerMsg[msgs.size()]));					
+				}
 			}else{
-				this.form.setMessage("There are " + msgs.size() + " omitted Gitblit servers", status, msgList.toArray(new ServerMsg[msgs.size()]));
+				if(this.omitServerErrors == false){
+					this.form.setMessage("There are unavailable Gitblit servers", status, msgList.toArray(new ServerMsg[msgs.size()]));
+				}
+				else{
+					this.form.setMessage("There are " + msgs.size() + " omitted Gitblit servers", status, msgList.toArray(new ServerMsg[msgs.size()]));
+				}
 			}
 		}else{
 			this.form.setMessage(null);
@@ -947,4 +961,24 @@ public class RepoExplorerView extends ViewPart{
 				return this.actionFactory.getAction(CloneAction.ID);
 		}
 	}
+
+	public void saveViewState(IMemento memento){
+		try{
+			colFactory.update(this.prefModel, true);
+			PreferenceMgr.saveConfig(this.prefModel);
+		}catch(GitBlitExplorerException e){
+			Activator.logError("Error saveing preferences.", e);
+		}
+		if(this.memento == null){
+			return;
+		}
+	}
+	
+	public void loadViewState(){
+		if(this.memento == null){
+			return;
+		}
+	}
+	
+	
 }

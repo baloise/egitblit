@@ -1,8 +1,5 @@
 package com.baloise.egitblit.pref;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
 import java.util.List;
 
 import org.eclipse.equinox.security.storage.ISecurePreferences;
@@ -12,7 +9,6 @@ import com.baloise.egitblit.common.GitBlitExplorerException;
 import com.baloise.egitblit.gitblit.GitBlitServer;
 import com.baloise.egitblit.main.Activator;
 import com.baloise.egitblit.pref.PreferenceModel.ColumnData;
-import com.baloise.egitblit.view.ColumnDesc;
 
 /**
  * Handling preference settings
@@ -195,78 +191,5 @@ public class PreferenceMgr{
 		}
 		return value.trim();
 	}
-	
-	
-	/**
-	 * @param ColumnDat list list to be sorted by position
-	 */
-	public final static List<ColumnData> sortByIndex(List<ColumnData> list){
-		if(list == null){
-			return new ArrayList<PreferenceModel.ColumnData>();
-		}
-		Collections.sort(list,new Comparator<ColumnData>() {
-			@Override
-			public int compare(ColumnData o1, ColumnData o2){
-				return new Integer(o1.pos).compareTo(o2.pos);
-			}
-		});
-		return list;
-	}
-	
-	public final static List<ColumnData> filterVisible(List<ColumnData> list){
-		List<ColumnData> res = new ArrayList<PreferenceModel.ColumnData>();
-		for(ColumnData item : list){
-			if(item.visible == true){
-				res.add(item);
-			}
-		}
-		return res;
-	}
-	
-	public final static List<ColumnData> initColumnData(){
-		List<ColumnData> res = new ArrayList<PreferenceModel.ColumnData>();
-		ColumnDesc[] items = ColumnDesc.values();
-		for(ColumnDesc item : items){
-			res.add(new ColumnData(item.name(), item.getIndex(), item.visible, item.width));
-		}
-		return res;
-	}
-	
-	
 
-	public final static boolean isValidConfig(){
-		return true;
-		// private void checkPreferences(){
-		// IPreferenceStore preferenceStore =
-		// Activator.getDefault().getPreferenceStore();
-		// String value =
-		// preferenceStore.getString(GitBlitExplorerPrefPage.KEY_GITBLIT_URL);
-		// try{
-		// new URL(value);
-		// }
-		// catch(Exception e){
-		// EclipseLog.error("Error while checking preferences",e);
-		// showMessage(IStatus.ERROR,"Gitblit Explorer: Configuration Error",
-		// "GitBlit URL is not specified or invalid");
-		// }
-		// value =
-		// preferenceStore.getString(GitBlitExplorerPrefPage.KEY_GITBLIT_USER);
-		// if(value == null || value.trim().isEmpty()){
-		// String msg = "Missing configuration parameter: User";
-		// EclipseLog.error(value);
-		// showMessage(IStatus.ERROR,"Gitblit Explorer: Configuration Error",
-		// msg);
-		// }
-		//
-		// value =
-		// preferenceStore.getString(GitBlitExplorerPrefPage.KEY_GITBLIT_PWD);
-		// if(value == null || value.trim().isEmpty()){
-		// String msg = "Missing configuration parameter: Password";
-		// EclipseLog.error(value);
-		// showMessage(IStatus.ERROR,"Gitblit Explorer: Configuration Error",
-		// msg);
-		// }
-		// }
-
-	}
 }
