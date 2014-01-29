@@ -5,6 +5,7 @@ import java.util.List;
 
 import com.baloise.egitblit.gitblit.GitBlitServer;
 import com.baloise.egitblit.main.Activator;
+import com.baloise.egitblit.view.ColumnData;
 
 /**
  * Model representing the preference settings
@@ -36,34 +37,6 @@ public class PreferenceModel{
 		}
 	};
 	
-	/**
-	 * Class holding column configuration (id, position and width)
-	 * @author MicBag
-	 *
-	 */
-	public static class ColumnData{
-		public String id;
-		public int pos;
-		public int width;
-		public boolean visible;
-		
-		public ColumnData(){
-		}
-		
-		public ColumnData(String id, int pos, boolean visible, int width){
-			this.id = id;
-			this.pos = pos;
-			this.visible = visible;
-			this.width = width;
-		}
-
-		@Override
-		public String toString(){
-			return "ColumnData [id=" + id + ", pos=" + pos + ", width=" + width + ", visible=" + visible + "]";
-		}
-		
-	}
-
 	// ------------------------------------------------------------------------
 	// Properties
 	// ------------------------------------------------------------------------

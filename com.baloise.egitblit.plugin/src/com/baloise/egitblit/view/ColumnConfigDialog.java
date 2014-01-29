@@ -39,7 +39,6 @@ import org.eclipse.ui.forms.widgets.FormToolkit;
 import com.baloise.egitblit.main.Activator;
 import com.baloise.egitblit.main.SharedImages;
 import com.baloise.egitblit.pref.PreferenceModel;
-import com.baloise.egitblit.pref.PreferenceModel.ColumnData;
 
 /**
  * Dialog to configure the group / repo view (display columns, order of columns)

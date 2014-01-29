@@ -8,7 +8,6 @@ import org.eclipse.equinox.security.storage.SecurePreferencesFactory;
 import com.baloise.egitblit.common.GitBlitExplorerException;
 import com.baloise.egitblit.gitblit.GitBlitServer;
 import com.baloise.egitblit.main.Activator;
-import com.baloise.egitblit.pref.PreferenceModel.ColumnData;
 
 /**
  * Handling preference settings
@@ -26,12 +25,6 @@ public class PreferenceMgr{
 	public final static String KEY_GITBLIT_OMIT_SERVER_ERROR = "com.baloise.gitblit.general.omitServerInError";
 	public final static String KEY_GITBLIT_OMIT_COLOR_COLUMS = "com.baloise.gitblit.general.viewer.coloring";
 	public final static String KEY_GITBLIT_SHOW_GROUPS = "com.baloise.gitblit.general.viewer.showGroups";
-	
-	public final static String KEY_GITBLIT_COLUMN_DESC_NODE = "com.baloise.gitblit.general.viewer.column.desc";
-	public final static String KEY_GITBLIT_COLUMN_DESC_ID = "com.baloise.gitblit.general.viewer.column.desc.id";
-	public final static String KEY_GITBLIT_COLUMN_DESC_POS = "com.baloise.gitblit.general.viewer.column.desc.pos";
-	public final static String KEY_GITBLIT_COLUMN_DESC_WIDTH = "com.baloise.gitblit.general.viewer.column.desc.width";
-	public final static String KEY_GITBLIT_COLUMN_DESC_VISIBLE = "com.baloise.gitblit.general.viewer.column.desc.visible";
 	
 
 	// Node containing the list of servers
@@ -79,26 +72,7 @@ public class PreferenceMgr{
 			
 			// --- Column settings
 			ISecurePreferences entryNode;
-			ISecurePreferences serverNode = pref.node(KEY_GITBLIT_COLUMN_DESC_NODE);
-			String[] cols = serverNode.childrenNames();
-			String id;
-			int pos,width;
-			boolean visible;
-			for(String col : cols){
-				entryNode = serverNode.node(col);
-				id = entryNode.get(KEY_GITBLIT_COLUMN_DESC_ID, null);
-				if(id == null){
-					// Node does not exist. Should not happen
-					continue;
-				}
-				pos   = entryNode.getInt(KEY_GITBLIT_COLUMN_DESC_POS, -1);
-				width = entryNode.getInt(KEY_GITBLIT_COLUMN_DESC_WIDTH, 0);
-				visible = entryNode.getBoolean(KEY_GITBLIT_COLUMN_DESC_VISIBLE, true);
-				if(width == 0 && visible == true){
-					visible = false; 
-				}
-				prefModel.putColumnData(id, pos, visible,width);
-			}
+			ISecurePreferences serverNode;
 			
 			// ---- Read list of servers
 			// Root node
@@ -149,21 +123,7 @@ public class PreferenceMgr{
 			pref.putBoolean(KEY_GITBLIT_SHOW_GROUPS, prefModel.isShowGroups(), false);
 
 			ISecurePreferences entryNode;
-
-			ISecurePreferences serverNode = pref.node(KEY_GITBLIT_COLUMN_DESC_NODE);
-			serverNode.removeNode();
-			pref.flush();
-			serverNode = pref.node(KEY_GITBLIT_COLUMN_DESC_NODE);
-
-			List<ColumnData> descs = prefModel.getColumnData();
-			for(ColumnData desc : descs){
-				entryNode = serverNode.node(desc.id);
-				entryNode.put(KEY_GITBLIT_COLUMN_DESC_ID, desc.id, false);
-				entryNode.putInt(KEY_GITBLIT_COLUMN_DESC_POS, desc.pos, false);
-				entryNode.putInt(KEY_GITBLIT_COLUMN_DESC_WIDTH, desc.width, false);
-				entryNode.putBoolean(KEY_GITBLIT_COLUMN_DESC_VISIBLE, desc.visible, false);
-			}
-			pref.flush();
+			ISecurePreferences serverNode;
 			
 			// --- Write new settings
 			int count = 0;

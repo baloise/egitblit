@@ -16,7 +16,6 @@ import org.eclipse.swt.widgets.TreeColumn;
 import com.baloise.egitblit.main.Activator;
 import com.baloise.egitblit.pref.PreferenceMgr;
 import com.baloise.egitblit.pref.PreferenceModel;
-import com.baloise.egitblit.pref.PreferenceModel.ColumnData;
 
 /**
  * Helper / Factory for creating and maintaining repo viewer tree / columns
@@ -319,7 +318,7 @@ public class ColumnFactory{
 		int pos, width;
 		boolean visible;
 		
-		List<ColumnData> list = new ArrayList<PreferenceModel.ColumnData>();
+		List<ColumnData> list = new ArrayList<ColumnData>();
 		ColumnDesc[] items = ColumnDesc.values();
 		for(ColumnDesc item : items){
 			col = getColumn(item);
@@ -359,7 +358,7 @@ public class ColumnFactory{
 	 */
 	public final static List<ColumnData> sortByIndex(List<ColumnData> list){
 		if(list == null){
-			return new ArrayList<PreferenceModel.ColumnData>();
+			return new ArrayList<ColumnData>();
 		}
 		Collections.sort(list,new Comparator<ColumnData>() {
 			@Override
@@ -371,7 +370,7 @@ public class ColumnFactory{
 	}
 	
 	public final static List<ColumnData> filterVisible(List<ColumnData> list){
-		List<ColumnData> res = new ArrayList<PreferenceModel.ColumnData>();
+		List<ColumnData> res = new ArrayList<ColumnData>();
 		for(ColumnData item : list){
 			if(item.visible == true){
 				res.add(item);
@@ -381,7 +380,7 @@ public class ColumnFactory{
 	}
 	
 	public final static List<ColumnData> initColumnData(){
-		List<ColumnData> res = new ArrayList<PreferenceModel.ColumnData>();
+		List<ColumnData> res = new ArrayList<ColumnData>();
 		ColumnDesc[] items = ColumnDesc.values();
 		for(ColumnDesc item : items){
 			res.add(new ColumnData(item.name(), item.getIndex(), item.visible, item.width));
