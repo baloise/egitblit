@@ -14,7 +14,6 @@ import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.widgets.TreeColumn;
 
 import com.baloise.egitblit.main.Activator;
-import com.baloise.egitblit.pref.PreferenceMgr;
 import com.baloise.egitblit.pref.PreferenceModel;
 
 /**
@@ -236,7 +235,6 @@ public class ColumnFactory{
 	 * @param model PreferencesModel
 	 */
 	public final void createColumns(PreferenceModel model){
-
 		viewer.getTree().setRedraw(false);
 
 		// --- Remove all columns
@@ -254,9 +252,10 @@ public class ColumnFactory{
 			// --- Create columns from prefs
 			colList = model.getColumnData();
 		}
+
 		if(colList == null || colList.isEmpty()){
 			// --- no columns in preferences saved
-			colList = initColumnData();
+			colList = createColumnData();
 		}
 
 		sortByIndex(colList);
@@ -275,6 +274,42 @@ public class ColumnFactory{
 		viewer.refresh(true);
 		viewer.getTree().setRedraw(true);
 	}
+	
+	public final static List<ColumnData> createColumnData(){
+		List<ColumnData> res = new ArrayList<ColumnData>();
+		ColumnDesc[] items = ColumnDesc.values();
+		for(ColumnDesc item : items){
+			res.add(new ColumnData(item.name(), item.getIndex(), item.visible, item.width));
+		}
+		return res;
+	}
+	
+	/**
+	 * @param ColumnDat list list to be sorted by position
+	 */
+	public final static List<ColumnData> sortByIndex(List<ColumnData> list){
+		if(list == null){
+			return new ArrayList<ColumnData>();
+		}
+		Collections.sort(list,new Comparator<ColumnData>() {
+			@Override
+			public int compare(ColumnData o1, ColumnData o2){
+				return new Integer(o1.pos).compareTo(o2.pos);
+			}
+		});
+		return list;
+	}
+	
+	public final static List<ColumnData> filterVisible(List<ColumnData> list){
+		List<ColumnData> res = new ArrayList<ColumnData>();
+		for(ColumnData item : list){
+			if(item.visible == true){
+				res.add(item);
+			}
+		}
+		return res;
+	}
+
 
 	/**
 	 * Init tree sorter
@@ -302,6 +337,9 @@ public class ColumnFactory{
 	 *            init columns with pref settings
 	 */
 	public void update(PreferenceModel model, boolean toPrefFromPref){
+		if(model == null){
+			return;
+		}
 		if(toPrefFromPref){
 			model.setColumnData(getColumnData());
 		}else{
@@ -352,39 +390,4 @@ public class ColumnFactory{
 		}
 		return list;
 	}
-	
-	/**
-	 * @param ColumnDat list list to be sorted by position
-	 */
-	public final static List<ColumnData> sortByIndex(List<ColumnData> list){
-		if(list == null){
-			return new ArrayList<ColumnData>();
-		}
-		Collections.sort(list,new Comparator<ColumnData>() {
-			@Override
-			public int compare(ColumnData o1, ColumnData o2){
-				return new Integer(o1.pos).compareTo(o2.pos);
-			}
-		});
-		return list;
-	}
-	
-	public final static List<ColumnData> filterVisible(List<ColumnData> list){
-		List<ColumnData> res = new ArrayList<ColumnData>();
-		for(ColumnData item : list){
-			if(item.visible == true){
-				res.add(item);
-			}
-		}
-		return res;
-	}
-	
-	public final static List<ColumnData> initColumnData(){
-		List<ColumnData> res = new ArrayList<ColumnData>();
-		ColumnDesc[] items = ColumnDesc.values();
-		for(ColumnDesc item : items){
-			res.add(new ColumnData(item.name(), item.getIndex(), item.visible, item.width));
-		}
-		return res;
-	}	
 }

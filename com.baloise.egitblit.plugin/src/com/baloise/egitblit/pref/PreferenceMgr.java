@@ -20,9 +20,7 @@ public class PreferenceMgr{
 
 	// --- global settings under root node
 	public final static String KEY_GITBLIT_DCLICK = "com.baloise.gitblit.dobuleclick";
-	public final static String KEY_GITBLIT_OMIT_SERVER_ERROR = "com.baloise.gitblit.general.omitServerInError";
-	public final static String KEY_GITBLIT_OMIT_COLOR_COLUMS = "com.baloise.gitblit.general.viewer.coloring";
-	public final static String KEY_GITBLIT_SHOW_GROUPS = "com.baloise.gitblit.general.viewer.showGroups";
+	public final static String KEY_GITBLIT_DECORATRE_VIEW = "com.baloise.gitblit.general.viewer.coloring";
 	
 
 	// Node containing the list of servers
@@ -59,14 +57,8 @@ public class PreferenceMgr{
 			int val = pref.getInt(KEY_GITBLIT_DCLICK, PreferenceModel.DoubleClickBehaviour.OpenGitBlit.value);
 			prefModel.setDoubleClick(PreferenceModel.DoubleClickBehaviour.getValue(val));
 
-			boolean bval = pref.getBoolean(KEY_GITBLIT_OMIT_SERVER_ERROR, false);
-			prefModel.setOmitServerErrors(bval);
-			
-			bval = pref.getBoolean(KEY_GITBLIT_OMIT_COLOR_COLUMS, false);
+			Boolean bval = pref.getBoolean(KEY_GITBLIT_DECORATRE_VIEW, false);
 			prefModel.setDecorateView(bval);
-
-			bval = pref.getBoolean(KEY_GITBLIT_SHOW_GROUPS, true);
-			prefModel.setShowGroups(bval);
 			
 			// --- Column settings
 			ISecurePreferences entryNode;
@@ -108,7 +100,7 @@ public class PreferenceMgr{
 		ISecurePreferences pref = SecurePreferencesFactory.getDefault().node(KEY_GITBLIT_ROOT);
 
 		if(pref == null){
-			final String msg = "Can�t access preferences for Gitblit Explorer. Confriguration will not be saved.";
+			final String msg = "Can't access preferences for Gitblit Explorer. Confriguration will not be saved.";
 			Activator.logError(msg);
 			throw new GitBlitExplorerException(msg);
 		}
@@ -116,9 +108,7 @@ public class PreferenceMgr{
 		try{
 			// --- Saving global settings
 			pref.putInt(KEY_GITBLIT_DCLICK, prefModel.getDoubleClick().value, false);
-			pref.putBoolean(KEY_GITBLIT_OMIT_SERVER_ERROR, prefModel.isOmitServerErrors(),false);
-			pref.putBoolean(KEY_GITBLIT_OMIT_COLOR_COLUMS, prefModel.isDecorateView(), false);
-			pref.putBoolean(KEY_GITBLIT_SHOW_GROUPS, prefModel.isShowGroups(), false);
+			pref.putBoolean(KEY_GITBLIT_DECORATRE_VIEW, prefModel.isDecorateView(), false);
 
 			ISecurePreferences entryNode;
 			ISecurePreferences serverNode;

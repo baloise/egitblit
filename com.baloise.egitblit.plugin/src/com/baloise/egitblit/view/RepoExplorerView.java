@@ -196,7 +196,6 @@ public class RepoExplorerView extends ViewPart{
 	private StyledLabelProvider		labelProvider;
 	private DoubleClickBehaviour	dbclick				= DoubleClickBehaviour.OpenGitBlit;
 	private PreferenceModel			prefModel			= new PreferenceModel();
-	private List<GitBlitServer>		serverList			= null;
 	private Action					refreshAction;
 	private ExpandCItem				expandCItem;
 
@@ -447,7 +446,7 @@ public class RepoExplorerView extends ViewPart{
 
 		this.expandCItem = new ExpandCItem(viewer);
 		final ImageDescriptor treeMode = Activator.getImageDescriptor(SharedImages.TreeMode);
-		Action hideGroupsAllAction = new Action("Hide Groups", SWT.TOGGLE) {
+		Action hideGroupsAllAction = new Action("Show groups or projects only", SWT.TOGGLE) {
 			@Override
 			public void run(){
 				viewer.getTree().setRedraw(false);
@@ -588,6 +587,7 @@ public class RepoExplorerView extends ViewPart{
 		// --------------------------------------------------------------------
 		// Create columns from preferences
 		// --------------------------------------------------------------------
+		loadViewState();
 		colFactory.createColumns(prefModel);
 
 		TreeColumn[] a = viewer.getTree().getColumns();
@@ -642,14 +642,13 @@ public class RepoExplorerView extends ViewPart{
 	private void initPreferences(){
 		try{
 			this.prefModel = PreferenceMgr.readConfig();
-			if(prefModel != null){
-				dbclick = prefModel.getDoubleClick();
-				if(omitServerErrors == null){
-					omitServerErrors = prefModel.isOmitServerErrors();
-				}
-				if(labelProvider != null){
-					labelProvider.setDecorateLabels(prefModel.isDecorateView());
-				}
+			loadViewState();
+			dbclick = prefModel.getDoubleClick();
+			if(omitServerErrors == null){
+				omitServerErrors = prefModel.isOmitServerErrors();
+			}
+			if(labelProvider != null){
+				labelProvider.setDecorateLabels(prefModel.isDecorateView());
 			}
 			return;
 		}catch(GitBlitExplorerException e){
@@ -659,7 +658,7 @@ public class RepoExplorerView extends ViewPart{
 
 	private List<String> getOmittedServerErrorUrls(){
 		List<String> res = new ArrayList<String>();
-		for(GitBlitServer item : this.serverList){
+		for(GitBlitServer item :  prefModel.getServerList()){
 			if(item.serverError == true && res.contains(item.url) == false){
 				res.add(item.url);
 			}
@@ -667,30 +666,7 @@ public class RepoExplorerView extends ViewPart{
 		return res;
 	}
 
-	/**
-	 * Init the server list to use from preferences
-	 * 
-	 * @param reload
-	 */
-	private void initServerList(boolean reload){
-		List<GitBlitServer> slist = null;
 
-		if(reload == true){
-			// Reload server definitions to do a full refresh
-			initPreferences();
-		}
-		try{
-			slist = this.prefModel.getServerList();
-		}catch(Exception e){
-			Activator.logError("Error reading preferences", e);
-			return;
-		}
-		if(reload == true || this.serverList == null || this.serverList.isEmpty() || omitServerErrors == false){
-			this.serverList = slist;
-			// return with initial list & state
-			return;
-		}
-	}
 
 	/**
 	 * Reading repos / projects from gitblit
@@ -698,7 +674,9 @@ public class RepoExplorerView extends ViewPart{
 	 * @return reload Currently not supported
 	 */
 	private void loadRepositories(boolean reload){
-		initServerList(reload);
+		if(reload){
+			initPreferences();
+		}
 
 		Job job = new Job("Gitblit Repository Explorer") {
 			@Override
@@ -708,7 +686,7 @@ public class RepoExplorerView extends ViewPart{
 					final IProgressMonitor fmon = monitor;
 
 					// --- Read preferences
-					int size = serverList.size();
+					int size = prefModel.getServerList().size();
 					monitor.beginTask("Reading repositories form Gitblit Server", size + 1);
 
 					ProgressToken token = new ProgressToken() {
@@ -729,7 +707,7 @@ public class RepoExplorerView extends ViewPart{
 					};
 
 					// --- Reading & prepare grouped
-					GitBlitBD bd = new GitBlitBD(serverList);
+					GitBlitBD bd = new GitBlitBD(prefModel.getServerList());
 					List<GitBlitRepository> projList = bd.readRepositories(token, true, omitServerErrors);
 
 					// Not canceling here to prepare the result which we have
@@ -768,7 +746,13 @@ public class RepoExplorerView extends ViewPart{
 					return Status.OK_STATUS;
 				}catch(Exception e){
 					Activator.showAndLogError("", e);
-					modelList.add(new ErrorViewModel("Error reading projects from Gitblit. Check your preference settings.."));
+					modelList.add(new ErrorViewModel("Error reading repositories from Gitblit."));
+					List<GitBlitServer> list = prefModel.getServerList();
+					for(GitBlitServer item : list){
+						if(item.active && item.serverError){
+							modelList.add(new ErrorViewModel("Server \"" + item.url + "\" is unavailable."));
+						}
+					}
 					syncWithUi(modelList);
 					return Status.CANCEL_STATUS;
 				}
@@ -985,7 +969,7 @@ public class RepoExplorerView extends ViewPart{
 	}
 	
 	public void loadViewState(){
-		if(this.memento == null){
+		if(this.memento == null || this.prefModel == null){
 			return;
 		}
 		List<ColumnData> list = ColumnFactory.createColumnData();
@@ -993,9 +977,10 @@ public class RepoExplorerView extends ViewPart{
 		for(ColumnData item : list){
 			item.loadState(this.memento);
 		}
-		colFactory.createColumns(prefModel);
+		Boolean val = memento.getBoolean(KEY_GITBLIT_OMIT_SERVER_ERROR);
+		this.prefModel.setOmitServerErrors(val != null ? val : true);
 		
+		val = memento.getBoolean(KEY_GITBLIT_SHOW_GROUPS);
+		this.prefModel.setShowGroups(val != null ? val : true);
 	}
-	
-	
 }

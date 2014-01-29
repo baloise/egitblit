@@ -91,6 +91,7 @@ public class PreferenceModel{
 	}
 	
 	public void setServerList(List<GitBlitServer> repoList){
+		this.serverList.clear();
 		this.serverList.addAll(repoList);
 	}
 	
