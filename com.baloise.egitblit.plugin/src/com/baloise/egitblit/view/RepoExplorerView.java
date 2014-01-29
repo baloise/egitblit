@@ -85,6 +85,8 @@ public class RepoExplorerView extends ViewPart{
 
 	public final static String CONTEXT_ID = "com.baloise.egitblit.context";
 	
+	public final static String KEY_GITBLIT_OMIT_SERVER_ERROR = "com.baloise.egitblit.view.omitservererror";
+	public final static String KEY_GITBLIT_SHOW_GROUPS = "com.baloise.egitblit.view.showgroups";
 	/**
 	 * Enum containing the display modes (Grouped or only the repos)
 	 * 
@@ -646,7 +648,7 @@ public class RepoExplorerView extends ViewPart{
 					omitServerErrors = prefModel.isOmitServerErrors();
 				}
 				if(labelProvider != null){
-					labelProvider.setDecorateLabels(prefModel.isColorColumns());
+					labelProvider.setDecorateLabels(prefModel.isDecorateView());
 				}
 			}
 			return;
@@ -986,12 +988,12 @@ public class RepoExplorerView extends ViewPart{
 		if(this.memento == null){
 			return;
 		}
-//		List<ColumnData> list = ColumnFactory.createColumnData();
-//		this.prefModel.setColumnData(list);
-//		for(ColumnData item : list){
-//			item.loadState(this.memento);
-//		}
-//		colFactory.createColumns(prefModel);
+		List<ColumnData> list = ColumnFactory.createColumnData();
+		this.prefModel.setColumnData(list);
+		for(ColumnData item : list){
+			item.loadState(this.memento);
+		}
+		colFactory.createColumns(prefModel);
 		
 	}
 	

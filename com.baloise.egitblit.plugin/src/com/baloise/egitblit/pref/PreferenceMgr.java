@@ -1,7 +1,5 @@
 package com.baloise.egitblit.pref;
 
-import java.util.List;
-
 import org.eclipse.equinox.security.storage.ISecurePreferences;
 import org.eclipse.equinox.security.storage.SecurePreferencesFactory;
 
@@ -65,7 +63,7 @@ public class PreferenceMgr{
 			prefModel.setOmitServerErrors(bval);
 			
 			bval = pref.getBoolean(KEY_GITBLIT_OMIT_COLOR_COLUMS, false);
-			prefModel.setColorColumns(bval);
+			prefModel.setDecorateView(bval);
 
 			bval = pref.getBoolean(KEY_GITBLIT_SHOW_GROUPS, true);
 			prefModel.setShowGroups(bval);
@@ -119,7 +117,7 @@ public class PreferenceMgr{
 			// --- Saving global settings
 			pref.putInt(KEY_GITBLIT_DCLICK, prefModel.getDoubleClick().value, false);
 			pref.putBoolean(KEY_GITBLIT_OMIT_SERVER_ERROR, prefModel.isOmitServerErrors(),false);
-			pref.putBoolean(KEY_GITBLIT_OMIT_COLOR_COLUMS, prefModel.isColorColumns(), false);
+			pref.putBoolean(KEY_GITBLIT_OMIT_COLOR_COLUMS, prefModel.isDecorateView(), false);
 			pref.putBoolean(KEY_GITBLIT_SHOW_GROUPS, prefModel.isShowGroups(), false);
 
 			ISecurePreferences entryNode;

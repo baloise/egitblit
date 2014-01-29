@@ -14,6 +14,11 @@ import com.baloise.egitblit.view.ColumnData;
  */
 public class PreferenceModel{
 
+	/**
+	 * DoubleClick behaviour
+	 * @author MicBag
+	 *
+	 */
 	public static enum DoubleClickBehaviour{
 			OpenGitBlit(0),
 			CopyUrl(1),
@@ -41,9 +46,9 @@ public class PreferenceModel{
 	// Properties
 	// ------------------------------------------------------------------------
 	private DoubleClickBehaviour dbClick;
-	private List<GitBlitServer> repoList;
+	private List<GitBlitServer> serverList;
 	private boolean omitServerErrors;
-	private boolean colorColums;
+	private boolean decorateView;
 	private boolean showGroups;
 	private List<ColumnData> colData;
 	
@@ -52,12 +57,12 @@ public class PreferenceModel{
 	}
 	
 	public void reset(){
-		dbClick = DoubleClickBehaviour.PasteEGit;
-		repoList = new ArrayList<GitBlitServer>();
-		omitServerErrors = false;
-		colorColums = false;
-		showGroups = true;
-		colData = new ArrayList<ColumnData>();
+		this.dbClick = DoubleClickBehaviour.PasteEGit;
+		this.serverList = new ArrayList<GitBlitServer>();
+		this.omitServerErrors = false;
+		this.decorateView = false;
+		this.showGroups = true;
+		this.colData = new ArrayList<ColumnData>();
 	}
 	
 	public void init(PreferenceModel model){
@@ -66,9 +71,9 @@ public class PreferenceModel{
 		}
 		reset();
 		this.dbClick = model.dbClick;
-		this.repoList.addAll(model.repoList);
+		this.serverList.addAll(model.serverList);
 		this.omitServerErrors = model.omitServerErrors;
-		this.colorColums = model.colorColums;
+		this.decorateView = model.decorateView;
 		this.showGroups = model.showGroups;
 		this.colData.addAll(model.colData);
 	}
@@ -85,22 +90,22 @@ public class PreferenceModel{
 		this.dbClick = dbcl;
 	}
 	
-	public void setRepoList(List<GitBlitServer> repoList){
-		this.repoList.addAll(repoList);
+	public void setServerList(List<GitBlitServer> repoList){
+		this.serverList.addAll(repoList);
 	}
 	
 	public List<GitBlitServer> getServerList(){
-		return this.repoList;
+		return this.serverList;
 	}
 	public void addRepository(GitBlitServer repo){
 		if(repo == null){
 			return;
 		}
-		if(this.repoList.contains(repo)){
+		if(this.serverList.contains(repo)){
 			Activator.logError("Can�t add repository location "  + repo.url + ". A repository with this url already exists.");
 			return;
 		}
-		this.repoList.add(repo);
+		this.serverList.add(repo);
 	}
 
 	public void addRepository(String url, boolean active, String user, String pwd){
@@ -111,15 +116,15 @@ public class PreferenceModel{
 		if(repo == null){
 			return false;
 		}
-		return this.repoList.remove(repo);
+		return this.serverList.remove(repo);
 	}
 	
-	public void setColorColumns(boolean yesNo){
-		this.colorColums = yesNo;
+	public void setDecorateView(boolean yesNo){
+		this.decorateView = yesNo;
 	}
 	
-	public boolean isColorColumns(){
-		return this.colorColums;
+	public boolean isDecorateView(){
+		return this.decorateView;
 	}
 
 	public void setOmitServerErrors(boolean val){
@@ -194,6 +199,6 @@ public class PreferenceModel{
 
 	@Override
 	public String toString(){
-		return "PreferenceModel [dbClick=" + dbClick + ", repoList=" + repoList + ", omitServerErrors=" + omitServerErrors + ", colorColums=" + colorColums + ", showGroups=" + showGroups + ", colDesc=" + colData + "]";
+		return "PreferenceModel [dbClick=" + dbClick + ", repoList=" + serverList + ", omitServerErrors=" + omitServerErrors + ", colorColums=" + decorateView + ", showGroups=" + showGroups + ", colDesc=" + colData + "]";
 	}
 }

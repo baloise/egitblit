@@ -311,7 +311,7 @@ public class GitBlitExplorerPrefPage extends PreferencePage implements IWorkbenc
 		btColViewer.addSelectionListener(new SelectionListener() {
 			@Override
 			public void widgetSelected(SelectionEvent e){
-				prefModel.setColorColumns(btColViewer.getSelection());
+				prefModel.setDecorateView(btColViewer.getSelection());
 			}
 			
 			@Override
@@ -361,7 +361,7 @@ public class GitBlitExplorerPrefPage extends PreferencePage implements IWorkbenc
 			viewer.setInput(this.prefModel);
 			synchDoubleClick(true);
 			syncActive(true);
-			this.btColViewer.setSelection(prefModel.isColorColumns());
+			this.btColViewer.setSelection(prefModel.isDecorateView());
 		}
 	}
 	
