@@ -19,7 +19,6 @@ import org.eclipse.jface.action.Separator;
 import org.eclipse.jface.dialogs.IMessageProvider;
 import org.eclipse.jface.layout.GridDataFactory;
 import org.eclipse.jface.layout.GridLayoutFactory;
-import org.eclipse.jface.preference.PreferenceDialog;
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.jface.util.IPropertyChangeListener;
 import org.eclipse.jface.util.PropertyChangeEvent;
@@ -48,7 +47,6 @@ import org.eclipse.ui.ISharedImages;
 import org.eclipse.ui.contexts.IContextService;
 import org.eclipse.ui.dialogs.FilteredTree;
 import org.eclipse.ui.dialogs.PatternFilter;
-import org.eclipse.ui.dialogs.PreferencesUtil;
 import org.eclipse.ui.forms.IMessage;
 import org.eclipse.ui.forms.widgets.Form;
 import org.eclipse.ui.forms.widgets.FormToolkit;
@@ -61,7 +59,6 @@ import com.baloise.egitblit.gitblit.GitBlitServer;
 import com.baloise.egitblit.gitblit.ProgressToken;
 import com.baloise.egitblit.main.Activator;
 import com.baloise.egitblit.main.SharedImages;
-import com.baloise.egitblit.pref.GitBlitExplorerPrefPage;
 import com.baloise.egitblit.pref.PreferenceMgr;
 import com.baloise.egitblit.pref.PreferenceModel;
 import com.baloise.egitblit.pref.PreferenceModel.DoubleClickBehaviour;
@@ -70,6 +67,7 @@ import com.baloise.egitblit.view.action.BrowseAction;
 import com.baloise.egitblit.view.action.CloneAction;
 import com.baloise.egitblit.view.action.CloneOneClickAction;
 import com.baloise.egitblit.view.action.CopyAction;
+import com.baloise.egitblit.view.action.ViewActionBase;
 import com.baloise.egitblit.view.model.ErrorViewModel;
 import com.baloise.egitblit.view.model.GitBlitViewModel;
 import com.baloise.egitblit.view.model.GroupViewModel;
@@ -471,8 +469,7 @@ public class RepoExplorerView extends ViewPart{
 		final Action prefAction = new Action("Open preferences"){
 			@Override
 			public void runWithEvent(Event event){
-				PreferenceDialog dialog = PreferencesUtil.createPreferenceDialogOn(null, GitBlitExplorerPrefPage.ID, null, null);
-			    dialog.open();
+				ViewActionBase.openPreferences();
 			}
 		};
 		hmgr.add(prefAction);
@@ -657,7 +654,7 @@ public class RepoExplorerView extends ViewPart{
 	private List<String> getOmittedServerUrls(){
 		List<String> res = new ArrayList<String>();
 		for(GitBlitServer item : this.serverList){
-			if(item.serverError == true){
+			if(item.serverError == true && res.contains(item.url) == false){
 				res.add(item.url);
 			}
 		}

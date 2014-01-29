@@ -9,6 +9,7 @@ import org.eclipse.jface.action.Action;
 import org.eclipse.jface.preference.PreferenceDialog;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.Viewer;
+import org.eclipse.jface.window.Window;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.dialogs.PreferencesUtil;
 
@@ -88,11 +89,14 @@ public abstract class ViewActionBase extends Action{
 	protected boolean handleErrorModel(){
 		GitBlitViewModel model = getSelectedModel();
 		if(model instanceof ErrorViewModel){
-			PreferenceDialog dialog = PreferencesUtil.createPreferenceDialogOn(null, GitBlitExplorerPrefPage.ID, null, null);
-		    dialog.open();
-		    return true;
+			return openPreferences();
 		}
 		return false;
+	}
+	
+	public final static boolean openPreferences(){
+		PreferenceDialog dialog = PreferencesUtil.createPreferenceDialogOn(null, GitBlitExplorerPrefPage.ID, null, null);
+	    return Window.OK == dialog.open();
 	}
 	
 	protected Display getDisplay(){
