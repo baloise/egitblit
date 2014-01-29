@@ -972,12 +972,27 @@ public class RepoExplorerView extends ViewPart{
 		if(this.memento == null){
 			return;
 		}
+		
+		this.colFactory.update(this.prefModel, true);
+		List<ColumnData> list = this.prefModel.getColumnData();
+		for(ColumnData item : list){
+			item.saveState(memento);
+		}
+		memento.putBoolean(KEY_GITBLIT_OMIT_SERVER_ERROR, this.prefModel.isOmitServerErrors());
+		memento.putBoolean(KEY_GITBLIT_SHOW_GROUPS, this.prefModel.isShowGroups());
 	}
 	
 	public void loadViewState(){
 		if(this.memento == null){
 			return;
 		}
+//		List<ColumnData> list = ColumnFactory.createColumnData();
+//		this.prefModel.setColumnData(list);
+//		for(ColumnData item : list){
+//			item.loadState(this.memento);
+//		}
+//		colFactory.createColumns(prefModel);
+		
 	}
 	
 	
