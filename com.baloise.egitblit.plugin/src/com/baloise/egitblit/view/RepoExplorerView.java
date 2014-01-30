@@ -292,7 +292,8 @@ public class RepoExplorerView extends ViewPart{
 		public void propertyChange(PropertyChangeEvent event){
 			String prop = event.getProperty();
 			if(prop != null && prop.startsWith(PreferenceMgr.KEY_GITBLIT_ROOT) && viewer != null){
-				loadRepositories(true);
+				initPreferences(true);
+				loadRepositories(false);
 			}
 		}
 	};
@@ -352,7 +353,7 @@ public class RepoExplorerView extends ViewPart{
 		// Sync preferences
 		// --------------------------------------------------------------------
 		Activator.getDefault().getPreferenceStore().addPropertyChangeListener(propChangeListener);
-		initPreferences();
+		initPreferences(false);
 
 		// --------------------------------------------------------------------
 		// --- FormToolkit
@@ -470,7 +471,7 @@ public class RepoExplorerView extends ViewPart{
 
 		IMenuManager hmgr = this.form.getMenuManager();
 		hmgr.add(this.omitAction);
-		this.omitAction.setChecked(this.prefModel.isOmitServerErrors());
+		this.omitAction.setChecked(this.omitServerErrors);
 		final Action prefAction = new Action("Open preferences"){
 			@Override
 			public void runWithEvent(Event event){
@@ -538,7 +539,7 @@ public class RepoExplorerView extends ViewPart{
 		// Preparing the model: Initializing viewData wrapper and loading
 		// repositories, sync related ui controls
 		this.viewData = new ViewerData();
-		loadRepositories(true);
+		loadRepositories(false);
 
 		boolean mode = this.prefModel.isShowGroups();
 		hideGroupsAllAction.setChecked(mode);
@@ -580,6 +581,7 @@ public class RepoExplorerView extends ViewPart{
 		};
 		// --------------------------------------------------------------------
 		// Create Viewer
+		// --------------------------------------------------------------------
 		FilteredTree filteredTree = new FilteredTree(parent, SWT.FULL_SELECTION | SWT.BORDER | SWT.H_SCROLL | SWT.V_SCROLL, filter, true);
 		viewer = filteredTree.getViewer();
 		colFactory = new ColumnFactory(viewer);
@@ -595,6 +597,12 @@ public class RepoExplorerView extends ViewPart{
 		viewer.setContentProvider(new RepoContentProvider());
 		this.labelProvider = new StyledLabelProvider(viewer);
 		viewer.setLabelProvider(this.labelProvider);
+
+		// --------------------------------------------------------------------
+		// --- Init view settings (after all components are created
+		// --------------------------------------------------------------------
+		this.dbclick = prefModel.getDoubleClick();
+		this.labelProvider.setDecorateLabels(prefModel.isDecorateView());
 
 		// --------------------------------------------------------------------
 		// --- Viewer layout
@@ -639,16 +647,26 @@ public class RepoExplorerView extends ViewPart{
 	/**
 	 * Loads & sync the preferences with view
 	 */
-	private void initPreferences(){
+	private void initPreferences(boolean setFields){
 		try{
+			// --- Load settings
 			this.prefModel = PreferenceMgr.readConfig();
 			loadViewState();
-			dbclick = prefModel.getDoubleClick();
-			if(omitServerErrors == null){
-				omitServerErrors = prefModel.isOmitServerErrors();
+
+			// --- Init variables
+			this.dbclick = prefModel.getDoubleClick();
+			if(this.omitServerErrors == null){
+				this.omitServerErrors = prefModel.isOmitServerErrors();
 			}
-			if(labelProvider != null){
-				labelProvider.setDecorateLabels(prefModel.isDecorateView());
+			
+			if(setFields){
+				// --- Init preference related fields
+				if(this.omitAction != null){
+					this.omitAction.setChecked(this.omitServerErrors);
+				}
+				if(this.labelProvider != null){
+					this.labelProvider.setDecorateLabels(this.prefModel.isDecorateView());
+				}
 			}
 			return;
 		}catch(GitBlitExplorerException e){
@@ -671,11 +689,11 @@ public class RepoExplorerView extends ViewPart{
 	/**
 	 * Reading repos / projects from gitblit
 	 * 
-	 * @return reload Currently not supported
+	 * @return reload Reload serverList
 	 */
 	private void loadRepositories(boolean reload){
 		if(reload){
-			initPreferences();
+			PreferenceMgr.readServerList(this.prefModel);
 		}
 
 		Job job = new Job("Gitblit Repository Explorer") {
@@ -949,15 +967,10 @@ public class RepoExplorerView extends ViewPart{
 	}
 
 	public void saveViewState(IMemento memento){
-		try{
-			colFactory.update(this.prefModel, true);
-			PreferenceMgr.saveConfig(this.prefModel);
-		}catch(GitBlitExplorerException e){
-			Activator.logError("Error saveing preferences.", e);
-		}
 		if(this.memento == null){
 			return;
 		}
+		colFactory.update(this.prefModel, true);
 		
 		this.colFactory.update(this.prefModel, true);
 		List<ColumnData> list = this.prefModel.getColumnData();

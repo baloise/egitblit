@@ -120,6 +120,11 @@ public class PreferenceModel{
 		return this.serverList.remove(repo);
 	}
 	
+	public void clearServerList(){
+		this.serverList.clear();
+	}
+
+	
 	public void setDecorateView(boolean yesNo){
 		this.decorateView = yesNo;
 	}

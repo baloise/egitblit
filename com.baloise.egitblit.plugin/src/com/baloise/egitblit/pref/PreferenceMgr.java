@@ -43,10 +43,8 @@ public class PreferenceMgr{
 	 */
 	public static PreferenceModel readConfig() throws GitBlitExplorerException{
 		PreferenceModel prefModel = new PreferenceModel();
-
 		try{
 			ISecurePreferences pref = SecurePreferencesFactory.getDefault().node(KEY_GITBLIT_ROOT);
-
 			if(pref == null){
 				final String msg = "Can�t access preferences for Gitblit explorer. Continue with new (empty) settings.";
 				Activator.logError(msg);
@@ -54,16 +52,34 @@ public class PreferenceMgr{
 			}
 
 			// --- Read global settings
-			int val = pref.getInt(KEY_GITBLIT_DCLICK, PreferenceModel.DoubleClickBehaviour.OpenGitBlit.value);
-			prefModel.setDoubleClick(PreferenceModel.DoubleClickBehaviour.getValue(val));
-
-			Boolean bval = pref.getBoolean(KEY_GITBLIT_DECORATRE_VIEW, false);
-			prefModel.setDecorateView(bval);
+			prefModel.setDoubleClick(PreferenceModel.DoubleClickBehaviour.getValue(pref.getInt(KEY_GITBLIT_DCLICK, PreferenceModel.DoubleClickBehaviour.OpenGitBlit.value)));
+			prefModel.setDecorateView(pref.getBoolean(KEY_GITBLIT_DECORATRE_VIEW, false));
 			
+			readServerList(prefModel);
+		}catch(Exception e){
+			Activator.logError("Error reading preferences. Continue with configuration settings which have been read so far.", e);
+		}
+		return prefModel;
+	}
+	
+	public static void readServerList(PreferenceModel prefModel){
+		if(prefModel == null){
+			Activator.logError("Error reading preferences. Missing call parameter PreferenceModel.");
+			return;
+		}
+		try{
+			ISecurePreferences pref = SecurePreferencesFactory.getDefault().node(KEY_GITBLIT_ROOT);
+			if(pref == null){
+				final String msg = "Can�t access preferences for Gitblit explorer. Continue with new (empty) settings.";
+				Activator.logError(msg);
+				return;
+			}
+
 			// --- Column settings
 			ISecurePreferences entryNode;
 			ISecurePreferences serverNode;
 			
+			prefModel.clearServerList();
 			// ---- Read list of servers
 			// Root node
 			serverNode = pref.node(KEY_GITBLIT_SERVER_NODE);
@@ -88,7 +104,6 @@ public class PreferenceMgr{
 		}catch(Exception e){
 			Activator.logError("Error reading preferences. Continue with configuration settings which have been read so far.", e);
 		}
-		return prefModel;
 	}
 
 	public static void saveConfig(PreferenceModel prefModel) throws GitBlitExplorerException{
