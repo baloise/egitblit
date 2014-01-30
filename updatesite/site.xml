@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <site>
-   <feature url="features/com.baloise.egitblit.feature_0.0.1.201401292144.jar" id="com.baloise.egitblit.feature" version="0.0.1.201401292144">
+   <feature url="features/com.baloise.egitblit.feature_0.0.1.201401302047.jar" id="com.baloise.egitblit.feature" version="0.0.1.201401302047">
       <category name="com.baloise.egitblit"/>
    </feature>
    <category-def name="com.baloise.egitblit" label="GitBlitExplorer"/>
