@@ -1,7 +1,12 @@
 package com.baloise.egitblit.view;
 
+import static java.util.Arrays.asList;
+
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
@@ -25,7 +30,12 @@ import org.eclipse.jface.util.PropertyChangeEvent;
 import org.eclipse.jface.viewers.ColumnViewerToolTipSupport;
 import org.eclipse.jface.viewers.DoubleClickEvent;
 import org.eclipse.jface.viewers.IDoubleClickListener;
+import org.eclipse.jface.viewers.ISelection;
+import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.IStructuredSelection;
+import org.eclipse.jface.viewers.SelectionChangedEvent;
+import org.eclipse.jface.viewers.StructuredSelection;
+import org.eclipse.jface.viewers.TreePath;
 import org.eclipse.jface.viewers.TreeViewer;
 import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.jface.window.Window;
@@ -64,6 +74,7 @@ import com.baloise.egitblit.main.SharedImages;
 import com.baloise.egitblit.pref.PreferenceMgr;
 import com.baloise.egitblit.pref.PreferenceModel;
 import com.baloise.egitblit.pref.PreferenceModel.DoubleClickBehaviour;
+import com.baloise.egitblit.view.SyncWithPackageManagerListener.GitBlitUrlSelectionListener;
 import com.baloise.egitblit.view.action.ActionFactory;
 import com.baloise.egitblit.view.action.BrowseAction;
 import com.baloise.egitblit.view.action.CloneAction;
@@ -81,7 +92,7 @@ import com.baloise.egitblit.view.model.ProjectViewModel;
  * @author MicBag
  * 
  */
-public class RepoExplorerView extends ViewPart{
+public class RepoExplorerView extends ViewPart implements GitBlitUrlSelectionListener{
 
 	public final static String CONTEXT_ID = "com.baloise.egitblit.context";
 	
@@ -197,6 +208,7 @@ public class RepoExplorerView extends ViewPart{
 	private DoubleClickBehaviour	dbclick				= DoubleClickBehaviour.OpenGitBlit;
 	private PreferenceModel			prefModel			= new PreferenceModel();
 	private Action					refreshAction;
+	private Action					linkToPackageExplorerAction;
 	private ExpandCItem				expandCItem;
 
 	private Form					form;
@@ -298,6 +310,8 @@ public class RepoExplorerView extends ViewPart{
 		}
 	};
 
+	private SyncWithPackageManagerListener selectionListener;
+
 	/**
 	 * ...guess
 	 */
@@ -312,6 +326,7 @@ public class RepoExplorerView extends ViewPart{
 	@Override
 	public void dispose(){
 		Activator.getDefault().getPreferenceStore().removePropertyChangeListener(propChangeListener);
+		selectionListener.setEnabled(false);
 		super.dispose();
 	}
 
@@ -333,6 +348,7 @@ public class RepoExplorerView extends ViewPart{
 	public void init(IViewSite site, IMemento memento) throws PartInitException{
 		super.init(site, memento);
 		this.memento = memento;
+		selectionListener = new SyncWithPackageManagerListener(this,site.getWorkbenchWindow());
 	}
 
 	/*
@@ -444,6 +460,28 @@ public class RepoExplorerView extends ViewPart{
 				return refreskImgDesc;
 			}
 		};
+		
+		
+		
+		linkToPackageExplorerAction = new Action("Link with Package Explorer", SWT.TOGGLE) {
+			{
+				try {
+					String imgDisabled = "platform:/plugin/org.eclipse.ui.browser/icons/dlcl16/synced.gif";
+					setDisabledImageDescriptor(ImageDescriptor.createFromURL(new URL(imgDisabled)));
+					String imgEnabled= "platform:/plugin/org.eclipse.ui.browser/icons/elcl16/synced.gif";
+					setImageDescriptor(ImageDescriptor.createFromURL(new URL(imgEnabled)));
+				} catch (MalformedURLException e1) {
+					e1.printStackTrace();
+				}
+			}
+			
+			@Override
+			public void setChecked(boolean checked) {
+				super.setChecked(checked);
+				selectionListener.setEnabled(checked);
+			}
+		};
+		
 
 		this.expandCItem = new ExpandCItem(viewer);
 		final ImageDescriptor treeMode = Activator.getImageDescriptor(SharedImages.TreeMode);
@@ -465,6 +503,7 @@ public class RepoExplorerView extends ViewPart{
 
 		hideGroupsAllAction.setChecked(true);
 		this.form.getToolBarManager().add(expandCItem);
+		this.form.getToolBarManager().add(linkToPackageExplorerAction);
 		this.form.getToolBarManager().add(hideGroupsAllAction);
 		this.form.getToolBarManager().add(refreshAction);
 		this.form.getToolBarManager().update(true);
@@ -548,6 +587,15 @@ public class RepoExplorerView extends ViewPart{
 		}else{
 			viewData.setViewMode(ViewMode.Repository);
 		}
+		
+		viewer.addSelectionChangedListener(new ISelectionChangedListener() {
+			@Override
+			public void selectionChanged(SelectionChangedEvent arg0) {
+				if(skipSelectionEvent) return;
+				selectionListener.lastSelectedProject = null;
+			}
+		});
+		
 	}
 
 	/**
@@ -972,7 +1020,6 @@ public class RepoExplorerView extends ViewPart{
 		}
 		colFactory.update(this.prefModel, true);
 		
-		this.colFactory.update(this.prefModel, true);
 		List<ColumnData> list = this.prefModel.getColumnData();
 		for(ColumnData item : list){
 			item.saveState(memento);
@@ -995,5 +1042,24 @@ public class RepoExplorerView extends ViewPart{
 		
 		val = memento.getBoolean(KEY_GITBLIT_SHOW_GROUPS);
 		this.prefModel.setShowGroups(val != null ? val : true);
+	}
+	
+	boolean skipSelectionEvent;
+	@Override
+	public void select(Set<String> gitBlitUrls) {
+		if(!linkToPackageExplorerAction.isChecked()) return;
+		List<GitBlitViewModel> projects = viewData.getProjects();
+		for (GitBlitViewModel viewModel : projects) {
+			if (viewModel instanceof ProjectViewModel) {
+				ProjectViewModel proj = (ProjectViewModel) viewModel;
+				if(gitBlitUrls.contains(proj.getGitUrl())){
+					expandCItem.expand(true);
+					skipSelectionEvent=true;
+					ISelection selection = new StructuredSelection(asList(proj.getParent(), proj));
+					viewer.setSelection(selection , true);
+					skipSelectionEvent = false;
+				}
+			}
+		}
 	}
 }
