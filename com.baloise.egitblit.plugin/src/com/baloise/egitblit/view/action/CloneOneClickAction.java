@@ -25,10 +25,13 @@ import org.eclipse.egit.ui.internal.clone.ProjectRecord;
 import org.eclipse.egit.ui.internal.clone.ProjectUtils;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.viewers.Viewer;
+import org.eclipse.jface.wizard.WizardDialog;
 import org.eclipse.jgit.lib.Ref;
 import org.eclipse.jgit.lib.Repository;
 import org.eclipse.jgit.transport.URIish;
 import org.eclipse.jgit.transport.UsernamePasswordCredentialsProvider;
+import org.eclipse.swt.widgets.Display;
+import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.IWorkingSet;
 import org.eclipse.ui.IWorkingSetManager;
 import org.eclipse.ui.PlatformUI;
@@ -40,16 +43,17 @@ import com.baloise.egitblit.main.Activator;
 import com.baloise.egitblit.pref.PreferenceMgr;
 import com.baloise.egitblit.view.model.GitBlitViewModel;
 import com.baloise.egitblit.view.model.ProjectViewModel;
+import com.baloise.egitblit.view.wizard.GitCreateStandardProjectWizard;
 
 /**
  * @see Action
  * @author culmat
  * 
  */
-public class CloneOneClickAction extends CloneAction{
+public class CloneOneClickAction extends CloneAction {
 	public final static String ID = "com.baloise.egitblit.cmd.import";
 
-	public CloneOneClickAction(Viewer viewer){
+	public CloneOneClickAction(Viewer viewer) {
 		super(viewer);
 		setText("Clone && Import Project");
 		setActionDefinitionId(ID);
@@ -57,19 +61,19 @@ public class CloneOneClickAction extends CloneAction{
 	}
 
 	@Override
-	public void doRun(){
-		try{
+	public void doRun() {
+		try {
 			GitBlitViewModel model = getSelectedModel();
-			if(model instanceof ProjectViewModel){
+			if (model instanceof ProjectViewModel) {
 				ProjectViewModel project = (ProjectViewModel) model;
 				performClone(project);
 			}
-		}catch(Exception e){
+		} catch (Exception e) {
 			Activator.logError(e.getMessage(), e);
 		}
 	}
 
-	protected void performClone(final ProjectViewModel project) throws URISyntaxException, GitBlitExplorerException{
+	protected void performClone(final ProjectViewModel project) throws URISyntaxException, GitBlitExplorerException {
 		URIish uri = new URIish(project.getGitUrl());
 		final Collection<Ref> selectedBranches;
 		selectedBranches = Collections.emptyList();
@@ -83,45 +87,54 @@ public class CloneOneClickAction extends CloneAction{
 		op.setCredentialsProvider(credentialsProvider);
 
 		op.addPostCloneTask(new PostCloneTask() {
-			public void execute(Repository repository, IProgressMonitor monitor) throws CoreException{
+			public void execute(Repository repository, IProgressMonitor monitor) throws CoreException {
 				org.eclipse.egit.core.Activator.getDefault().getRepositoryUtil().addConfiguredRepository(new File(workdir, ".git"));
-				if(project.hasCommits()){
+				if (project.hasCommits()) {
 					final IWorkingSet[] sets = new IWorkingSet[] { createWorkingSet(project.getName()) };
 					importProjects(repository, sets);
+				} else {
+					final GitCreateStandardProjectWizard wiz = new GitCreateStandardProjectWizard(repository, workdir.getAbsolutePath());
+					Display.getDefault().syncExec(new Runnable() {
+						public void run() {
+							Shell shell = PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell();
+							WizardDialog wizardDialog = new WizardDialog(shell, wiz);
+							wizardDialog.open();
+						}
+					});
 				}
 			}
 		});
 		runAsJob(op);
 	}
 
-	private UsernamePasswordCredentialsProvider getUsernamePasswordCredentialsProvider(String serverURL) throws GitBlitExplorerException{
+	private UsernamePasswordCredentialsProvider getUsernamePasswordCredentialsProvider(String serverURL) throws GitBlitExplorerException {
 		List<GitBlitServer> serverList = PreferenceMgr.readConfig().getServerList();
-		for(GitBlitServer server : serverList){
-			if(serverURL.equalsIgnoreCase(server.url)){
+		for (GitBlitServer server : serverList) {
+			if (serverURL.equalsIgnoreCase(server.url)) {
 				return new UsernamePasswordCredentialsProvider(server.user, server.password);
 			}
 		}
 		throw new GitBlitExplorerException("No server config found for URL " + serverURL);
 	}
 
-	private void importProjects(final Repository repository, final IWorkingSet[] sets){
+	private void importProjects(final Repository repository, final IWorkingSet[] sets) {
 		Job importJob = new Job("Importing") {
 
 			@SuppressWarnings("restriction")
-			protected IStatus run(IProgressMonitor monitor){
+			protected IStatus run(IProgressMonitor monitor) {
 				List<File> files = new ArrayList<File>();
 				ProjectUtil.findProjectFiles(files, repository.getWorkTree(), true, monitor);
-				if(files.isEmpty())
+				if (files.isEmpty())
 					return Status.OK_STATUS;
 
 				Set<ProjectRecord> records = new LinkedHashSet<ProjectRecord>();
-				for(File file : files)
+				for (File file : files)
 					records.add(new ProjectRecord(file));
-				try{
+				try {
 					ProjectUtils.createProjects(records, repository, sets, monitor);
-				}catch(InvocationTargetException e){
+				} catch (InvocationTargetException e) {
 					Activator.logError(e.getLocalizedMessage(), e);
-				}catch(InterruptedException e){
+				} catch (InterruptedException e) {
 					Activator.logError(e.getLocalizedMessage(), e);
 				}
 				return Status.OK_STATUS;
@@ -130,10 +143,10 @@ public class CloneOneClickAction extends CloneAction{
 		importJob.schedule();
 	}
 
-	private IWorkingSet createWorkingSet(String name){
+	private IWorkingSet createWorkingSet(String name) {
 		IWorkingSetManager workingSetManager = PlatformUI.getWorkbench().getWorkingSetManager();
 		IWorkingSet ws = workingSetManager.getWorkingSet(name);
-		if(ws == null){
+		if (ws == null) {
 			ws = workingSetManager.createWorkingSet(name, new IAdaptable[0]);
 			ws.setId("org.eclipse.jdt.ui.JavaWorkingSetPage");
 			workingSetManager.addWorkingSet(ws);
@@ -142,24 +155,24 @@ public class CloneOneClickAction extends CloneAction{
 	}
 
 	@SuppressWarnings("restriction")
-	private void runAsJob(final CloneOperation op){
+	private void runAsJob(final CloneOperation op) {
 		final Job job = new Job("Cloning") {
 			@Override
-			protected IStatus run(final IProgressMonitor monitor){
-				try{
+			protected IStatus run(final IProgressMonitor monitor) {
+				try {
 					op.run(monitor);
 					return Status.OK_STATUS;
-				}catch(InterruptedException e){
+				} catch (InterruptedException e) {
 					return Status.CANCEL_STATUS;
-				}catch(InvocationTargetException e){
+				} catch (InvocationTargetException e) {
 					Throwable thr = e.getCause();
 					return new Status(IStatus.ERROR, Activator.PLUGIN_ID, 0, thr.getMessage(), thr);
 				}
 			}
 
 			@Override
-			public boolean belongsTo(Object family){
-				if(family.equals(JobFamilies.CLONE))
+			public boolean belongsTo(Object family) {
+				if (family.equals(JobFamilies.CLONE))
 					return true;
 				return super.belongsTo(family);
 			}
@@ -168,25 +181,25 @@ public class CloneOneClickAction extends CloneAction{
 		job.schedule();
 	}
 
-	private File getWorkdir(ProjectViewModel project){
+	private File getWorkdir(ProjectViewModel project) {
 		String default_repository_dir = Platform.getPreferencesService().getString("org.eclipse.egit.ui", "default_repository_dir", System.getProperty("user.home"), null);
 		File ret = new File(default_repository_dir);
-		if(!GitBlitRepository.GROUP_MAIN.equals(project.getGroupName())){
+		if (!GitBlitRepository.GROUP_MAIN.equals(project.getGroupName())) {
 			ret = new File(ret, project.getGroupName());
 		}
 		return new File(ret, project.getProjectName());
 	}
 
 	@Override
-	public boolean isEnabled(){
-		if(getEGitCommand() == null)
+	public boolean isEnabled() {
+		if (getEGitCommand() == null)
 			return false;
 
 		GitBlitViewModel model = getSelectedModel();
-		if(model instanceof ProjectViewModel){
+		if (model instanceof ProjectViewModel) {
 			ProjectViewModel project = (ProjectViewModel) model;
 			File workdir = getWorkdir(project);
-			if(!workdir.exists() || workdir.list().length == 0)
+			if (!workdir.exists() || workdir.list().length == 0)
 				return true;
 		}
 		return false;
