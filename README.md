@@ -24,5 +24,8 @@ Eclipse Plugin listing git repositories hosted by gitblit in a view.
 - or starts EGit Clone Wizard with selected repository path by default
 - Open corresponding gitblit summary page of the selected project
 
+[![Build Status](https://baloise.ci.cloudbees.com/job/eGitblit/badge/icon)](https://baloise.ci.cloudbees.com/job/eGitblit/) 
+
+
 
 
