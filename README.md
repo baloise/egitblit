@@ -17,12 +17,12 @@ egitblit
   </tbody>
 </table>
 
-Eclipse Plugin listing git repositories hosted by gitblit in a view.
-- Search for a repo/project within gitblit repos
+Eclipse Plugin listing git repositories hosted by [Gitblit](http://gitblit.com/) in a view.
+- Search for a repo/project within Gitblit repos
 - Copies git repo url to clipboard
 - or via drag&drop to any drag&drop enabled target as text (or as type URL)
 - or starts EGit Clone Wizard with selected repository path by default
-- Open corresponding gitblit summary page of the selected project
+- Open corresponding Gitblit summary page of the selected project
 
 [![Build Status](https://baloise.ci.cloudbees.com/job/eGitblit/badge/icon)](https://baloise.ci.cloudbees.com/job/eGitblit/) 
 
