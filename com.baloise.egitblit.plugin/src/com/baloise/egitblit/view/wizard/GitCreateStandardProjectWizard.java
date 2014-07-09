@@ -2,11 +2,6 @@ package com.baloise.egitblit.view.wizard;
 
 import java.io.File;
 import java.lang.reflect.InvocationTargetException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
 
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IProjectDescription;
@@ -21,17 +16,11 @@ import org.eclipse.egit.core.op.ConnectProviderOperation;
 import org.eclipse.egit.ui.Activator;
 import org.eclipse.egit.ui.internal.UIText;
 import org.eclipse.egit.ui.internal.clone.GitCreateGeneralProjectPage;
-import org.eclipse.egit.ui.internal.clone.GitImportWizard;
-import org.eclipse.egit.ui.internal.clone.GitProjectsImportPage;
-import org.eclipse.egit.ui.internal.clone.GitSelectWizardPage;
-import org.eclipse.egit.ui.internal.clone.ProjectRecord;
-import org.eclipse.egit.ui.internal.clone.ProjectUtils;
 import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.jface.wizard.IWizardPage;
 import org.eclipse.jface.wizard.Wizard;
 import org.eclipse.jgit.lib.Repository;
 import org.eclipse.osgi.util.NLS;
-import org.eclipse.ui.IWorkingSet;
 import org.eclipse.ui.PlatformUI;
 // stolen from org.eclipse.egit.ui.internal.clone.GitCreateProjectViaWizardWizard ;-)
 public class GitCreateStandardProjectWizard extends Wizard {

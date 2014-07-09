@@ -35,7 +35,6 @@ import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.jface.viewers.StructuredSelection;
-import org.eclipse.jface.viewers.TreePath;
 import org.eclipse.jface.viewers.TreeViewer;
 import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.jface.window.Window;
@@ -95,16 +94,17 @@ import com.baloise.egitblit.view.model.ProjectViewModel;
 public class RepoExplorerView extends ViewPart implements GitBlitUrlSelectionListener{
 
 	public final static String CONTEXT_ID = "com.baloise.egitblit.context";
-	
+
 	public final static String KEY_GITBLIT_OMIT_SERVER_ERROR = "com.baloise.egitblit.view.omitservererror";
 	public final static String KEY_GITBLIT_SHOW_GROUPS = "com.baloise.egitblit.view.showgroups";
+
 	/**
 	 * Enum containing the display modes (Grouped or only the repos)
 	 * 
 	 * @author MicBag
 	 * 
 	 */
-	private enum ViewMode{
+	private enum ViewMode {
 		Group, Repository
 	};
 
@@ -115,11 +115,10 @@ public class RepoExplorerView extends ViewPart implements GitBlitUrlSelectionLis
 	 * 
 	 */
 	private class ViewerData{
-		private List<GroupViewModel>	groupModelList	= new ArrayList<GroupViewModel>();
-		private ViewMode				viewMode		= ViewMode.Group;
+		private List<GroupViewModel> groupModelList = new ArrayList<GroupViewModel>();
+		private ViewMode viewMode = ViewMode.Group;
 
-		public ViewerData(){
-		}
+		public ViewerData(){}
 
 		public void setGroupModel(List<GroupViewModel> list){
 			this.groupModelList.clear();
@@ -136,7 +135,8 @@ public class RepoExplorerView extends ViewPart implements GitBlitUrlSelectionLis
 			ViewMode mode;
 			if(this.viewMode == ViewMode.Group){
 				mode = ViewMode.Repository;
-			}else{
+			}
+			else{
 				mode = ViewMode.Group;
 			}
 			setViewMode(mode);
@@ -146,7 +146,7 @@ public class RepoExplorerView extends ViewPart implements GitBlitUrlSelectionLis
 		public List<GitBlitViewModel> getModel(){
 			switch(viewMode){
 				case Group:
-					return (List) this.groupModelList;
+					return (List)this.groupModelList;
 				case Repository:
 					return getProjects();
 			}
@@ -155,12 +155,12 @@ public class RepoExplorerView extends ViewPart implements GitBlitUrlSelectionLis
 
 		public List<GitBlitViewModel> getProjects(){
 			List<GitBlitViewModel> list = new ArrayList<GitBlitViewModel>();
-			for(GitBlitViewModel item : this.groupModelList){
+			for(GitBlitViewModel item: this.groupModelList){
 				if(item instanceof ErrorViewModel){
 					list.add(item);
 					continue;
 				}
-				list.addAll((List) ((GroupViewModel) item).getChilds());
+				list.addAll((List)((GroupViewModel)item).getChilds());
 			}
 			return list;
 		}
@@ -186,7 +186,8 @@ public class RepoExplorerView extends ViewPart implements GitBlitUrlSelectionLis
 					// Showing repositories only (no groups)
 					col.setText("Repository");
 					col.setToolTipText("Name of the repository");
-				}else{
+				}
+				else{
 					// Showing groups
 					col.setText("Group / Repository");
 					col.setToolTipText("Name of the group and its repositories");
@@ -199,20 +200,20 @@ public class RepoExplorerView extends ViewPart implements GitBlitUrlSelectionLis
 	// ------------------------------------------------------------------------
 	// --- Variables
 	// ------------------------------------------------------------------------
-	private TreeViewer				viewer;
-	private ColumnFactory			colFactory;
-	private ActionFactory   		actionFactory;
-	private IMemento				memento = null;
-	private ViewerData				viewData;		
-	private StyledLabelProvider		labelProvider;
-	private DoubleClickBehaviour	dbclick				= DoubleClickBehaviour.OpenGitBlit;
-	private PreferenceModel			prefModel			= new PreferenceModel();
-	private Action					refreshAction;
-	private Action					linkToPackageExplorerAction;
-	private ExpandCItem				expandCItem;
+	private TreeViewer viewer;
+	private ColumnFactory colFactory;
+	private ActionFactory actionFactory;
+	private IMemento memento = null;
+	private ViewerData viewData;
+	private StyledLabelProvider labelProvider;
+	private DoubleClickBehaviour dbclick = DoubleClickBehaviour.OpenGitBlit;
+	private PreferenceModel prefModel = new PreferenceModel();
+	private Action refreshAction;
+	private Action linkToPackageExplorerAction;
+	private ExpandCItem expandCItem;
 
-	private Form					form;
-	private Boolean					omitServerErrors	= null;
+	private Form form;
+	private Boolean omitServerErrors = null;
 
 	// ------------------------------------------------------------------------
 	// --- Local actions
@@ -227,7 +228,8 @@ public class RepoExplorerView extends ViewPart implements GitBlitUrlSelectionLis
 			setChecked(omitServerErrors);
 			try{
 				prefModel.setOmitServerErrors(omitServerErrors);
-			}catch(Exception e){
+			}
+			catch(Exception e){
 				Activator.logError("Error saving preference settings.", e);
 			}
 			loadRepositories(!omitServerErrors);
@@ -246,7 +248,7 @@ public class RepoExplorerView extends ViewPart implements GitBlitUrlSelectionLis
 	/**
 	 * Action shown as menu item in form header to omit unavailable servers
 	 */
-	private OmitAction	omitAction	= new OmitAction();
+	private OmitAction omitAction = new OmitAction();
 
 	/**
 	 * Internal class for showing messages at the form header
@@ -254,8 +256,8 @@ public class RepoExplorerView extends ViewPart implements GitBlitUrlSelectionLis
 	 * @author MicBag
 	 */
 	private class ServerMsg implements IMessage{
-		private String	msg;
-		private int		type	= IMessageProvider.NONE;
+		private String msg;
+		private int type = IMessageProvider.NONE;
 
 		public ServerMsg(String msg, int type){
 			setMessage(msg, type);
@@ -299,7 +301,7 @@ public class RepoExplorerView extends ViewPart implements GitBlitUrlSelectionLis
 
 	// ------------------------------------------------------------------------
 	// Subscribe on preference changes
-	IPropertyChangeListener	propChangeListener	= new IPropertyChangeListener() {
+	IPropertyChangeListener propChangeListener = new IPropertyChangeListener() {
 		@Override
 		public void propertyChange(PropertyChangeEvent event){
 			String prop = event.getProperty();
@@ -315,8 +317,7 @@ public class RepoExplorerView extends ViewPart implements GitBlitUrlSelectionLis
 	/**
 	 * ...guess
 	 */
-	public RepoExplorerView(){
-	}
+	public RepoExplorerView(){}
 
 	/*
 	 * (non-Javadoc)
@@ -340,15 +341,17 @@ public class RepoExplorerView extends ViewPart implements GitBlitUrlSelectionLis
 		super.saveState(memento);
 		saveViewState(memento);
 	}
-	
-	/* (non-Javadoc)
+
+	/*
+	 * (non-Javadoc)
+	 * 
 	 * @see org.eclipse.ui.part.ViewPart#init(org.eclipse.ui.IViewSite, org.eclipse.ui.IMemento)
 	 */
 	@Override
 	public void init(IViewSite site, IMemento memento) throws PartInitException{
 		super.init(site, memento);
 		this.memento = memento;
-		selectionListener = new SyncWithPackageManagerListener(this,site.getWorkbenchWindow());
+		selectionListener = new SyncWithPackageManagerListener(this, site.getWorkbenchWindow());
 	}
 
 	/*
@@ -360,11 +363,11 @@ public class RepoExplorerView extends ViewPart implements GitBlitUrlSelectionLis
 	 */
 	@Override
 	public void createPartControl(Composite parent){
-		
+
 		// --- Register context to separate keybindings form standard eclipse (see plugin.xml)
 		IContextService contextService = (IContextService)getSite().getService(IContextService.class);
 		contextService.activateContext(CONTEXT_ID);
-		
+
 		// --------------------------------------------------------------------
 		// Sync preferences
 		// --------------------------------------------------------------------
@@ -388,16 +391,13 @@ public class RepoExplorerView extends ViewPart implements GitBlitUrlSelectionLis
 		IJobManager jobMan = Job.getJobManager();
 		jobMan.addJobChangeListener(new IJobChangeListener() {
 			@Override
-			public void sleeping(IJobChangeEvent event){
-			}
+			public void sleeping(IJobChangeEvent event){}
 
 			@Override
-			public void scheduled(IJobChangeEvent event){
-			}
+			public void scheduled(IJobChangeEvent event){}
 
 			@Override
-			public void running(IJobChangeEvent event){
-			}
+			public void running(IJobChangeEvent event){}
 
 			@Override
 			public void done(IJobChangeEvent event){
@@ -408,12 +408,10 @@ public class RepoExplorerView extends ViewPart implements GitBlitUrlSelectionLis
 			}
 
 			@Override
-			public void awake(IJobChangeEvent event){
-			}
+			public void awake(IJobChangeEvent event){}
 
 			@Override
-			public void aboutToRun(IJobChangeEvent event){
-			}
+			public void aboutToRun(IJobChangeEvent event){}
 		});
 
 		// --------------------------------------------------------------------
@@ -460,28 +458,26 @@ public class RepoExplorerView extends ViewPart implements GitBlitUrlSelectionLis
 				return refreskImgDesc;
 			}
 		};
-		
-		
-		
+
 		linkToPackageExplorerAction = new Action("Link with Package Explorer", SWT.TOGGLE) {
 			{
-				try {
+				try{
 					String imgDisabled = "platform:/plugin/org.eclipse.ui.browser/icons/dlcl16/synced.gif";
 					setDisabledImageDescriptor(ImageDescriptor.createFromURL(new URL(imgDisabled)));
-					String imgEnabled= "platform:/plugin/org.eclipse.ui.browser/icons/elcl16/synced.gif";
+					String imgEnabled = "platform:/plugin/org.eclipse.ui.browser/icons/elcl16/synced.gif";
 					setImageDescriptor(ImageDescriptor.createFromURL(new URL(imgEnabled)));
-				} catch (MalformedURLException e1) {
+				}
+				catch(MalformedURLException e1){
 					e1.printStackTrace();
 				}
 			}
-			
+
 			@Override
-			public void setChecked(boolean checked) {
+			public void setChecked(boolean checked){
 				super.setChecked(checked);
 				selectionListener.setEnabled(checked);
 			}
 		};
-		
 
 		this.expandCItem = new ExpandCItem(viewer);
 		final ImageDescriptor treeMode = Activator.getImageDescriptor(SharedImages.TreeMode);
@@ -511,7 +507,7 @@ public class RepoExplorerView extends ViewPart implements GitBlitUrlSelectionLis
 		IMenuManager hmgr = this.form.getMenuManager();
 		hmgr.add(this.omitAction);
 		this.omitAction.setChecked(this.omitServerErrors);
-		final Action prefAction = new Action("Open preferences"){
+		final Action prefAction = new Action("Open preferences") {
 			@Override
 			public void runWithEvent(Event event){
 				ViewActionBase.openPreferences();
@@ -554,9 +550,9 @@ public class RepoExplorerView extends ViewPart implements GitBlitUrlSelectionLis
 		mgr.setRemoveAllWhenShown(true);
 		mgr.addMenuListener(new IMenuListener() {
 			public void menuAboutToShow(IMenuManager manager){
-				IStructuredSelection selection = (IStructuredSelection) viewer.getSelection();
+				IStructuredSelection selection = (IStructuredSelection)viewer.getSelection();
 				if(selection != null){
-					GitBlitViewModel model = (GitBlitViewModel) selection.getFirstElement();
+					GitBlitViewModel model = (GitBlitViewModel)selection.getFirstElement();
 					if(model instanceof ProjectViewModel){
 						mgr.add(actionFactory.getAction(CloneAction.ID));
 						mgr.add(actionFactory.getAction(CloneOneClickAction.ID));
@@ -584,18 +580,19 @@ public class RepoExplorerView extends ViewPart implements GitBlitUrlSelectionLis
 		hideGroupsAllAction.setChecked(mode);
 		if(mode == true){
 			viewData.setViewMode(ViewMode.Group);
-		}else{
+		}
+		else{
 			viewData.setViewMode(ViewMode.Repository);
 		}
-		
+
 		viewer.addSelectionChangedListener(new ISelectionChangedListener() {
 			@Override
-			public void selectionChanged(SelectionChangedEvent arg0) {
+			public void selectionChanged(SelectionChangedEvent arg0){
 				if(skipSelectionEvent) return;
 				selectionListener.lastSelectedProject = null;
 			}
 		});
-		
+
 	}
 
 	/**
@@ -611,9 +608,9 @@ public class RepoExplorerView extends ViewPart implements GitBlitUrlSelectionLis
 			// Copied from
 			// http://eclipsesource.com/blogs/2012/10/26/filtering-tables-in-swtjface/
 			protected boolean isLeafMatch(final Viewer viewer, final Object element){
-				TreeViewer treeViewer = (TreeViewer) viewer;
+				TreeViewer treeViewer = (TreeViewer)viewer;
 				int numberOfColumns = treeViewer.getTree().getColumnCount();
-				RepoLabelProvider labelProvider = (RepoLabelProvider) treeViewer.getLabelProvider();
+				RepoLabelProvider labelProvider = (RepoLabelProvider)treeViewer.getLabelProvider();
 				boolean isMatch = false;
 				for(int columnIndex = 0; columnIndex < numberOfColumns; columnIndex++){
 					TreeColumn item = treeViewer.getTree().getColumn(columnIndex);
@@ -621,7 +618,7 @@ public class RepoExplorerView extends ViewPart implements GitBlitUrlSelectionLis
 						// column is invisible: Ignore
 						continue;
 					}
-					String labelText = labelProvider.getColumnText((GitBlitViewModel) element, colFactory.getColumnDesc(columnIndex));
+					String labelText = labelProvider.getColumnText((GitBlitViewModel)element, colFactory.getColumnDesc(columnIndex));
 					isMatch |= wordMatches(labelText);
 				}
 				return isMatch;
@@ -669,7 +666,7 @@ public class RepoExplorerView extends ViewPart implements GitBlitUrlSelectionLis
 		// Drag support
 		// --------------------------------------------------------------------
 		int operations = DND.DROP_COPY | DND.DROP_MOVE;
-		Transfer[] transferTypes = new Transfer[] { TextTransfer.getInstance() };
+		Transfer[] transferTypes = new Transfer[] {TextTransfer.getInstance()};
 		viewer.addDragSupport(operations, transferTypes, new RepoDragListener(viewer));
 		viewer.addDoubleClickListener(new IDoubleClickListener() {
 			@Override
@@ -677,8 +674,9 @@ public class RepoExplorerView extends ViewPart implements GitBlitUrlSelectionLis
 				getDoubleClickAction().run();
 			}
 		});
-		
+
 		this.actionFactory = new ActionFactory(this);
+		this.actionFactory.setPrefModel(this.prefModel);
 		actionFactory.addAction(new BrowseAction(viewer));
 		actionFactory.addAction(new CloneAction(viewer));
 		actionFactory.addAction(new CloneOneClickAction(viewer));
@@ -699,6 +697,9 @@ public class RepoExplorerView extends ViewPart implements GitBlitUrlSelectionLis
 		try{
 			// --- Load settings
 			this.prefModel = PreferenceMgr.readConfig();
+			if(this.actionFactory != null){
+				this.actionFactory.setPrefModel(this.prefModel);
+			}
 			loadViewState();
 
 			// --- Init variables
@@ -706,7 +707,7 @@ public class RepoExplorerView extends ViewPart implements GitBlitUrlSelectionLis
 			if(this.omitServerErrors == null){
 				this.omitServerErrors = prefModel.isOmitServerErrors();
 			}
-			
+
 			if(setFields){
 				// --- Init preference related fields
 				if(this.omitAction != null){
@@ -717,22 +718,21 @@ public class RepoExplorerView extends ViewPart implements GitBlitUrlSelectionLis
 				}
 			}
 			return;
-		}catch(GitBlitExplorerException e){
+		}
+		catch(GitBlitExplorerException e){
 			Activator.logError("Error initializing view with preference settings.", e);
 		}
 	}
 
 	private List<String> getOmittedServerErrorUrls(){
 		List<String> res = new ArrayList<String>();
-		for(GitBlitServer item :  prefModel.getServerList()){
+		for(GitBlitServer item: prefModel.getServerList()){
 			if(item.serverError == true && res.contains(item.url) == false){
 				res.add(item.url);
 			}
 		}
 		return res;
 	}
-
-
 
 	/**
 	 * Reading repos / projects from gitblit
@@ -793,13 +793,13 @@ public class RepoExplorerView extends ViewPart implements GitBlitUrlSelectionLis
 					GroupViewModel gModel;
 					ProjectViewModel pModel;
 					List<GitBlitRepository> grList;
-					for(String item : groupNames){
+					for(String item: groupNames){
 						// Get repos by group
 						grList = getReposByGroup(projList, item);
 						gModel = new GroupViewModel(item);
 						modelList.add(gModel);
 						// add childs
-						for(GitBlitRepository pitem : grList){
+						for(GitBlitRepository pitem: grList){
 							pModel = new ProjectViewModel(pitem);
 							if(pitem.hasCommits == false){
 								pModel.setToolTip("Repository has no commits. Can�t show repository summary in GitBlit");
@@ -810,11 +810,12 @@ public class RepoExplorerView extends ViewPart implements GitBlitUrlSelectionLis
 					fmon.worked(1);
 					syncWithUi(modelList);
 					return Status.OK_STATUS;
-				}catch(Exception e){
+				}
+				catch(Exception e){
 					Activator.showAndLogError("", e);
 					modelList.add(new ErrorViewModel("Error reading repositories from Gitblit."));
 					List<GitBlitServer> list = prefModel.getServerList();
-					for(GitBlitServer item : list){
+					for(GitBlitServer item: list){
 						if(item.active && item.serverError){
 							modelList.add(new ErrorViewModel("Server \"" + item.url + "\" is unavailable."));
 						}
@@ -827,8 +828,7 @@ public class RepoExplorerView extends ViewPart implements GitBlitUrlSelectionLis
 
 		job.addJobChangeListener(new IJobChangeListener() {
 			@Override
-			public void sleeping(IJobChangeEvent event){
-			}
+			public void sleeping(IJobChangeEvent event){}
 
 			@Override
 			public void scheduled(IJobChangeEvent event){
@@ -836,8 +836,7 @@ public class RepoExplorerView extends ViewPart implements GitBlitUrlSelectionLis
 			}
 
 			@Override
-			public void running(IJobChangeEvent event){
-			}
+			public void running(IJobChangeEvent event){}
 
 			@Override
 			public void done(IJobChangeEvent event){
@@ -845,12 +844,10 @@ public class RepoExplorerView extends ViewPart implements GitBlitUrlSelectionLis
 			}
 
 			@Override
-			public void awake(IJobChangeEvent event){
-			}
+			public void awake(IJobChangeEvent event){}
 
 			@Override
-			public void aboutToRun(IJobChangeEvent event){
-			}
+			public void aboutToRun(IJobChangeEvent event){}
 		});
 		job.schedule();
 	}
@@ -859,7 +856,7 @@ public class RepoExplorerView extends ViewPart implements GitBlitUrlSelectionLis
 	 * Enables / disables refresh button while performing an refresh action
 	 * 
 	 * @param enalbe
-	 *            true = enabled, false = nope
+	 *           true = enabled, false = nope
 	 */
 	private void enableRefreshButton(final boolean enable){
 		if(this.form == null || this.form.isDisposed() == true){
@@ -904,7 +901,7 @@ public class RepoExplorerView extends ViewPart implements GitBlitUrlSelectionLis
 	 * Set a header message
 	 * 
 	 * @param msgs
-	 *            messages to display
+	 *           messages to display
 	 */
 	private void setHeaderMessage(List<String> msgs){
 		// setBusy needed. Otherwise the menu at the form title will be disposed
@@ -913,7 +910,7 @@ public class RepoExplorerView extends ViewPart implements GitBlitUrlSelectionLis
 		this.form.setBusy(true);
 		if(msgs != null && msgs.size() > 0){
 			List<ServerMsg> msgList = new ArrayList<ServerMsg>();
-			for(String item : msgs){
+			for(String item: msgs){
 				msgList.add(new ServerMsg(item + " is unavailable", IMessageProvider.INFORMATION));
 			}
 			int status = IMessageProvider.ERROR;
@@ -925,9 +922,10 @@ public class RepoExplorerView extends ViewPart implements GitBlitUrlSelectionLis
 					this.form.setMessage("There is one unavailable Gitblit server", status, msgList.toArray(new ServerMsg[msgs.size()]));
 				}
 				else{
-					this.form.setMessage("There is one omitted Gitblit server", status, msgList.toArray(new ServerMsg[msgs.size()]));					
+					this.form.setMessage("There is one omitted Gitblit server", status, msgList.toArray(new ServerMsg[msgs.size()]));
 				}
-			}else{
+			}
+			else{
 				if(this.omitServerErrors == false){
 					this.form.setMessage("There are unavailable Gitblit servers", status, msgList.toArray(new ServerMsg[msgs.size()]));
 				}
@@ -935,7 +933,8 @@ public class RepoExplorerView extends ViewPart implements GitBlitUrlSelectionLis
 					this.form.setMessage("There are " + msgs.size() + " omitted Gitblit servers", status, msgList.toArray(new ServerMsg[msgs.size()]));
 				}
 			}
-		}else{
+		}
+		else{
 			this.form.setMessage(null);
 		}
 		this.form.setBusy(orgState);
@@ -953,7 +952,7 @@ public class RepoExplorerView extends ViewPart implements GitBlitUrlSelectionLis
 			return res;
 		}
 
-		for(GitBlitRepository item : list){
+		for(GitBlitRepository item: list){
 			if(item.groupName == null){
 				// Set defaults
 				item.groupName = GitBlitRepository.GROUP_MAIN;
@@ -981,7 +980,7 @@ public class RepoExplorerView extends ViewPart implements GitBlitUrlSelectionLis
 			res.addAll(list);
 			return res;
 		}
-		for(GitBlitRepository item : list){
+		for(GitBlitRepository item: list){
 			if(groupName.equalsIgnoreCase(item.groupName)){
 				if(res.contains(item) == false){
 					res.add(item);
@@ -992,8 +991,7 @@ public class RepoExplorerView extends ViewPart implements GitBlitUrlSelectionLis
 	}
 
 	@Override
-	public void setFocus(){
-	}
+	public void setFocus(){}
 
 	/**
 	 * Determinate double click action, based on preferences
@@ -1019,44 +1017,45 @@ public class RepoExplorerView extends ViewPart implements GitBlitUrlSelectionLis
 			return;
 		}
 		colFactory.update(this.prefModel, true);
-		
+
 		List<ColumnData> list = this.prefModel.getColumnData();
-		for(ColumnData item : list){
+		for(ColumnData item: list){
 			item.saveState(memento);
 		}
 		memento.putBoolean(KEY_GITBLIT_OMIT_SERVER_ERROR, this.prefModel.isOmitServerErrors());
 		memento.putBoolean(KEY_GITBLIT_SHOW_GROUPS, this.prefModel.isShowGroups());
 	}
-	
+
 	public void loadViewState(){
 		if(this.memento == null || this.prefModel == null){
 			return;
 		}
 		List<ColumnData> list = ColumnFactory.createColumnData();
 		this.prefModel.setColumnData(list);
-		for(ColumnData item : list){
+		for(ColumnData item: list){
 			item.loadState(this.memento);
 		}
 		Boolean val = memento.getBoolean(KEY_GITBLIT_OMIT_SERVER_ERROR);
 		this.prefModel.setOmitServerErrors(val != null ? val : true);
-		
+
 		val = memento.getBoolean(KEY_GITBLIT_SHOW_GROUPS);
 		this.prefModel.setShowGroups(val != null ? val : true);
 	}
-	
+
 	boolean skipSelectionEvent;
+
 	@Override
-	public void select(Set<String> gitBlitUrls) {
+	public void select(Set<String> gitBlitUrls){
 		if(!linkToPackageExplorerAction.isChecked()) return;
 		List<GitBlitViewModel> projects = viewData.getProjects();
-		for (GitBlitViewModel viewModel : projects) {
-			if (viewModel instanceof ProjectViewModel) {
-				ProjectViewModel proj = (ProjectViewModel) viewModel;
+		for(GitBlitViewModel viewModel: projects){
+			if(viewModel instanceof ProjectViewModel){
+				ProjectViewModel proj = (ProjectViewModel)viewModel;
 				if(gitBlitUrls.contains(proj.getGitUrl())){
 					expandCItem.expand(true);
-					skipSelectionEvent=true;
+					skipSelectionEvent = true;
 					ISelection selection = new StructuredSelection(asList(proj.getParent(), proj));
-					viewer.setSelection(selection , true);
+					viewer.setSelection(selection, true);
 					skipSelectionEvent = false;
 				}
 			}

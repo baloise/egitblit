@@ -15,6 +15,7 @@ import org.eclipse.ui.dialogs.PreferencesUtil;
 
 import com.baloise.egitblit.main.Activator;
 import com.baloise.egitblit.pref.GitBlitExplorerPrefPage;
+import com.baloise.egitblit.pref.PreferenceModel;
 import com.baloise.egitblit.view.model.ErrorViewModel;
 import com.baloise.egitblit.view.model.GitBlitViewModel;
 
@@ -27,8 +28,9 @@ import com.baloise.egitblit.view.model.GitBlitViewModel;
  */
 public abstract class ViewActionBase extends Action{
 
+	public final static String KEY_PREF_MODEL = "com.baloise.egitblit.prefmodel";
 	private Viewer viewer;
-
+	
 	/**
 	 * @param id Id corresponding to a command id in plugin.xml if you want to define a key binding
 	 * @param viewer viewer
@@ -39,7 +41,6 @@ public abstract class ViewActionBase extends Action{
 		this.viewer = viewer;
 		setActionDefinitionId(id);
 	}
-	
 	
 	public abstract void doRun();
 	
@@ -55,6 +56,14 @@ public abstract class ViewActionBase extends Action{
 		return this.viewer;
 	}
 
+	public PreferenceModel getPrefModel(){
+		return (PreferenceModel)this.viewer.getData(KEY_PREF_MODEL);
+	}
+	
+	public void setPrefModel(PreferenceModel model){
+		this.viewer.setData(KEY_PREF_MODEL, model);
+	}
+	
 	/**
 	 * Determinate the selected view model from the viewer
 	 * @return Selected model

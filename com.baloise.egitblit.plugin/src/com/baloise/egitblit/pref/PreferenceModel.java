@@ -51,6 +51,8 @@ public class PreferenceModel{
 	private boolean decorateView;
 	private boolean showGroups;
 	private List<ColumnData> colData;
+
+	private boolean wsGroupName = true;
 	
 	public PreferenceModel(){
 		reset();
@@ -63,6 +65,8 @@ public class PreferenceModel{
 		this.decorateView = false;
 		this.showGroups = true;
 		this.colData = new ArrayList<ColumnData>();
+
+		this.wsGroupName = true;
 	}
 	
 	public void init(PreferenceModel model){
@@ -70,15 +74,26 @@ public class PreferenceModel{
 			return;
 		}
 		reset();
+		
 		this.dbClick = model.dbClick;
 		this.serverList.addAll(model.serverList);
 		this.omitServerErrors = model.omitServerErrors;
 		this.decorateView = model.decorateView;
 		this.showGroups = model.showGroups;
 		this.colData.addAll(model.colData);
+		
+		this.wsGroupName = model.wsGroupName;
 	}
 
 	
+	public boolean isWSGroupNameEnabled(){
+	  return this.wsGroupName;
+	}
+	
+	public void setWSGroupNameEnabled(boolean enabled){
+	  this.wsGroupName = enabled;
+	}
+
 	public DoubleClickBehaviour getDoubleClick(){
 		return this.dbClick;
 	}
@@ -205,6 +220,7 @@ public class PreferenceModel{
 
 	@Override
 	public String toString(){
-		return "PreferenceModel [dbClick=" + dbClick + ", repoList=" + serverList + ", omitServerErrors=" + omitServerErrors + ", colorColums=" + decorateView + ", showGroups=" + showGroups + ", colDesc=" + colData + "]";
+		return "PreferenceModel [dbClick=" + dbClick + ", serverList=" + serverList + ", omitServerErrors=" + omitServerErrors + ", decorateView=" + decorateView + ", showGroups=" + showGroups + ", colData=" + colData + ", wsGroupName=" + wsGroupName + "]";
 	}
+
 }

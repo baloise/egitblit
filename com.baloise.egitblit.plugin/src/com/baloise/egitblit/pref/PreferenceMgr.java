@@ -33,6 +33,9 @@ public class PreferenceMgr{
 	public final static String KEY_GITBLIT_SERVER_USER = "com.baloise.gitblit.server.user";
 	public final static String KEY_GITBLIT_SERVER_PASSWORD = "com.baloise.gitblit.server.password";
 
+	public final static String KEY_GITBLIT_WS_GROUPNAME = "com.baloise.gitblit.workingset.groupname";
+
+	
 	public final static String VALUE_GITBLIT_URL_SEPERATOR = "/";
 
 	/**
@@ -54,6 +57,8 @@ public class PreferenceMgr{
 			// --- Read global settings
 			prefModel.setDoubleClick(PreferenceModel.DoubleClickBehaviour.getValue(pref.getInt(KEY_GITBLIT_DCLICK, PreferenceModel.DoubleClickBehaviour.OpenGitBlit.value)));
 			prefModel.setDecorateView(pref.getBoolean(KEY_GITBLIT_DECORATRE_VIEW, false));
+			
+			prefModel.setWSGroupNameEnabled(pref.getBoolean(KEY_GITBLIT_WS_GROUPNAME, true));
 			
 			readServerList(prefModel);
 		}catch(Exception e){
@@ -125,6 +130,8 @@ public class PreferenceMgr{
 			pref.putInt(KEY_GITBLIT_DCLICK, prefModel.getDoubleClick().value, false);
 			pref.putBoolean(KEY_GITBLIT_DECORATRE_VIEW, prefModel.isDecorateView(), false);
 
+			pref.putBoolean(KEY_GITBLIT_WS_GROUPNAME, prefModel.isWSGroupNameEnabled(), true);
+			
 			ISecurePreferences entryNode;
 			ISecurePreferences serverNode;
 			

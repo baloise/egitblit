@@ -33,6 +33,7 @@ public class CloneAction extends ViewActionBase{
 		if(model instanceof ProjectViewModel){
 			// Copy url to clipboard
 			CopyAction cca = new CopyAction(getViewer());
+			cca.setPrefModel(getPrefModel());
 			cca.run();
 
 			Command cmd = getEGitCommand();
