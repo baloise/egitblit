@@ -20,15 +20,16 @@ import org.eclipse.swt.widgets.Text;
  *
  */
 public class RepositoryDialog extends TitleAreaDialog{
-
 	private Text ctrlUrl;
 	private Text ctrlUser;
 	private Text ctrlPwd;
+    private Text ctrlSshPort;
 	
 	public String url;
 	public String urlSep;
 	public String user;
 	public String pwd;
+    public Integer sshPort;
 
 	public RepositoryDialog(Shell parentShell){
 		super(parentShell);
@@ -47,6 +48,13 @@ public class RepositoryDialog extends TitleAreaDialog{
 		this.url = ctrlUrl.getText();
 		this.user = ctrlUser.getText();
 		this.pwd = ctrlPwd.getText();
+
+        try {
+            this.sshPort = Integer.parseInt(ctrlSshPort.getText());
+        } catch (NumberFormatException e) {
+            MessageDialog.open(IStatus.INFO, getShell(),"Invalid SSH port","The entered SSH port is invalid.", SWT.NONE);
+            return;
+        }
 
 		if(!containsValue(this.url)){
 			MessageDialog.open(IStatus.INFO,getShell(),"Invalid Url","Missing URL.",SWT.NONE);
@@ -67,6 +75,7 @@ public class RepositoryDialog extends TitleAreaDialog{
 		if(!containsValue(this.user) && containsValue(this.pwd)){
 			this.pwd = null;
 		}
+
 		super.okPressed();
 	}
 	
@@ -100,18 +109,26 @@ public class RepositoryDialog extends TitleAreaDialog{
 		new Label(container, SWT.NONE).setText("Password:");		
 		ctrlPwd = new Text(container, SWT.BORDER |  SWT.PASSWORD);
 		ctrlPwd.setLayoutData(gd);
+
+        new Label(container, SWT.NONE).setText("SSH Port:");
+        ctrlSshPort = new Text(container, SWT.BORDER);
+        ctrlSshPort.setLayoutData(gd);
 		
 		if(url == null || url.trim().isEmpty()){
 			url = "https://";
 		}
 		if(user == null || user.trim().isEmpty()){
 			user = System.getProperty("user.name");
-			pwd = "";;
+			pwd = "";
 		}
+        if(sshPort == null) {
+            sshPort = PreferenceMgr.DEFAULT_SSH_PORT;
+        }
 		
 		ctrlUrl.setText(url);
 		ctrlUser.setText(user);
 		ctrlPwd.setText(pwd);
+        ctrlSshPort.setText(sshPort.toString());
 
 		return area;
 	}

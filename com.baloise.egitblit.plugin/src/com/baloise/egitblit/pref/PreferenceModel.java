@@ -41,11 +41,35 @@ public class PreferenceModel{
 			return null;
 		}
 	};
+
+    /**
+     *
+     */
+    public static enum CloneProtocol{
+        HTTP(0),
+        SSH(1);
+
+        public final int value;
+        CloneProtocol(int value){
+            this.value = value;
+        }
+
+        public static CloneProtocol getValue(int val){
+            CloneProtocol[] values = CloneProtocol.values();
+            for(CloneProtocol item : values){
+                if(item.value == val){
+                    return item;
+                }
+            }
+            return null;
+        }
+    }
 	
 	// ------------------------------------------------------------------------
 	// Properties
 	// ------------------------------------------------------------------------
 	private DoubleClickBehaviour dbClick;
+    private CloneProtocol cloneProtocol;
 	private List<GitBlitServer> serverList;
 	private boolean omitServerErrors;
 	private boolean decorateView;
@@ -60,6 +84,7 @@ public class PreferenceModel{
 	
 	public void reset(){
 		this.dbClick = DoubleClickBehaviour.PasteEGit;
+        this.cloneProtocol = CloneProtocol.HTTP;
 		this.serverList = new ArrayList<GitBlitServer>();
 		this.omitServerErrors = false;
 		this.decorateView = false;
@@ -76,6 +101,7 @@ public class PreferenceModel{
 		reset();
 		
 		this.dbClick = model.dbClick;
+        this.cloneProtocol = model.cloneProtocol;
 		this.serverList.addAll(model.serverList);
 		this.omitServerErrors = model.omitServerErrors;
 		this.decorateView = model.decorateView;
@@ -97,14 +123,25 @@ public class PreferenceModel{
 	public DoubleClickBehaviour getDoubleClick(){
 		return this.dbClick;
 	}
-	
+
 	public void setDoubleClick(DoubleClickBehaviour dbcl){
 		if(dbcl == null){
 			return;
 		}
 		this.dbClick = dbcl;
 	}
-	
+
+    public CloneProtocol getCloneProtocol() {
+        return this.cloneProtocol;
+    }
+
+    public void setCloneProtocol(CloneProtocol cloneProtocol) {
+        if (cloneProtocol == null) {
+            return;
+        }
+        this.cloneProtocol = cloneProtocol;
+    }
+
 	public void setServerList(List<GitBlitServer> repoList){
 		this.serverList.clear();
 		this.serverList.addAll(repoList);
@@ -124,8 +161,8 @@ public class PreferenceModel{
 		this.serverList.add(repo);
 	}
 
-	public void addRepository(String url, boolean active, String user, String pwd){
-		addRepository(new GitBlitServer(url,active, user,pwd));
+	public void addRepository(String url, boolean active, String user, String pwd, Integer sshPort){
+		addRepository(new GitBlitServer(url,active, user,pwd, sshPort));
 	}
 
 	public boolean removeRepository(GitBlitServer repo){

@@ -1,10 +1,13 @@
 package com.baloise.egitblit.view.model;
 
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
 import com.baloise.egitblit.gitblit.GitBlitRepository;
+import com.baloise.egitblit.pref.PreferenceMgr;
 
 /**
  * ViewModel wrapping GitBlitProject (Git Repository entry)
@@ -227,6 +230,7 @@ public class ProjectViewModel implements GitBlitViewModel{
 		return repo.repoRGB;
 	}
 
+    public String getSshUrl(int sshPort) { return httpUrlToSshUrl(repo.gitUrl, sshPort); }
 	// public String getGitURL(){
 	// return this.entry.gitUrl;
 	// }
@@ -329,5 +333,26 @@ public class ProjectViewModel implements GitBlitViewModel{
 		return this.toolTip;
 	}
 
+    private static final String httpProtocol = "http";
+    private static final String sshProtocol = "ssh";
 
+    private String httpUrlToSshUrl(String httpUrl, int sshPort) {
+        try {
+            URL oldUrl = new URL(httpUrl);
+
+            String file = oldUrl.getFile();
+            if (file.startsWith("/gitblit/r")) {
+                file = file.substring(10);
+            }
+
+            URL url = new URL(httpProtocol, oldUrl.getHost(), sshPort, file);
+            String sshUrl = url.toString();
+            sshUrl = sshUrl.substring(4);
+            sshUrl = sshProtocol + sshUrl;
+
+            return sshUrl;
+        } catch (MalformedURLException e) {
+            return httpUrl;
+        }
+    }
 }
