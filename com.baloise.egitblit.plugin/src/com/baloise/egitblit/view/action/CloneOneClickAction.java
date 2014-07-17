@@ -153,7 +153,7 @@ public class CloneOneClickAction extends CloneAction{
 				}
 				
 				try{
-					ProjectUtils.createProjects(records, repository, sets, monitor);
+					ProjectUtils.createProjects(records, false, repository, sets, monitor);
 				}
 				catch(Exception e){
 					Activator.logError(e.getLocalizedMessage(), e);
