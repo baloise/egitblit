@@ -14,12 +14,14 @@ import com.baloise.egitblit.main.Activator;
  * 
  */
 public class PreferenceMgr{
+    public static final Integer DEFAULT_SSH_PORT = 29418;
 
 	// --- Root node
 	public final static String KEY_GITBLIT_ROOT = "com.baloise.gitblit";
 
 	// --- global settings under root node
 	public final static String KEY_GITBLIT_DCLICK = "com.baloise.gitblit.dobuleclick";
+    public final static String KEY_GITBLIT_CLONE_PROTOCOL = "com.baloise.gitblit.clone.protocol";
 	public final static String KEY_GITBLIT_DECORATRE_VIEW = "com.baloise.gitblit.general.viewer.coloring";
 	
 
@@ -32,6 +34,8 @@ public class PreferenceMgr{
 	// "com.baloise.gitblit.server.url.separator";
 	public final static String KEY_GITBLIT_SERVER_USER = "com.baloise.gitblit.server.user";
 	public final static String KEY_GITBLIT_SERVER_PASSWORD = "com.baloise.gitblit.server.password";
+
+    public final static String KEY_GITBLIT_SERVER_SSH_PORT = "com.baloise.gitblit.server.ssh.port";
 
 	public final static String KEY_GITBLIT_WS_GROUPNAME = "com.baloise.gitblit.workingset.groupname";
 
@@ -49,14 +53,15 @@ public class PreferenceMgr{
 		try{
 			ISecurePreferences pref = SecurePreferencesFactory.getDefault().node(KEY_GITBLIT_ROOT);
 			if(pref == null){
-				final String msg = "Can�t access preferences for Gitblit explorer. Continue with new (empty) settings.";
+				final String msg = "Can't access preferences for Gitblit explorer. Continue with new (empty) settings.";
 				Activator.logError(msg);
 				return prefModel;
 			}
 
 			// --- Read global settings
 			prefModel.setDoubleClick(PreferenceModel.DoubleClickBehaviour.getValue(pref.getInt(KEY_GITBLIT_DCLICK, PreferenceModel.DoubleClickBehaviour.OpenGitBlit.value)));
-			prefModel.setDecorateView(pref.getBoolean(KEY_GITBLIT_DECORATRE_VIEW, false));
+			prefModel.setCloneProtocol(PreferenceModel.CloneProtocol.getValue(pref.getInt(KEY_GITBLIT_CLONE_PROTOCOL, PreferenceModel.CloneProtocol.HTTP.value)));
+            prefModel.setDecorateView(pref.getBoolean(KEY_GITBLIT_DECORATRE_VIEW, false));
 			
 			prefModel.setWSGroupNameEnabled(pref.getBoolean(KEY_GITBLIT_WS_GROUPNAME, true));
 			
@@ -75,7 +80,7 @@ public class PreferenceMgr{
 		try{
 			ISecurePreferences pref = SecurePreferencesFactory.getDefault().node(KEY_GITBLIT_ROOT);
 			if(pref == null){
-				final String msg = "Can�t access preferences for Gitblit explorer. Continue with new (empty) settings.";
+				final String msg = "Can't access preferences for Gitblit explorer. Continue with new (empty) settings.";
 				Activator.logError(msg);
 				return;
 			}
@@ -91,6 +96,7 @@ public class PreferenceMgr{
 			if(serverNode != null){
 				// An entry
 				String url, user, pwd;
+                Integer sshPort;
 				boolean active;
 	
 				String[] names = serverNode.childrenNames();
@@ -100,7 +106,8 @@ public class PreferenceMgr{
 					active = entryNode.getBoolean(KEY_GITBLIT_SERVER_ACTIVE, true);
 					user = entryNode.get(KEY_GITBLIT_SERVER_USER, null);
 					pwd = entryNode.get(KEY_GITBLIT_SERVER_PASSWORD, null);
-					prefModel.addRepository(url, active, user, pwd);
+                    sshPort = entryNode.getInt(KEY_GITBLIT_SERVER_SSH_PORT, DEFAULT_SSH_PORT);
+					prefModel.addRepository(url, active, user, pwd, sshPort);
 				}
 			}
 			else{
@@ -128,6 +135,7 @@ public class PreferenceMgr{
 		try{
 			// --- Saving global settings
 			pref.putInt(KEY_GITBLIT_DCLICK, prefModel.getDoubleClick().value, false);
+            pref.putInt(KEY_GITBLIT_CLONE_PROTOCOL, prefModel.getCloneProtocol().value, false);
 			pref.putBoolean(KEY_GITBLIT_DECORATRE_VIEW, prefModel.isDecorateView(), false);
 
 			pref.putBoolean(KEY_GITBLIT_WS_GROUPNAME, prefModel.isWSGroupNameEnabled(), true);
@@ -148,6 +156,7 @@ public class PreferenceMgr{
 				entryNode.putBoolean(KEY_GITBLIT_SERVER_ACTIVE, item.active, false);
 				entryNode.put(KEY_GITBLIT_SERVER_USER, trim(item.user), false);
 				entryNode.put(KEY_GITBLIT_SERVER_PASSWORD, item.password, true);
+                entryNode.putInt(KEY_GITBLIT_SERVER_SSH_PORT, item.sshPort, false);
 			}
 			pref.flush();
 		}catch(Exception e){

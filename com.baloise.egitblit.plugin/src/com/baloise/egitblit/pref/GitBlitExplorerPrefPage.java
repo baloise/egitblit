@@ -45,6 +45,8 @@ import com.baloise.egitblit.view.action.BrowseAction;
 import com.baloise.egitblit.view.action.CloneAction;
 import com.baloise.egitblit.view.action.CopyAction;
 
+import static com.baloise.egitblit.pref.PreferenceModel.CloneProtocol;
+
 /**
  * Preference Page Page showing the configuration settings of git blit explorer
  * 
@@ -62,6 +64,8 @@ public class GitBlitExplorerPrefPage extends PreferencePage implements IWorkbenc
 	private Button btCopyUrl;
 	private Button btEGitPaste;
 	private Button btColViewer;
+    private Button btProtocolHttp;
+    private Button btProtocolSsh;
 
 	private Button btWSGroupName;
 
@@ -164,6 +168,18 @@ public class GitBlitExplorerPrefPage extends PreferencePage implements IWorkbenc
 			}
 		});
 
+        // --- add ssh port column
+        TableViewerColumn sshPort = createColumn(this.viewer, "SSH Port", 100);
+        sshPort.setLabelProvider(new ColumnLabelProvider() {
+            @Override
+            public String getText(Object element){
+                if(element instanceof GitBlitServer){
+                    return Integer.toString(((GitBlitServer)element).sshPort);
+                }
+                return "";
+            }
+        });
+
 		// --- container for table/row related editing / actions
 		Composite btComp = new Composite(root, SWT.NONE);
 		l = GridLayoutFactory.swtDefaults().create();
@@ -261,6 +277,23 @@ public class GitBlitExplorerPrefPage extends PreferencePage implements IWorkbenc
 		btOpenGitBlit = createRadiobutton(new BrowseAction(null), g);
 		btCopyUrl = createRadiobutton(new CopyAction(null), g);
 
+        // --- Container for clone protocol chooser
+        new Label(root, SWT.NONE);
+        g = new Group(root, SWT.SHADOW_IN);
+        g.setLayout(l);
+        gd = GridDataFactory.swtDefaults().create();
+        gd.horizontalAlignment = SWT.FILL;
+        gd.verticalAlignment = SWT.TOP;
+        gd.grabExcessHorizontalSpace = true;
+        gd.grabExcessVerticalSpace = false;
+        g.setLayoutData(gd);
+        g.setText("Clone protocol");
+
+        btProtocolHttp = new Button(g, SWT.RADIO);
+        btProtocolHttp.setText("HTTP");
+        btProtocolSsh = new Button(g, SWT.RADIO);
+        btProtocolSsh.setText("SSH");
+
 		// --- Open edit dialog when a given row is double clicked
 		viewer.setContentProvider(new PreferenceModelProvider());
 		viewer.addDoubleClickListener(new IDoubleClickListener() {
@@ -334,6 +367,7 @@ public class GitBlitExplorerPrefPage extends PreferencePage implements IWorkbenc
 			public void widgetDefaultSelected(SelectionEvent e){}
 		});
 
+        // --- Report issue / Feedback link
 		new Label(root, SWT.NONE); // filler
 		Link link = new Link(root, SWT.NONE);
 		link.setText("<a>Report issue / Feeedback</a>");
@@ -368,6 +402,7 @@ public class GitBlitExplorerPrefPage extends PreferencePage implements IWorkbenc
 	 */
 	protected void applyFieldValues(){
 		synchDoubleClick(false);
+        syncCloneProtocol(false);
 		syncActive(false);
 	}
 
@@ -376,6 +411,7 @@ public class GitBlitExplorerPrefPage extends PreferencePage implements IWorkbenc
 			this.prefModel = readPreferenceSettings();
 			viewer.setInput(this.prefModel);
 			synchDoubleClick(true);
+            syncCloneProtocol(true);
 			syncActive(true);
 			this.btColViewer.setSelection(prefModel.isDecorateView());
 			this.btWSGroupName.setSelection(prefModel.isWSGroupNameEnabled());
@@ -449,6 +485,37 @@ public class GitBlitExplorerPrefPage extends PreferencePage implements IWorkbenc
 			}
 		}
 	}
+
+    /**
+     * @param doRead
+     *           true = read from model to gui, false = save gui to model
+     */
+    protected void syncCloneProtocol(boolean doRead){
+        if(this.btProtocolHttp == null || this.btProtocolSsh == null || this.prefModel == null){
+            return;
+        }
+        if(doRead){
+            CloneProtocol dbcl = this.prefModel.getCloneProtocol();
+            switch(dbcl){
+                case HTTP:
+                    this.btProtocolHttp.setSelection(true);
+                    this.btProtocolSsh.setSelection(false);
+                    break;
+                case SSH:
+                    this.btProtocolHttp.setSelection(false);
+                    this.btProtocolSsh.setSelection(true);
+                    break;
+            }
+        }
+        else{
+            if(btProtocolHttp.getSelection() == true){
+                this.prefModel.setCloneProtocol(CloneProtocol.HTTP);
+            }
+            else if(btProtocolSsh.getSelection() == true){
+                this.prefModel.setCloneProtocol(CloneProtocol.SSH);
+            }
+        }
+    }
 
 	@Override
 	protected void performDefaults(){
@@ -540,6 +607,7 @@ public class GitBlitExplorerPrefPage extends PreferencePage implements IWorkbenc
 		dlg.url = entry.url;
 		dlg.user = entry.user;
 		dlg.pwd = entry.password;
+        dlg.sshPort = entry.sshPort;
 		// dlg.urlSep = entry.urlSeparator;
 
 		int rc = dlg.open();
@@ -548,6 +616,7 @@ public class GitBlitExplorerPrefPage extends PreferencePage implements IWorkbenc
 			entry.user = dlg.user;
 			entry.password = dlg.pwd;
 			entry.active = true;
+            entry.sshPort = dlg.sshPort;
 		}
 		return rc;
 	}

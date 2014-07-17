@@ -102,7 +102,7 @@ public class CloneOneClickAction extends CloneAction{
 						if(!GitBlitRepository.GROUP_MAIN.equalsIgnoreCase(gname)){
 							// Hide main group, add other group names by default
 							// Here: Group name is not main. Therefore add group name by default
-							PreferenceModel prefModel = getPrefModel();							
+							PreferenceModel prefModel = getPrefModel();
 							if(prefModel == null || prefModel.isWSGroupNameEnabled()){
 								pname = gname + "/" + pname;
 							}
@@ -153,7 +153,7 @@ public class CloneOneClickAction extends CloneAction{
 				}
 				
 				try{
-					ProjectUtils.createProjects(records, repository, sets, monitor);
+					ProjectUtils.createProjects(records, false, sets, monitor);
 				}
 				catch(Exception e){
 					Activator.logError(e.getLocalizedMessage(), e);

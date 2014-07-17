@@ -12,6 +12,7 @@ public class GitBlitServer{
 	public String url;
 	public String user;
 	public String password;
+    public Integer sshPort;
 
 	// Status / Confiig fields
 	public boolean active = true;
@@ -19,15 +20,16 @@ public class GitBlitServer{
 	
 	private List<GitBlitRepository> projectList;
 	
-	public GitBlitServer(String url, boolean active, String user, String pwd){
+	public GitBlitServer(String url, boolean active, String user, String pwd, Integer sshPort){
 		this.url = url;
 		this.user = user;
 		this.password = pwd;
 		this.active = active;
+        this.sshPort = sshPort;
 	}
 	
 	public GitBlitServer(){
-		this(null,true,null,null);
+		this(null,true,null,null,null);
 	}
 
 	public void addProject(GitBlitRepository proj){

@@ -75,14 +75,6 @@ public class GitBlitBD{
 	 * @throws GitBlitExplorerException
 	 *             in case of an network or authorization error
 	 */
-	/**
-	 * Reads all groups/repositories from the gitblit servers which have been
-	 * added
-	 * 
-	 * @return List of repositories
-	 * @throws GitBlitExplorerException
-	 *             in case of an network or authorization error
-	 */
 	public List<GitBlitRepository> readRepositories(ProgressToken token, boolean activeOnly, boolean omitHasError) throws GitBlitExplorerException{
 		List<GitBlitRepository> bres = new ArrayList<GitBlitRepository>();
 
