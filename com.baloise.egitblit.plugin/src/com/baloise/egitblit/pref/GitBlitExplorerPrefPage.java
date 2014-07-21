@@ -348,10 +348,6 @@ public class GitBlitExplorerPrefPage extends PreferencePage implements IWorkbenc
 				}
 			}
 		});
-		// gd = GridDataFactory.swtDefaults().create();
-		// gd.horizontalAlignment = SWT.LEFT;
-		// link.setLayoutData(gd);
-
 		initData();
 		return root;
 	}

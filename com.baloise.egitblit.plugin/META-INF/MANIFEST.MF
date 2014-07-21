@@ -13,8 +13,8 @@ Require-Bundle: org.eclipse.ui,
  org.eclipse.swt,
  org.eclipse.equinox.security,
  org.eclipse.core.resources,
- org.eclipse.egit.core;bundle-version="3.4.1",
- org.eclipse.egit.ui;bundle-version="3.4.1",
+ org.eclipse.egit.core,
+ org.eclipse.egit.ui,
  org.junit;resolution:=optional
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Bundle-ActivationPolicy: lazy
