@@ -43,6 +43,7 @@ import com.baloise.egitblit.main.Activator;
 import com.baloise.egitblit.pref.PreferenceModel.DoubleClickBehaviour;
 import com.baloise.egitblit.view.action.BrowseAction;
 import com.baloise.egitblit.view.action.CloneAction;
+import com.baloise.egitblit.view.action.CloneOneClickAction;
 import com.baloise.egitblit.view.action.CopyAction;
 
 /**
@@ -257,9 +258,9 @@ public class GitBlitExplorerPrefPage extends PreferencePage implements IWorkbenc
 		g.setLayoutData(gd);
 		g.setText("Double click on repository entry");
 
-		btEGitPaste = createRadiobutton(new CloneAction(null), g);
-		btOpenGitBlit = createRadiobutton(new BrowseAction(null), g);
-		btCopyUrl = createRadiobutton(new CopyAction(null), g);
+		btEGitPaste = createRadioButton(new CloneAction(null), g);
+		btOpenGitBlit = createRadioButton(new BrowseAction(null), g);
+		btCopyUrl = createRadioButton(new CopyAction(null), g);
 
 		// --- Open edit dialog when a given row is double clicked
 		viewer.setContentProvider(new PreferenceModelProvider());
@@ -294,7 +295,7 @@ public class GitBlitExplorerPrefPage extends PreferencePage implements IWorkbenc
 
 		new Label(root, SWT.NONE);
 		g = new Group(root, SWT.SHADOW_IN);
-		g.setText("Settings");
+		g.setText("Action Settings");
 		g.setLayout(l);
 		gd = GridDataFactory.swtDefaults().create();
 		gd.horizontalAlignment = SWT.FILL;
@@ -303,9 +304,8 @@ public class GitBlitExplorerPrefPage extends PreferencePage implements IWorkbenc
 		gd.grabExcessVerticalSpace = false;
 		g.setLayoutData(gd);
 
-		btWSGroupName = new Button(g, SWT.CHECK);
-		btWSGroupName.setText("Action \"Clone && Import Project\": Add group name to working set name");
-		btWSGroupName.addSelectionListener(new SelectionListener() {
+		this.btWSGroupName = createCheckButton(new CloneOneClickAction(null), "Add group name to working set name", g);
+		this.btWSGroupName.addSelectionListener(new SelectionListener() {
 			@Override
 			public void widgetSelected(SelectionEvent e){
 				prefModel.setWSGroupNameEnabled(btWSGroupName.getSelection());
@@ -356,14 +356,21 @@ public class GitBlitExplorerPrefPage extends PreferencePage implements IWorkbenc
 		return root;
 	}
 
-	private Button createRadiobutton(Action action, Group g){
+	private Button createRadioButton(Action action, Group g){
 		Button ret = new Button(g, SWT.RADIO);
 		ret.setText(action.getText());
 		ret.setImage(action.getImageDescriptor().createImage());
 		return ret;
 	}
 
-	/**
+  private Button createCheckButton(Action action, String actionText, Group g){
+    Button ret = new Button(g, SWT.CHECK);
+    ret.setText(action.getText() + ": " + actionText);
+    ret.setImage(action.getImageDescriptor().createImage());
+    return ret;
+  }
+
+  /**
 	 * Apply all field settings of preferences to preference model.
 	 */
 	protected void applyFieldValues(){
