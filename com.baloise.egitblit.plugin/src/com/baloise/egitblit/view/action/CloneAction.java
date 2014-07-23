@@ -31,11 +31,12 @@ public class CloneAction extends ViewActionBase{
 	public void doRun(){
 		GitBlitViewModel model = getSelectedModel();
 		if(model instanceof ProjectViewModel){
-			// Copy url to clipboard
+
+		  // Copy url to clipboard
 			CopyAction cca = new CopyAction(getViewer());
 			cca.setPrefModel(getPrefModel());
 			cca.run();
-
+			
 			Command cmd = getEGitCommand();
 			if(cmd == null){
 				Activator.logError("Can't call EGit. Eclipse command service not avail or EGit not installed.");

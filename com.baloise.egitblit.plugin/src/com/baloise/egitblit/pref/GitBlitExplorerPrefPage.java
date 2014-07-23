@@ -543,7 +543,7 @@ public class GitBlitExplorerPrefPage extends PreferencePage implements IWorkbenc
 		dlg.url = entry.url;
 		dlg.user = entry.user;
 		dlg.pwd = entry.password;
-		// dlg.urlSep = entry.urlSeparator;
+		dlg.cloneSettings = entry.cloneSettings;
 
 		int rc = dlg.open();
 		if(rc == Window.OK){
@@ -551,6 +551,7 @@ public class GitBlitExplorerPrefPage extends PreferencePage implements IWorkbenc
 			entry.user = dlg.user;
 			entry.password = dlg.pwd;
 			entry.active = true;
+			entry.cloneSettings = dlg.cloneSettings;
 		}
 		return rc;
 	}

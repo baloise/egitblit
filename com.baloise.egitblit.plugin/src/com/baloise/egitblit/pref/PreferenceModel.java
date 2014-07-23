@@ -124,8 +124,8 @@ public class PreferenceModel{
 		this.serverList.add(repo);
 	}
 
-	public void addRepository(String url, boolean active, String user, String pwd){
-		addRepository(new GitBlitServer(url,active, user,pwd));
+	public void addRepository(String url, boolean active, String user, String pwd, CloneSettings set){
+		addRepository(new GitBlitServer(url,active, user,pwd,set));
 	}
 
 	public boolean removeRepository(GitBlitServer repo){

@@ -11,8 +11,6 @@ import org.eclipse.ui.PlatformUI;
 
 import com.baloise.egitblit.gitblit.GitBlitRepository;
 import com.baloise.egitblit.main.Activator;
-import com.baloise.egitblit.pref.PreferenceMgr;
-import com.baloise.egitblit.pref.PreferenceModel;
 import com.baloise.egitblit.view.model.GitBlitViewModel;
 import com.baloise.egitblit.view.model.ProjectViewModel;
 

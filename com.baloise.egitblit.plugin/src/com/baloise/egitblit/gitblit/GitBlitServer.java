@@ -2,6 +2,9 @@ package com.baloise.egitblit.gitblit;
 
 import java.util.List;
 
+import com.baloise.egitblit.pref.CloneSettings;
+import com.baloise.egitblit.pref.CloneSettings.CloneProtocol;
+
 /**
  * Represents one Config Entry (one GitBlit Repo entry)
  * @author MicBag
@@ -12,6 +15,8 @@ public class GitBlitServer{
 	public String url;
 	public String user;
 	public String password;
+	public CloneSettings cloneSettings;
+	
 
 	// Status / Confiig fields
 	public boolean active = true;
@@ -19,12 +24,30 @@ public class GitBlitServer{
 	
 	private List<GitBlitRepository> projectList;
 	
-	public GitBlitServer(String url, boolean active, String user, String pwd){
-		this.url = url;
-		this.user = user;
-		this.password = pwd;
-		this.active = active;
+  public GitBlitServer(String url, boolean active, String user, String pwd, CloneSettings cls){
+    this.url = url;
+    this.user = user;
+    this.password = pwd;
+    this.active = active;
+    this.cloneSettings = cls; 
+  }
+
+  public GitBlitServer(String url, boolean active, String user, String pwd){
+    this(url,active,user,pwd,new CloneSettings());
 	}
+  
+  public CloneSettings getCloneSettings(){
+    return this.cloneSettings;
+  }
+  
+  public CloneSettings setCloneSettings(CloneProtocol prot, Integer port){
+    CloneSettings set = new CloneSettings(prot,port);
+    setCloneSettings(set);
+    return set;
+  }
+  public void setCloneSettings(CloneSettings set){
+    this.cloneSettings = set;
+  }
 	
 	public GitBlitServer(){
 		this(null,true,null,null);

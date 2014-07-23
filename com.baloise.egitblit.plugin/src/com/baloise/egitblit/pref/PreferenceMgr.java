@@ -6,6 +6,7 @@ import org.eclipse.equinox.security.storage.SecurePreferencesFactory;
 import com.baloise.egitblit.common.GitBlitExplorerException;
 import com.baloise.egitblit.gitblit.GitBlitServer;
 import com.baloise.egitblit.main.Activator;
+import com.baloise.egitblit.pref.CloneSettings.CloneProtocol;
 
 /**
  * Handling preference settings
@@ -28,11 +29,16 @@ public class PreferenceMgr{
 	// --- Server entry
 	public final static String KEY_GITBLIT_SERVER_URL = "com.baloise.gitblit.server.url";
 	public final static String KEY_GITBLIT_SERVER_ACTIVE = "com.baloise.gitblit.server.active";
+
 	// public final static String KEY_GITBLIT_SERVER_URL_SEP =
 	// "com.baloise.gitblit.server.url.separator";
 	public final static String KEY_GITBLIT_SERVER_USER = "com.baloise.gitblit.server.user";
 	public final static String KEY_GITBLIT_SERVER_PASSWORD = "com.baloise.gitblit.server.password";
 
+	public final static String KEY_GITBLIT_SERVER_CLONE_PROTOCOL = "com.baloise.gitblit.server.clone.protocol";
+	public final static String KEY_GITBLIT_SERVER_CLONE_PORT     = "com.baloise.gitblit.server.clone.port";
+  public final static String KEY_GITBLIT_SERVER_CLONE_ENABLED  = "com.baloise.gitblit.server.clone.enabled";
+	
 	public final static String KEY_GITBLIT_WS_GROUPNAME = "com.baloise.gitblit.workingset.groupname";
 
 	
@@ -49,7 +55,7 @@ public class PreferenceMgr{
 		try{
 			ISecurePreferences pref = SecurePreferencesFactory.getDefault().node(KEY_GITBLIT_ROOT);
 			if(pref == null){
-				final String msg = "Can�t access preferences for Gitblit explorer. Continue with new (empty) settings.";
+				final String msg = "Can't access preferences for Gitblit explorer. Continue with new (empty) settings.";
 				Activator.logError(msg);
 				return prefModel;
 			}
@@ -90,8 +96,10 @@ public class PreferenceMgr{
 			serverNode = pref.node(KEY_GITBLIT_SERVER_NODE);
 			if(serverNode != null){
 				// An entry
-				String url, user, pwd;
-				boolean active;
+				String url, user, pwd,protocol;
+				Integer port;
+				boolean active,enabled;
+				CloneSettings set = null;
 	
 				String[] names = serverNode.childrenNames();
 				for(String item : names){
@@ -100,7 +108,21 @@ public class PreferenceMgr{
 					active = entryNode.getBoolean(KEY_GITBLIT_SERVER_ACTIVE, true);
 					user = entryNode.get(KEY_GITBLIT_SERVER_USER, null);
 					pwd = entryNode.get(KEY_GITBLIT_SERVER_PASSWORD, null);
-					prefModel.addRepository(url, active, user, pwd);
+					
+					protocol = entryNode.get(KEY_GITBLIT_SERVER_CLONE_PROTOCOL, null); 
+					port     = entryNode.getInt(KEY_GITBLIT_SERVER_CLONE_PORT, -1);
+					enabled  = entryNode.getBoolean(KEY_GITBLIT_SERVER_CLONE_ENABLED, false);
+					
+					CloneProtocol prot = CloneProtocol.getValue(protocol);
+					if(prot == null){
+					  set = new CloneSettings(false);
+					  Activator.logInfo("Clone Settings for server " + url + " can't be read. Using default clone settings.");
+					}
+					else{
+					  set = new CloneSettings(prot,port);
+					  set.setEnabled(enabled);
+					}
+					prefModel.addRepository(url, active, user, pwd,set);
 				}
 			}
 			else{
@@ -142,12 +164,20 @@ public class PreferenceMgr{
 			pref.flush();
 			serverNode = pref.node(KEY_GITBLIT_SERVER_NODE);
 			
+			CloneSettings set; 
 			for(GitBlitServer item : prefModel.getServerList()){
 				entryNode = serverNode.node(KEY_GITBLIT_SERVER_URL + "_" + count++);
 				entryNode.put(KEY_GITBLIT_SERVER_URL, trim(item.url), false);
 				entryNode.putBoolean(KEY_GITBLIT_SERVER_ACTIVE, item.active, false);
 				entryNode.put(KEY_GITBLIT_SERVER_USER, trim(item.user), false);
 				entryNode.put(KEY_GITBLIT_SERVER_PASSWORD, item.password, true);
+				set = item.cloneSettings;
+				if(set == null){
+				  set = new CloneSettings();
+				}
+				entryNode.put(KEY_GITBLIT_SERVER_CLONE_PROTOCOL,set.getCloneProtocol().schema,false);
+				entryNode.putInt(KEY_GITBLIT_SERVER_CLONE_PORT,set.getPort(),false);
+				entryNode.putBoolean(KEY_GITBLIT_SERVER_CLONE_ENABLED,set.isEnabled(),false);
 			}
 			pref.flush();
 		}catch(Exception e){

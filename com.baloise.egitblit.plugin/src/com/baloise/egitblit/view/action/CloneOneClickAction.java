@@ -79,7 +79,13 @@ public class CloneOneClickAction extends CloneAction{
 
 	@SuppressWarnings("restriction")
 	protected void performClone(final ProjectViewModel project) throws URISyntaxException, GitBlitExplorerException{
-		URIish uri = new URIish(project.getGitUrl());
+		//URIish uri = new URIish(project.getGitUrl());
+
+	  CopyAction cca = new CopyAction(getViewer());
+    cca.setPrefModel(getPrefModel());
+    String copyURL = cca.makeCopyUrl(project);
+	  URIish uri = new URIish(copyURL);
+		
 		final Collection<Ref> selectedBranches;
 		selectedBranches = Collections.emptyList();
 		final File workdir = getWorkdir(project);
