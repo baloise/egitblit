@@ -6,7 +6,6 @@ import org.eclipse.equinox.security.storage.SecurePreferencesFactory;
 import com.baloise.egitblit.common.GitBlitExplorerException;
 import com.baloise.egitblit.gitblit.GitBlitServer;
 import com.baloise.egitblit.main.Activator;
-import com.baloise.egitblit.pref.CloneSettings.CloneProtocol;
 
 /**
  * Handling preference settings

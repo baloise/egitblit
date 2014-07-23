@@ -2,8 +2,8 @@ package com.baloise.egitblit.gitblit;
 
 import java.util.List;
 
+import com.baloise.egitblit.pref.CloneProtocol;
 import com.baloise.egitblit.pref.CloneSettings;
-import com.baloise.egitblit.pref.CloneSettings.CloneProtocol;
 
 /**
  * Represents one Config Entry (one GitBlit Repo entry)

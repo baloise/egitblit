@@ -14,8 +14,8 @@ import org.eclipse.ui.ISharedImages;
 
 import com.baloise.egitblit.gitblit.GitBlitServer;
 import com.baloise.egitblit.main.Activator;
+import com.baloise.egitblit.pref.CloneProtocol;
 import com.baloise.egitblit.pref.CloneSettings;
-import com.baloise.egitblit.pref.CloneSettings.CloneProtocol;
 import com.baloise.egitblit.pref.PreferenceModel;
 import com.baloise.egitblit.view.model.GitBlitViewModel;
 import com.baloise.egitblit.view.model.ProjectViewModel;

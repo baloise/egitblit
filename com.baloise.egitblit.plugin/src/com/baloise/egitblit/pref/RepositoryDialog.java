@@ -23,8 +23,6 @@ import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
 
-import com.baloise.egitblit.pref.CloneSettings.CloneProtocol;
-
 /**
  * Dialog for editing a gitblit server entry
  * 
@@ -209,7 +207,7 @@ public class RepositoryDialog extends TitleAreaDialog {
     addLabel(pcomp, "Protocol:");
 
     ctrlProtocol = new Combo(pcomp, SWT.READ_ONLY);
-    ctrlProtocol.setItems(CloneSettings.CloneProtocol.getDisplayValues());
+    ctrlProtocol.setItems(CloneProtocol.getDisplayValues());
 
     ctrlProtocol.addSelectionListener(new SelectionListener() {
       @Override
