@@ -32,18 +32,37 @@ public enum CloneProtocol {
     return null;
   }
 
+  /**
+   * Prepares an url for the clone action, depending on the current protocol
+   * @param host hostname (optional on File protocol)
+   * @param port port (optional)
+   * @param path path to project
+   * @param user userid (optional)
+   * @param pwd  password(optional) PLEASE NOTICE: The paassword will be added as plain, readable text!
+   * @param pwd  optional
+   * @return the prepared url
+   */
   public String makeUrl(String host, Integer port, String path, String user, String pwd) {
+
     if(this == CloneProtocol.File){
-      host = "";
+       host = host == null ? "" : host;
+       port = null; // no port on file protocol
     }
 
     if(host == null){
+      // otherwise (no file protocol): No host no fun
       return null;
     }
 
     String s = this.schema + "://";
+    if(this == CloneProtocol.File && host.isEmpty() == false){
+      // File protocol does not support host name. Therefore, add an additional slash (so, passed host name will be part of the path)
+      // If no host was passed, parameter path should start with a slash. Therefore, we already have three slashes after schema 
+      s += "/";
+    }
 
     if(this != CloneProtocol.File){
+      // Add user and if given the password to url. But only if this is not the file protocol 
       if(user != null && user.trim().length() > 0){
         s += user.trim();
         if(pwd != null && pwd.trim().length() > 0){
@@ -65,7 +84,8 @@ public enum CloneProtocol {
     }
     return s;
   }
-
+  
+  
   public static String[] getDisplayValues() {
     CloneProtocol items[] = values();
     String res[] = new String[items.length];
