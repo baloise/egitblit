@@ -158,7 +158,7 @@ public class RepositoryDialog extends TitleAreaDialog {
     ctrlPwd.setLayoutData(fgd);
 
     if(url == null || url.trim().isEmpty()){
-      url = CloneProtocol.HTTPS.schema + "//";
+      url = CloneProtocol.HTTPS.schema + "://";
     }
     if(user == null || user.trim().isEmpty()){
       user = System.getProperty("user.name");

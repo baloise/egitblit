@@ -2,8 +2,6 @@ package com.baloise.egitblit.view.action;
 
 import static org.eclipse.ui.PlatformUI.getWorkbench;
 
-import java.net.URL;
-
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.jface.viewers.Viewer;
@@ -14,7 +12,6 @@ import org.eclipse.ui.ISharedImages;
 
 import com.baloise.egitblit.gitblit.GitBlitServer;
 import com.baloise.egitblit.main.Activator;
-import com.baloise.egitblit.pref.CloneProtocol;
 import com.baloise.egitblit.pref.CloneSettings;
 import com.baloise.egitblit.pref.PreferenceModel;
 import com.baloise.egitblit.view.model.GitBlitViewModel;
@@ -53,8 +50,11 @@ public class CopyAction extends ViewActionBase {
   }
   
   public String makeCopyUrl(final ProjectViewModel model) {
-    String gurl = model.getGitUrl();
-    GitBlitServer server = null;
+
+	String gurl = model.getGitUrl();
+
+	// Get the host server of the model
+	GitBlitServer server = null;
     PreferenceModel prefModel = getPrefModel();
     for(GitBlitServer gitBlitServer : prefModel.getServerList()){
       if(gitBlitServer.url.equalsIgnoreCase(model.getServerUrl())){
@@ -62,30 +62,25 @@ public class CopyAction extends ViewActionBase {
           break;
       }
     }
+    
     if(server == null){
       Activator.logError("Internal error: Can't find server in config to modify clone action url. Using default git url instead.");
       return gurl;
     }
+    
     CloneSettings cls = server.getCloneSettings();
     if(cls == null){
       Activator.logError("Internal error: Can't find clone settings in config to modify clone action url. Using default git url instead.");
       return gurl;
     }
+    
     if(cls.isEnabled() == false){
       // Override clone settings is disabled
       return gurl;
     }
     
     try{
-      URL url = new URL(gurl);
-      
-      CloneSettings set = server.getCloneSettings();
-      if(set == null){
-        return gurl;
-      }
-      
-      CloneProtocol cp = set.getCloneProtocol();
-      String tgurl = cp.makeUrl(url.getHost(), set.getPort(), url.getPath(), null, null);
+      String tgurl = server.getCloneURL(gurl);
       if(tgurl == null){
         Activator.logError("Internal error: Error parsing copy clone url. Using default git url instead.");
         return gurl;
