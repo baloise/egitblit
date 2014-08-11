@@ -13,7 +13,9 @@ import com.baloise.egitblit.pref.CloneSettings;
  *
  */
 public class GitBlitServer{
-	
+	// Static fields
+    public static final String GITBLIT_URL_PREFIX = "gitblit/r/";
+
 	// Server settings
 	public String url;
 	public String user;
@@ -88,8 +90,8 @@ public class GitBlitServer{
 			// --- Git + SSH --------------------------------------------------
 			if(cp == CloneProtocol.GIT || cp == CloneProtocol.SSH){
 				// No ctx root / path
-				int pos = url.getPath().lastIndexOf("/");
-				cpath = url.getFile().substring(pos + 1);
+				int pos = url.getPath().indexOf(GITBLIT_URL_PREFIX);
+				cpath = url.getFile().substring(pos + GITBLIT_URL_PREFIX.length());
 			}
 
 			if(cp != CloneProtocol.SSH){
