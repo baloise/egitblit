@@ -47,9 +47,10 @@ public class CloneSettings{
 	}
 
 	public void setPort(Integer port){
-		this.port = port;
-		if(this.port == null || this.port < 0){
+		if(port == null || port < 0){
 			this.port = NO_PORT;
+			return;
 		}
+    this.port = port;
 	}
 }

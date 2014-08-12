@@ -12,7 +12,6 @@ import org.eclipse.ui.ISharedImages;
 
 import com.baloise.egitblit.gitblit.GitBlitServer;
 import com.baloise.egitblit.main.Activator;
-import com.baloise.egitblit.pref.CloneSettings;
 import com.baloise.egitblit.pref.PreferenceModel;
 import com.baloise.egitblit.view.model.GitBlitViewModel;
 import com.baloise.egitblit.view.model.ProjectViewModel;
@@ -68,13 +67,12 @@ public class CopyAction extends ViewActionBase {
       return gurl;
     }
     
-    CloneSettings cls = server.getCloneSettings();
-    if(cls == null){
+    if(server.cloneSettings == null){
       Activator.logError("Internal error: Can't find clone settings in config to modify clone action url. Using default git url instead.");
       return gurl;
     }
     
-    if(cls.isEnabled() == false){
+    if(server.cloneSettings.isEnabled() == false){
       // Override clone settings is disabled
       return gurl;
     }
@@ -82,13 +80,13 @@ public class CopyAction extends ViewActionBase {
     try{
       String tgurl = server.getCloneURL(gurl);
       if(tgurl == null){
-        Activator.logError("Internal error: Error parsing copy clone url. Using default git url instead.");
+        Activator.logError("Internal error: Error parsing copy clone url (URL returned is null). Using default git url instead.");
         return gurl;
       }
       return tgurl;
     }
     catch(Exception e){
-      Activator.logError("Internal error: Error parsing git url. Using default git url instead.");
+      Activator.logError("Internal error: Error parsing git url. Using default git url instead.",e);
       return gurl;
     }
   }

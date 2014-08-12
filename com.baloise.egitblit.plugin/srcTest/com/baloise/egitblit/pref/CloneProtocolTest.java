@@ -1,7 +1,7 @@
 package com.baloise.egitblit.pref;
 
-import java.util.HashMap;
-import java.util.Map;
+import java.util.ArrayList;
+import java.util.List;
 
 import org.junit.Assert;
 import org.junit.Test;
@@ -10,50 +10,108 @@ import com.baloise.egitblit.gitblit.GitBlitServer;
 
 public class CloneProtocolTest{
 
-	
-	private CloneSettings createSettings(CloneProtocol cp, Integer port){
-		return new CloneSettings(cp,port);
+  class TestCase{
+	  public final String exprectedURL;
+	  public final String projectURL;
+	  public final GitBlitServer server;
+	  
+	  public TestCase(String projectURL, String user, String pwd, Integer port, CloneProtocol protocol, String exprectedURL){
+	    this.exprectedURL = exprectedURL;
+	    this.projectURL = projectURL;
+	    server = new GitBlitServer(projectURL,user,pwd,new CloneSettings(protocol,port));	    
+	  }
 	}
+	
+	private List<TestCase> testCases = new ArrayList<TestCase>();
+	
+
+	private void addTestCase(String exprectedCtxPath, String projectURL, String user, String pwd, Integer port, CloneProtocol protocol){
+	  this.testCases.add(new TestCase(projectURL,user,pwd, port, protocol,protocol.schema + "://" + exprectedCtxPath));
+	}
+	
 	
 	@Test
 	public void testMakeUrl(){
 
-		Map<GitBlitServer, String> testData = new HashMap<GitBlitServer,String>();
-		
-		String schema = "https";
-		String host   = "myHost";
-		Integer port   = 4711;
-		String project = "/myProject.git";
-		String path   = "/a/b/c/" + project;
-		String user   = "user";
-		String pwd    = "pwd";
+    try{
+      addTestCaseSet(4711);
+      addTestCaseSet(null);
+      
+      for(TestCase item : this.testCases){
+        Assert.assertEquals("Clone Url protocol: " +item.server.cloneSettings.getCloneProtocol().schema + ":", 
+            item.exprectedURL, item.server.getCloneURL(item.projectURL));
+      }
+    }
+    catch(Exception e){
+      Assert.fail(e.getCause().getMessage());
+    }
+	}
+	
+	
+	protected void addTestCaseSet(Integer port){
+    String schema = "https";
+    String host   = "myHost";
+    String project = "myProject.git";
+    String user   = "user";
+    String pwd    = "pwd";
 
-		String gitProjectUrl = schema + "://" + host + path;
-		
-		int i=0;
-		testData.put(new GitBlitServer("" + i++, user,pwd,createSettings(CloneProtocol.File, null)), 	CloneProtocol.File.schema 	+ ":///" + host + path);
-		testData.put(new GitBlitServer("" + i++, user,pwd,createSettings(CloneProtocol.FTP, null)),  	CloneProtocol.FTP.schema 	+ "://"  + host + path);
-		testData.put(new GitBlitServer("" + i++, user,pwd,createSettings(CloneProtocol.GIT, null)),		CloneProtocol.GIT.schema 	+ "://"  + host + project);
-		testData.put(new GitBlitServer("" + i++, user,pwd,createSettings(CloneProtocol.HTTP, null)),	CloneProtocol.HTTP.schema 	+ "://"  + host + path);
-		testData.put(new GitBlitServer("" + i++, user,pwd,createSettings(CloneProtocol.HTTPS, null)), 	CloneProtocol.HTTPS.schema 	+ "://"  + host + path);
-		testData.put(new GitBlitServer("" + i++, user,pwd,createSettings(CloneProtocol.SFTP, null)),	CloneProtocol.SFTP.schema 	+ "://"  + host + path);
-		testData.put(new GitBlitServer("" + i++, user,pwd,createSettings(CloneProtocol.SSH, null)),		CloneProtocol.SSH.schema 	+ "://"  + user + "@" + host + project);
-		
+    String path   = "/a/b/c/";
+    String sshPath = "/" + GitBlitServer.GITBLIT_CTX_PATH;
 
-		testData.put(new GitBlitServer("" + i++, user,pwd,createSettings(CloneProtocol.File, port)), 	CloneProtocol.File.schema 	+ ":///" + host + path);
-		testData.put(new GitBlitServer("" + i++, user,pwd,createSettings(CloneProtocol.FTP, port)),  	CloneProtocol.FTP.schema 	+ "://"  + host + ":" + port + path);
-		testData.put(new GitBlitServer("" + i++, user,pwd,createSettings(CloneProtocol.GIT, port)),		CloneProtocol.GIT.schema 	+ "://"  + host + ":" + port + project);
-		testData.put(new GitBlitServer("" + i++, user,pwd,createSettings(CloneProtocol.HTTP, port)),	CloneProtocol.HTTP.schema 	+ "://"  + host + ":" + port + path);
-		testData.put(new GitBlitServer("" + i++, user,pwd,createSettings(CloneProtocol.HTTPS, port)), 	CloneProtocol.HTTPS.schema 	+ "://"  + host + ":" + port + path);
-		testData.put(new GitBlitServer("" + i++, user,pwd,createSettings(CloneProtocol.SFTP, port)),	CloneProtocol.SFTP.schema 	+ "://"  + host + ":" + port + path);
-		testData.put(new GitBlitServer("" + i++, user,pwd,createSettings(CloneProtocol.SSH, port)),		CloneProtocol.SSH.schema 	+ "://"  + user + "@" + host + ":" + port + project);
+    String httpURL = schema + "://" + host + getPort(port,null) + sshPath + project;
 
-		
-		for(GitBlitServer item : testData.keySet()){
-			Assert.assertEquals(gitProjectUrl +" does not match", testData.get(item), item.getCloneURL(gitProjectUrl));
-			System.out.println(item.getCloneURL(gitProjectUrl));
-		}
-		
+    // SSH
+    addTestCase(user + "@" + host + getPort(port,CloneProtocol.SSH) + "/" + project,      httpURL, user,pwd,port, CloneProtocol.SSH);
+    addTestCase(user + "@" + host + getPort(port,CloneProtocol.SSH) + "/" + project,      httpURL, user,null,port, CloneProtocol.SSH);
+    addTestCase(host + getPort(port,CloneProtocol.SSH) + "/" + project,                   httpURL, null,null,port, CloneProtocol.SSH);
+    // GIT
+    addTestCase(host + getPort(port,CloneProtocol.GIT) + "/" + project,                   httpURL, user,pwd,port, CloneProtocol.GIT);
+    addTestCase(host + getPort(port,CloneProtocol.GIT) + "/" + project,                   httpURL, user,null,port, CloneProtocol.GIT);
+    addTestCase(host + getPort(port,CloneProtocol.GIT) + "/" + project,                   httpURL, null,null,port, CloneProtocol.GIT);
+    
+    httpURL = schema + "://" + host + getPort(port,null)+ "/" + GitBlitServer.GITBLIT_CTX_PATH + path + project;
+    // SSH
+    addTestCase(user + "@" + host + getPort(port,CloneProtocol.SSH) + path + project,     httpURL, user,pwd,port, CloneProtocol.SSH);
+    addTestCase(user + "@" + host + getPort(port,CloneProtocol.SSH)+ path + project,      httpURL, user,null,port, CloneProtocol.SSH);
+    addTestCase(host + getPort(port,CloneProtocol.SSH) + path + project,                  httpURL, null,null,port, CloneProtocol.SSH);
+    // GIT
+    addTestCase(host + getPort(port,CloneProtocol.GIT) + path + project,                  httpURL, user,pwd,port, CloneProtocol.GIT);
+    addTestCase(host + getPort(port,CloneProtocol.GIT) + path + project,                  httpURL, user,null,port, CloneProtocol.GIT);
+    addTestCase(host + getPort(port,CloneProtocol.GIT) + path + project,                  httpURL, null,null,port, CloneProtocol.GIT);
+
+    httpURL = schema + "://" + host + getPort(port,null) + path + project;
+    // SSH
+    addTestCase(user + "@" + host + getPort(port,CloneProtocol.SSH) + "/" + project,     httpURL, user,pwd,port, CloneProtocol.SSH);
+    addTestCase(user + "@" + host + getPort(port,CloneProtocol.SSH) + "/" + project,     httpURL, user,null,port, CloneProtocol.SSH);
+    addTestCase(host + getPort(port,CloneProtocol.SSH) + "/" + project,                  httpURL, null,null,port, CloneProtocol.SSH);
+    // GIT
+    addTestCase(host + getPort(port,CloneProtocol.GIT) + "/" + project,                 httpURL, user,pwd,port, CloneProtocol.GIT);
+    addTestCase(host + getPort(port,CloneProtocol.GIT) + "/" + project,                 httpURL, user,null,port, CloneProtocol.GIT);
+    addTestCase(host + getPort(port,CloneProtocol.GIT) + "/" + project,                 httpURL, null,null,port, CloneProtocol.GIT);
+
+    
+    // Other protocols
+    addTestCase(host + getPort(port,CloneProtocol.FTP) + path + project,      httpURL, user,pwd,port, CloneProtocol.FTP);
+    addTestCase(host + getPort(port,CloneProtocol.HTTP) + path + project,     httpURL, user,pwd,port, CloneProtocol.HTTP);
+    addTestCase(host + getPort(port,CloneProtocol.HTTPS) + path + project,    httpURL, user,pwd,port, CloneProtocol.HTTPS);
+    addTestCase(host + getPort(port,CloneProtocol.SFTP) + path + project,     httpURL, user,pwd,port, CloneProtocol.SFTP);
+
+    addTestCase(host + getPort(port,CloneProtocol.FTP) + path + project,      httpURL, user,null,port, CloneProtocol.FTP);
+    addTestCase(host + getPort(port,CloneProtocol.HTTP) + path + project,     httpURL, user,null,port, CloneProtocol.HTTP);
+    addTestCase(host + getPort(port,CloneProtocol.HTTPS) + path + project,    httpURL, user,null,port, CloneProtocol.HTTPS);
+    addTestCase(host + getPort(port,CloneProtocol.SFTP) + path + project,     httpURL, user,null,port, CloneProtocol.SFTP);
+
+    addTestCase(host + getPort(port,CloneProtocol.FTP) + path + project,      httpURL, null,null,port, CloneProtocol.FTP);
+    addTestCase(host + getPort(port,CloneProtocol.HTTP) + path + project,     httpURL, null,null,port, CloneProtocol.HTTP);
+    addTestCase(host + getPort(port,CloneProtocol.HTTPS) + path + project,    httpURL, null,null,port, CloneProtocol.HTTPS);
+    addTestCase(host + getPort(port,CloneProtocol.SFTP) + path + project,     httpURL, null,null,port, CloneProtocol.SFTP);
+	
 	}
 
+	private String getPort(Integer port, CloneProtocol prot){
+	  if(port == null){
+	    return "";
+	  }
+	  return ":" + port;
+	}
 }
