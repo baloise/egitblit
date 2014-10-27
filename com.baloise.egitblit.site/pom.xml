@@ -15,15 +15,25 @@
 
 	<build>
 		<plugins>
-
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-site-plugin</artifactId>
+				<configuration>
+					<generateProjectInfo>false</generateProjectInfo>
+					<generateReports>false</generateReports>
+					<generateSitemap>false</generateSitemap>
+					<generatedSiteDirectory>false</generatedSiteDirectory>
+				</configuration>
+			</plugin>
 			<plugin>
 				<groupId>com.github.github</groupId>
 				<artifactId>site-maven-plugin</artifactId>
 				<version>0.10</version>
 				<configuration>
+					<oauth2Token>b0be1546ac1b924289b89b9c77241177cbc6c596</oauth2Token>
 					<repositoryOwner>baloise</repositoryOwner>
 					<repositoryName>egitblit</repositoryName>
-					<message>Releasing update site for ${project.version}</message>
+					<message>Releasing ${project.artifactId} ${project.version}</message>
 					<path>updatesite</path>
 				</configuration>
 				<executions>
@@ -35,7 +45,6 @@
 					</execution>
 				</executions>
 			</plugin>
-
 		</plugins>
 	</build>
 </project>
