@@ -1,5 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <site>
+   <description url="http://baloise.github.io/egitblit/updatesite/">
+      Eclipse Gitblit update site
+   </description>
    <feature url="features/com.baloise.egitblit.feature_0.0.1.qualifier.jar" id="com.baloise.egitblit.feature" version="0.0.1.qualifier">
       <category name="com.baloise.egitblit"/>
    </feature>
