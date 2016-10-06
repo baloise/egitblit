@@ -17,6 +17,7 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
+import org.eclipse.egit.core.RepositoryUtil;
 import org.eclipse.egit.core.internal.util.ProjectUtil;
 import org.eclipse.egit.core.op.CloneOperation;
 import org.eclipse.egit.core.op.CloneOperation.PostCloneTask;
@@ -212,7 +213,12 @@ public class CloneOneClickAction extends CloneAction{
 	}
 
 	private File getWorkdir(ProjectViewModel project){
-		String default_repository_dir = Platform.getPreferencesService().getString("org.eclipse.egit.ui", "default_repository_dir", System.getProperty("user.home"), null);
+		//String default_repository_dir = Platform.getPreferencesService().getString("org.eclipse.egit.ui", "default_repository_dir", System.getProperty("user.home"), null);
+		String default_repository_dir = RepositoryUtil.getDefaultRepositoryDir();
+		if(default_repository_dir == null || default_repository_dir.trim().isEmpty()){
+			default_repository_dir = System.getProperty("user.home");
+			Activator.logError("Can´t determinate default git repository location. Reason: eGit returned (null). Using '" + default_repository_dir + "' instead.");
+		}
 		File ret = new File(default_repository_dir);
 		if(!GitBlitRepository.GROUP_MAIN.equals(project.getGroupName())){
 			ret = new File(ret, project.getGroupName());
