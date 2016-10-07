@@ -1,17 +1,21 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <projectDescription>
-	<name>com.baloise.egitblit.site</name>
-	<comment></comment>
-	<projects>
-	</projects>
-	<buildSpec>
-		<buildCommand>
-			<name>org.eclipse.pde.UpdateSiteBuilder</name>
-			<arguments>
-			</arguments>
-		</buildCommand>
-	</buildSpec>
-	<natures>
-		<nature>org.eclipse.pde.UpdateSiteNature</nature>
-	</natures>
+  <name>com.baloise.egitblit.site</name>
+  <comment>NO_M2ECLIPSE_SUPPORT: Project files created with the maven-eclipse-plugin are not supported in M2Eclipse.</comment>
+  <projects>
+    <project>com.baloise.egitblit.feature</project>
+    <project>com.baloise.egitblit.plugin</project>
+  </projects>
+  <buildSpec>
+    <buildCommand>
+      <name>org.eclipse.pde.UpdateSiteBuilder</name>
+    </buildCommand>
+    <buildCommand>
+      <name>org.eclipse.jdt.core.javabuilder</name>
+    </buildCommand>
+  </buildSpec>
+  <natures>
+    <nature>org.eclipse.pde.UpdateSiteNature</nature>
+    <nature>org.eclipse.jdt.core.javanature</nature>
+  </natures>
 </projectDescription>

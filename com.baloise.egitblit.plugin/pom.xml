@@ -26,26 +26,9 @@
 			<version>1.9.5</version>
 			<scope>test</scope>
 		</dependency>
-	
-<!-- 		<dependency>
-			<groupId>com.gitblit</groupId>
-			<artifactId>gbapi</artifactId>
-			<version>1.3.2</version>
-		</dependency>
-		<dependency>
-			<groupId>com.google.code.gson</groupId>
-			<artifactId>gson</artifactId>
-			<version>2.2.4</version>
-		</dependency>
-		<dependency>
-			<groupId>rome</groupId>
-			<artifactId>rome</artifactId>
-			<version>1.0</version>
-		</dependency>
-		<dependency>
-			<groupId>jdom</groupId>
-			<artifactId>jdom</artifactId>
-			<version>1.1</version>
-		</dependency>
- -->	</dependencies>
+	</dependencies>
+	<organization>
+		<name>Basler Versicherung AG</name>
+		<url>https://www.baloise.ch</url>
+	</organization>
 </project>

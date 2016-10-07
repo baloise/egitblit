@@ -13,9 +13,22 @@
 		<tycho.version>0.19.0</tycho.version>
 		<github.global.server>github</github.global.server>
 		<kepler-repo.url>http://download.eclipse.org/releases/kepler</kepler-repo.url>
+		<mars-repo.url>http://download.eclipse.org/releases/mars</mars-repo.url>
+		<neon-repo.url>http://download.eclipse.org/releases/neon</neon-repo.url>
 	</properties>
 
 	<repositories>
+		<repository>
+			<id>eclipse-neon</id>
+			<url>http://download.eclipse.org/releases/neon</url>
+			<layout>p2</layout>
+		</repository>
+	
+		<repository>
+			<id>eclipse-mars</id>
+			<url>http://download.eclipse.org/releases/mars</url>
+			<layout>p2</layout>
+		</repository>
 		<repository>
 			<id>eclipse-kepler</id>
 			<url>http://download.eclipse.org/releases/kepler</url>
