@@ -1,6 +1,16 @@
 egitblit
 ========
+[![Build Status](https://travis-ci.org/baloise/egitblit.svg)](https://travis-ci.org/baloise/egitblit)
+[![Eclipse Marketplace - Downloads](https://img.shields.io/eclipse-marketplace/dt/eclipse-gitblit.svg)](http://marketplace.eclipse.org/content/eclipse-gitblit#group-metrics-tab)
 
+Eclipse Plugin listing git repositories hosted by [Gitblit](http://gitblit.com/) in a view.
+- Search for a repo/project within Gitblit repos
+- Copies git repo url to clipboard
+- or via drag&drop to any drag&drop enabled target as text (or as type URL)
+- or starts EGit Clone Wizard with selected repository path by default
+- Open corresponding Gitblit summary page of the selected project
+
+## install
 <table style="border: none; width:100%">
   <tbody>
     <tr style="border:none;">
@@ -10,22 +20,9 @@ egitblit
         </a>
       </td>
       <td style="vertical-align: middle; text-align: left; border: none;">
-        ← Drag it to your eclipse workbench to install! (I recommand Main Toolbar as Drop Target)<br/>
-        &nbsp;&nbsp;&nbsp;&nbsp; Requires http://www.eclipse.org/egit/ to be installed.
+        ← Drag it to your eclipse workbench to install! (recommended: use "Main Toolbar" as drop target)<br/>
+        Requires http://www.eclipse.org/egit/ to be installed.
       </td>
     </tr>
   </tbody>
 </table>
-
-Eclipse Plugin listing git repositories hosted by [Gitblit](http://gitblit.com/) in a view.
-- Search for a repo/project within Gitblit repos
-- Copies git repo url to clipboard
-- or via drag&drop to any drag&drop enabled target as text (or as type URL)
-- or starts EGit Clone Wizard with selected repository path by default
-- Open corresponding Gitblit summary page of the selected project
-
-[![Build Status](https://travis-ci.org/baloise/egitblit.svg)](https://travis-ci.org/baloise/egitblit)
-
-
-
-
