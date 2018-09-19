@@ -11,7 +11,6 @@ import com.baloise.egitblit.pref.CloneSettings;
  * Represents one Config Entry (one GitBlit Repo entry)
  * 
  * @author MicBag
- * 
  */
 public class GitBlitServer {
   // Static fields
@@ -50,16 +49,6 @@ public class GitBlitServer {
     this(null, true, null, null);
   }
 
-//  public CloneSettings getCloneSettings() {
-//    return this.cloneSettings;
-//  }
-//
-//  public CloneSettings setCloneSettings(CloneProtocol prot, Integer port) {
-//    CloneSettings set = new CloneSettings(prot, port);
-//    setCloneSettings(set);
-//    return set;
-//  }
-
   public void setCloneSettings(CloneSettings set) {
     this.cloneSettings = set;
   }
@@ -77,8 +66,6 @@ public class GitBlitServer {
       String cpath = url.getFile();
       Integer cport = this.cloneSettings.getPort();
       String cuser = this.user;
-      String cpwd = this.password;
-
       // --- File protocol ----------------------------------------------
       if(cp == CloneProtocol.File){
         // No host

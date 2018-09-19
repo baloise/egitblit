@@ -637,7 +637,6 @@ public class RepoExplorerView extends ViewPart implements GitBlitUrlSelectionLis
 		loadViewState();
 		colFactory.createColumns(prefModel);
 
-		TreeColumn[] a = viewer.getTree().getColumns();
 		// viewer = new TreeViewer(parent, SWT.H_SCROLL | SWT.V_SCROLL);
 		viewer.setContentProvider(new RepoContentProvider());
 		this.labelProvider = new StyledLabelProvider(viewer);
