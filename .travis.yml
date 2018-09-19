@@ -1,2 +1,2 @@
 language: java
-script: mvn clean package site
+script: mvn clean verify
